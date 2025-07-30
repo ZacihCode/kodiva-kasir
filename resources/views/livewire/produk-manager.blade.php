@@ -214,7 +214,7 @@
                 <p class="mb-6 text-gray-600">Yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.</p>
                 <div class="flex justify-end space-x-3">
                     <button @click="showConfirm = false" class="px-4 py-2 bg-gray-300 rounded">Batal</button>
-                    <button wire:click="deleteUserConfirmed" class="px-4 py-2 bg-red-600 text-white rounded">Hapus</button>
+                    <button wire:click="deleteVoucherConfirmed" class="px-4 py-2 bg-red-600 text-white rounded">Hapus</button>
                 </div>
             </div>
         </div>

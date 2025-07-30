@@ -16,6 +16,7 @@ class ParkirManager extends Component
     public $selectAll = false;
     public $confirmingDelete = false;
     public $confirmingBulkDelete = false;
+    public $serviceIdToDelete;
     public $showModal = false;
 
     use WithPagination;
@@ -39,7 +40,9 @@ class ParkirManager extends Component
         $this->validate();
 
         if ($this->editMode) {
-            Parkir::find($this->parkirIdBeingEdited)->update($this->only(['jenis_parkir', 'deskripsi', 'harga']));
+            Parkir::find($this->parkirIdBeingEdited)->update(
+                $this->only(['jenis_parkir', 'deskripsi', 'harga'])
+            );
         } else {
             Parkir::create($this->only(['jenis_parkir', 'deskripsi', 'harga']));
         }
@@ -60,14 +63,39 @@ class ParkirManager extends Component
     public function confirmDelete($id)
     {
         $this->confirmingDelete = true;
-        $this->parkirIdBeingEdited = $id;
+        $this->serviceIdToDelete = $id;
     }
 
-    public function deleteConfirmed()
+    public function deleteParkirConfirmed()
     {
-        Parkir::findOrFail($this->parkirIdBeingEdited)->delete();
+        Parkir::findOrFail($this->serviceIdToDelete)->delete();
         $this->confirmingDelete = false;
-        $this->parkirIdBeingEdited = null;
+        $this->selectedParkir = array_diff($this->selectedParkir, [$this->serviceIdToDelete]);
+        $this->serviceIdToDelete = null;
+    }
+
+    public function confirmBulkDelete()
+    {
+        $this->confirmingBulkDelete = true;
+    }
+
+    public function deleteSelectedConfirmed()
+    {
+        Parkir::whereIn('id', $this->selectedParkir)->delete();
+        $this->selectedParkir = [];
+        $this->selectAll = false;
+        $this->confirmingBulkDelete = false;
+    }
+
+    public function toggleSelectAll()
+    {
+        if ($this->selectAll) {
+            $this->selectedParkir = Parkir::where('jenis_parkir', 'like', '%' . $this->search . '%')
+                ->pluck('id')
+                ->toArray();
+        } else {
+            $this->selectedParkir = [];
+        }
     }
 
     public function render()
