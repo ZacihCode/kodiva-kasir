@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Slipgaji;
+use App\Models\SlipGaji;
 use Illuminate\Support\Facades\Http;
 
 class SlipGajiManager extends Component
