@@ -1,0 +1,19 @@
+name: Power Action Workflow
+
+on:
+  push:
+    branches:
+      - main # Replace with your desired branch
+
+jobs:
+  power_action:
+    name: Send Power Action to Pterodactyl Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute Pterodactyl Power Action
+        uses: D3OXY/pterodactyl-power@V1
+        with:
+          PANEL_URL: "https://panel.mhsshopid.my.id/"
+          API_KEY: ${{ secrets.PTERODACTYL_API_KEY }}
+          SERVER_ID: ${{ secrets.PTERODACTYL_SERVER_ID }}
+          POWER_ACTION: "RESTART" # You can change this to "STOP," "RESTART," or "KILL" as needed
