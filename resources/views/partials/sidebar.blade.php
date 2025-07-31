@@ -161,12 +161,16 @@
                 <span class="font-medium">Kasir Tiket</span>
             </a>
 
+            @auth
+            @if(auth()->user()->role !== 'admin' && auth()->user()->role !== 'user')
             <a href="{{ route($prefix . 'absensi.scan') }}"
                 class="nav-item flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
                 {{ request()->routeIs($prefix . 'absensi.scan') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
                 <i class="fa-solid fa-ticket mr-3 text-lg"></i>
                 <span class="font-medium">Scan Absen</span>
             </a>
+            @endif
+            @endauth
 
             @auth
             @if(auth()->user()->role !== 'kasir' && auth()->user()->role !== 'user')
