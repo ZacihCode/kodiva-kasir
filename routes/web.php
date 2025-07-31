@@ -45,19 +45,19 @@ Route::post('/logout', function () {
 
 
 // ✅ Middleware Auth untuk halaman utama
-Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/produk', [DashboardController::class, 'produk'])->name('produk');
-    Route::get('/kasir', [DashboardController::class, 'kasir'])->name('kasir');
-    Route::get('/laporan', [DashboardController::class, 'laporan'])->name('laporan');
-    Route::get('/slipgaji', [DashboardController::class, 'slipgaji'])->name('slipgaji');
-    Route::get('/parkir', [DashboardController::class, 'parkir'])->name('parkir');
-    Route::get('/diskon', [DashboardController::class, 'diskon'])->name('diskon');
-    Route::get('/karyawan', [DashboardController::class, 'karyawan'])->name('karyawan');
-    Route::get('/absensi', [DashboardController::class, 'absensi'])->name('absensi');
-    Route::get('/keuangan', [DashboardController::class, 'keuangan'])->name('keuangan');
-    Route::get('/setting', [DashboardController::class, 'setting'])->name('setting');
-});
+// Route::middleware('auth')->group(function () {
+//     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+//     Route::get('/produk', [DashboardController::class, 'produk'])->name('produk');
+//     Route::get('/kasir', [DashboardController::class, 'kasir'])->name('kasir');
+//     Route::get('/laporan', [DashboardController::class, 'laporan'])->name('laporan');
+//     Route::get('/slipgaji', [DashboardController::class, 'slipgaji'])->name('slipgaji');
+//     Route::get('/parkir', [DashboardController::class, 'parkir'])->name('parkir');
+//     Route::get('/diskon', [DashboardController::class, 'diskon'])->name('diskon');
+//     Route::get('/karyawan', [DashboardController::class, 'karyawan'])->name('karyawan');
+//     Route::get('/absensi', [DashboardController::class, 'absensi'])->name('absensi');
+//     Route::get('/keuangan', [DashboardController::class, 'keuangan'])->name('keuangan');
+//     Route::get('/setting', [DashboardController::class, 'setting'])->name('setting');
+// });
 
 // Admin Group
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
