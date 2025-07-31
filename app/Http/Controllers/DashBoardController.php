@@ -113,12 +113,21 @@ class DashboardController extends Controller
         $status = 'Belum Absen';
 
         if ($absen) {
+            // User sudah absen sebelumnya
             $sudahAbsen = true;
-            $status = $absen->status === 'hadir' ? '✅ Sudah Absen' : '❌ Tidak Hadir';
+            $status = $absen->status === 'hadir' ? 'Hadir' : 'Tidak Hadir';
         } else {
             $now = Carbon::now()->format('H:i:s');
-            if ($now > '07:00:00') {
-                $status = '❌ Tidak Hadir';
+            if ($now > '19:00:00') {
+                // Baru akan insert jika BELUM absen dan sekarang sudah lewat jam 19:00
+                Absensi::create([
+                    'user_id' => $user->id,
+                    'tanggal' => $today,
+                    'status' => 'tidak hadir',
+                    'keterangan' => 'Tidak hadir karena sudah lewat jam 19:00',
+                ]);
+                $status = 'Tidak Hadir';
+                $sudahAbsen = true;
             }
         }
 
@@ -137,10 +146,11 @@ class DashboardController extends Controller
         ]);
 
         $userId = $request->input('user_id');
-        $tanggal = now()->toDateString();
+        $tanggal = now(); // gunakan full datetime
 
+        // Cek apakah user sudah absen hari ini (bandingkan hanya tanggalnya)
         $existing = Absensi::where('user_id', $userId)
-            ->where('tanggal', $tanggal)
+            ->whereDate('tanggal', $tanggal) // <--- perhatikan ini
             ->first();
 
         if ($existing) {
@@ -152,8 +162,9 @@ class DashboardController extends Controller
 
         Absensi::create([
             'user_id' => $userId,
-            'tanggal' => $tanggal,
+            'tanggal' => $tanggal, // simpan full datetime
             'status'  => 'hadir',
+            'keterangan' => 'Hadir tepat waktu',
         ]);
 
         return response()->json([

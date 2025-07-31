@@ -89,7 +89,7 @@
     <div class="water-drop w-4 h-4" style="left: 90%; animation-delay: 3s;"></div>
 
     <!-- Header -->
-    <div class="sticky top-0 z-50 bg-white bg-opacity-20 backdrop-blur-md border-b border-white border-opacity-30">
+    <div class="sticky top-0 z-50 bg-white bg-opacity-50 backdrop-blur-md border-b border-white border-opacity-30">
         <div class="container mx-auto px-4 py-4 relative">
             <div class="flex items-center justify-between">
                 <!-- Logo & Judul -->
@@ -120,6 +120,17 @@
                             </button>
                         </form>
                     </div>
+                </div>
+
+                <!-- Tombol Logout untuk Desktop -->
+                <div class="hidden md:block">
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit"
+                            class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -190,7 +201,7 @@
 
                     <div class="bg-white bg-opacity-30 rounded-lg p-4">
                         <div class="flex items-center justify-center space-x-2">
-                            @if($status === 'Hadir')
+                            @if($status === 'Sudah Absen')
                             <i class="fas fa-check-circle text-green-400 text-2xl"></i>
                             <span class="text-white text-xl font-bold">{{ $status }}</span>
                             @elseif($status === 'Belum Absen')
