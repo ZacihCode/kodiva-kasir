@@ -43,22 +43,6 @@ Route::post('/logout', function () {
     return redirect('/login')->with('success', 'Logout Berhasil!');
 })->name('logout');
 
-
-// ✅ Middleware Auth untuk halaman utama
-// Route::middleware('auth')->group(function () {
-//     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-//     Route::get('/produk', [DashboardController::class, 'produk'])->name('produk');
-//     Route::get('/kasir', [DashboardController::class, 'kasir'])->name('kasir');
-//     Route::get('/laporan', [DashboardController::class, 'laporan'])->name('laporan');
-//     Route::get('/slipgaji', [DashboardController::class, 'slipgaji'])->name('slipgaji');
-//     Route::get('/parkir', [DashboardController::class, 'parkir'])->name('parkir');
-//     Route::get('/diskon', [DashboardController::class, 'diskon'])->name('diskon');
-//     Route::get('/karyawan', [DashboardController::class, 'karyawan'])->name('karyawan');
-//     Route::get('/absensi', [DashboardController::class, 'absensi'])->name('absensi');
-//     Route::get('/keuangan', [DashboardController::class, 'keuangan'])->name('keuangan');
-//     Route::get('/setting', [DashboardController::class, 'setting'])->name('setting');
-// });
-
 // Admin Group
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
@@ -70,6 +54,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/diskon', [DashboardController::class, 'diskon'])->name('admin.diskon');
     Route::get('/karyawan', [DashboardController::class, 'karyawan'])->name('admin.karyawan');
     Route::get('/absensi', [DashboardController::class, 'absensi'])->name('admin.absensi');
+    Route::get('/absensi/scan', [DashboardController::class, 'scanAbsensi'])->name('admin.absensi.scan');
+    Route::post('/absensi/submit', [DashboardController::class, 'submitAbsensi'])->name('admin.absensi.submit');
     Route::get('/keuangan', [DashboardController::class, 'keuangan'])->name('admin.keuangan');
     Route::get('/setting', [DashboardController::class, 'setting'])->name('admin.setting');
 });
