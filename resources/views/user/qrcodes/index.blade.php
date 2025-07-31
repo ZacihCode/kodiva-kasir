@@ -88,27 +88,26 @@
     <div class="water-drop w-4 h-4" style="left: 90%; animation-delay: 3s;"></div>
 
     <!-- Header -->
-    <div class="bg-white bg-opacity-20 backdrop-blur-md border-b border-white border-opacity-30">
-        <div class="container mx-auto px-4 py-4 relative">
-            <!-- Center: Judul -->
-            <div class="absolute left-1/2 transform -translate-x-1/2 text-center">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-white bg-opacity-30 p-3 rounded-full">
-                        <i class="fas fa-swimming-pool text-white text-2xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-white text-2xl font-bold">Pool Management System</h1>
-                        <p class="text-blue-100 text-sm">Sistem Absensi Kolam Berenang</p>
-                    </div>
+    <div class="sticky top-0 z-50 bg-white bg-opacity-20 backdrop-blur-md border-b border-white border-opacity-30">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between relative">
+
+            <!-- Logo & Judul (Center via absolute + transform) -->
+            <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-4 text-center">
+                <div class="h-16 w-16 rounded-full flex items-center justify-center">
+                    <img src="https://cdn.aceimg.com/1d462648b.png" alt="Sendang Plesungan" class="h-16 w-16 object-contain">
+                </div>
+                <div>
+                    <h1 class="text-black text-2xl font-bold">Pool Management System</h1>
+                    <p class="text-black font-bold text-sm">Sistem Absensi Kolam Berenang</p>
                 </div>
             </div>
 
-            <!-- Right: Logout -->
-            <div class="flex justify-end">
+            <!-- Logout Button (Right) -->
+            <div class="ml-auto">
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit"
-                        class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition">
+                        class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
                         <i class="fas fa-sign-out-alt mr-2"></i> Logout
                     </button>
                 </form>
