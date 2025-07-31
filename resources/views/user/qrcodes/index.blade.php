@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/alpinejs" defer></script>
     <style>
         .wave-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -89,28 +90,37 @@
 
     <!-- Header -->
     <div class="sticky top-0 z-50 bg-white bg-opacity-20 backdrop-blur-md border-b border-white border-opacity-30">
-        <div class="container mx-auto px-4 py-4 flex items-center justify-between relative">
-
-            <!-- Logo & Judul (Center via absolute + transform) -->
-            <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-4 text-center">
-                <div class="h-16 w-16 rounded-full flex items-center justify-center">
-                    <img src="https://cdn.aceimg.com/1d462648b.png" alt="Sendang Plesungan" class="h-16 w-16 object-contain">
+        <div class="container mx-auto px-4 py-4 relative">
+            <div class="flex items-center justify-between">
+                <!-- Logo & Judul -->
+                <div class="flex items-center space-x-4">
+                    <div class="h-14 w-14 md:h-16 md:w-16 rounded-full flex items-center justify-center">
+                        <img src="https://cdn.aceimg.com/1d462648b.png" alt="Sendang Plesungan" class="h-full w-full object-contain">
+                    </div>
+                    <div class="text-black">
+                        <h1 class="text-lg md:text-2xl font-bold">Pool Management System</h1>
+                        <p class="text-sm md:text-base font-medium">Sistem Absensi Kolam Berenang</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-black text-2xl font-bold">Pool Management System</h1>
-                    <p class="text-black font-bold text-sm">Sistem Absensi Kolam Berenang</p>
-                </div>
-            </div>
 
-            <!-- Logout Button (Right) -->
-            <div class="ml-auto">
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit"
-                        class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
-                        <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                <!-- Burger Menu untuk Mobile -->
+                <div class="relative md:hidden" x-data="{ open: false }">
+                    <button @click="open = !open"
+                        class="text-white bg-blue-600 hover:bg-blue-700 p-2 rounded-lg focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
                     </button>
-                </form>
+
+                    <div x-show="open" x-transition @click.outside="open = false"
+                        class="absolute right-0 mt-2 w-44 bg-white border rounded-lg shadow-lg z-50 overflow-visible">
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit"
+                                class="w-full text-left px-4 py-2 hover:bg-red-100 text-red-600 flex items-center">
+                                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
