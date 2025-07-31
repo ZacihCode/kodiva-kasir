@@ -213,8 +213,8 @@
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95">
 
-                <h2 class="text-lg font-bold mb-4 text-gray-800">Hapus Beberapa Layanan</h2>
-                <p class="mb-6 text-gray-600">Apakah kamu yakin ingin menghapus {{ count($selectedDiskon) }} Layanan terpilih?</p>
+                <h2 class="text-lg font-bold mb-4 text-gray-800">Hapus Beberapa Diskon</h2>
+                <p class="mb-6 text-gray-600">Apakah kamu yakin ingin menghapus {{ count($selectedDiskon) }} Diskon terpilih?</p>
                 <div class="flex justify-end space-x-3">
                     <button @click="showConfirmBulk = false" class="px-4 py-2 bg-gray-300 rounded">Batal</button>
                     <button wire:click="deleteSelectedConfirmed" class="px-4 py-2 bg-red-600 text-white rounded">Hapus</button>

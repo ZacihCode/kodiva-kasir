@@ -128,8 +128,8 @@
     <div class="flex items-center justify-center h-16 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 relative overflow-hidden">
         <div class="absolute inset-0 bg-black opacity-10"></div>
         <div class="relative z-10 flex items-center space-x-2">
-            <div class="logo-animation">
-                <img src="https://cdn.aceimg.com/446a53924.png" alt="Sendang Plesungan" class="h-8 w-8 object-contain">
+            <div class="bg-white bg-opacity-30 p-2 rounded-full">
+                <i class="fas fa-swimming-pool text-white text-2xl"></i>
             </div>
             <h1 class="text-white text-xl font-bold tracking-wide">Kasir Tiket</h1>
         </div>
@@ -142,25 +142,39 @@
     <!-- Navigation -->
     <nav class="mt-6 px-4 pb-4 h-full overflow-y-auto">
         <div class="space-y-1">
-            <a href="{{ route('dashboard') }}"
+            @php
+            $role = auth()->user()->role;
+            $prefix = $role === 'admin' ? 'admin.' : ($role === 'kasir' ? 'kasir.' : 'user.');
+            @endphp
+
+            <a href="{{ route($prefix . 'dashboard') }}"
                 class="nav-item flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
-                {{ request()->routeIs('dashboard') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
+            {{ request()->routeIs($prefix . 'dashboard') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
                 <i class="fas fa-tachometer-alt mr-3 text-lg"></i>
                 <span class="font-medium">Dashboard</span>
             </a>
 
-            <a href="{{ route('kasir') }}"
+            <a href="{{ route($prefix . 'kasir') }}"
                 class="nav-item flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
-                {{ request()->routeIs('kasir') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
+                {{ request()->routeIs($prefix . 'kasir') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
                 <i class="fa-solid fa-ticket mr-3 text-lg"></i>
                 <span class="font-medium">Kasir Tiket</span>
             </a>
 
+            <a href="{{ route($prefix . 'absensi.scan') }}"
+                class="nav-item flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
+                {{ request()->routeIs($prefix . 'absensi.scan') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
+                <i class="fa-solid fa-ticket mr-3 text-lg"></i>
+                <span class="font-medium">Scan Absen</span>
+            </a>
+
+            @auth
+            @if(auth()->user()->role !== 'kasir' && auth()->user()->role !== 'user')
             <!-- Produk Dropdown -->
-            <div x-data="{ open: {{ request()->routeIs('produk') || request()->routeIs('diskon') || request()->routeIs('parkir') ? 'true' : 'false' }} }" class="space-y-1">
+            <div x-data="{ open: {{ request()->routeIs($prefix . 'produk') || request()->routeIs($prefix . 'diskon') || request()->routeIs($prefix . 'parkir') ? 'true' : 'false' }} }" class="space-y-1">
                 <button @click="open = !open"
                     class="w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 group focus:outline-none
-        {{ request()->routeIs('produk') || request()->routeIs('diskon') || request()->routeIs('parkir') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
+            {{ request()->routeIs($prefix . 'produk') || request()->routeIs($prefix . 'diskon') || request()->routeIs($prefix . 'parkir') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
                     <i class="fa-solid fa-box mr-3 text-lg"></i>
                     <span class="font-medium">Produk</span>
                     <svg :class="{ 'rotate-180': open }" class="ml-auto h-4 w-4 transition-transform transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,51 +183,80 @@
                 </button>
 
                 <div x-show="open" x-transition x-cloak class="pl-10 space-y-1 text-sm">
-                    <a href="{{ route('produk') }}"
+                    <a href="{{ route($prefix . 'produk') }}"
                         class="block px-2 py-1 rounded transition hover:bg-blue-50
-            {{ request()->routeIs('produk') ? 'text-blue-600 font-semibold' : 'text-gray-700' }}">
+            {{ request()->routeIs($prefix . 'produk') ? 'text-blue-600 font-semibold' : 'text-gray-700' }}">
                         Tiket
                     </a>
-                    <a href="{{ route('diskon') }}"
+                    <a href="{{ route($prefix . 'diskon') }}"
                         class="block px-2 py-1 rounded transition hover:bg-blue-50
-            {{ request()->routeIs('diskon') ? 'text-blue-600 font-semibold' : 'text-gray-700' }}">
+            {{ request()->routeIs($prefix . 'diskon') ? 'text-blue-600 font-semibold' : 'text-gray-700' }}">
                         Diskon
                     </a>
-                    <a href="{{ route('parkir') }}"
+                    <a href="{{ route($prefix . 'parkir') }}"
                         class="block px-2 py-1 rounded transition hover:bg-blue-50
-            {{ request()->routeIs('parkir') ? 'text-blue-600 font-semibold' : 'text-gray-700' }}">
+            {{ request()->routeIs($prefix . 'parkir') ? 'text-blue-600 font-semibold' : 'text-gray-700' }}">
                         Parkir
                     </a>
                 </div>
             </div>
+            @endif
+            @endauth
 
-            <a href="{{ route('keuangan') }}"
+            @auth
+            @if(auth()->user()->role !== 'kasir' && auth()->user()->role !== 'user')
+            <a href="{{ route($prefix . 'keuangan') }}"
                 class="nav-item flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
-                {{ request()->routeIs('keuangan') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
+                {{ request()->routeIs($prefix . 'keuangan') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
                 <i class="fa-solid fa-sack-dollar mr-3 text-lg"></i>
                 <span class="font-medium">Keuangan</span>
             </a>
+            @endif
+            @endauth
 
-            <a href="{{ route('absensi') }}"
+            @auth
+            @if(auth()->user()->role !== 'kasir' && auth()->user()->role !== 'user')
+            <a href="{{ route($prefix . 'karyawan') }}"
                 class="nav-item flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
-                {{ request()->routeIs('absensi') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
+                {{ request()->routeIs($prefix . 'karyawan') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
+                <i class="fa-solid fa-user mr-3 text-lg"></i>
+                <span class="font-medium">Karyawan</span>
+            </a>
+            @endif
+            @endauth
+
+            @auth
+            @if(auth()->user()->role !== 'kasir' && auth()->user()->role !== 'user')
+            <a href="{{ route($prefix . 'absensi') }}"
+                class="nav-item flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
+                {{ request()->routeIs($prefix . 'absensi') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
                 <i class="fa-solid fa-calendar-days mr-3 text-lg"></i>
                 <span class="font-medium">Absensi</span>
             </a>
+            @endif
+            @endauth
 
-            <a href="{{ route('laporan') }}"
+            @auth
+            @if(auth()->user()->role !== 'kasir' && auth()->user()->role !== 'user')
+            <a href="{{ route($prefix . 'laporan') }}"
                 class="nav-item flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
-                {{ request()->routeIs('laporan') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
+                {{ request()->routeIs($prefix . 'laporan') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
                 <i class="fa-solid fa-clipboard mr-3 text-lg"></i>
                 <span class="font-medium">Laporan</span>
             </a>
+            @endif
+            @endauth
 
-            <a href="{{ route('slipgaji') }}"
+            @auth
+            @if(auth()->user()->role !== 'kasir' && auth()->user()->role !== 'user')
+            <a href="{{ route($prefix . 'slipgaji') }}"
                 class="nav-item flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
-                {{ request()->routeIs('slip-gaji') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
+                {{ request()->routeIs($prefix . 'slipgaji') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
                 <i class="fa-solid fa-money-check-dollar mr-3 text-lg"></i>
                 <span class="font-medium">Slip Gaji</span>
             </a>
+            @endif
+            @endauth
         </div>
 
         <!-- User Profile Section with Dropdown -->
@@ -224,8 +267,8 @@
                         <i class="fas fa-user text-white text-sm"></i>
                     </div>
                     <div class="ml-3 text-left">
-                        <p class="text-sm font-medium text-gray-700">Admin User</p>
-                        <p class="text-xs text-gray-500">Kasir Utama</p>
+                        <p class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</p>
+                        <p class="text-xs text-gray-500">{{ auth()->user()->role }}</p>
                     </div>
                     <svg class="w-4 h-4 ml-auto text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -236,7 +279,7 @@
                 <!-- Dropdown Menu -->
                 <div x-show="open" @click.away="open = false" x-transition
                     class="absolute right-4 mt-2 w-48 bg-white border rounded-lg shadow-lg z-50" x-cloak>
-                    <a href="{{ route('setting') }}"
+                    <a href="{{ route($prefix . 'setting') }}"
                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         <i class="fa-solid fa-gear mr-2"></i>Pengaturan
                     </a>

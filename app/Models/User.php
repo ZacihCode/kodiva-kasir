@@ -30,6 +30,10 @@ class User extends Authenticatable
         'role',
         'phone',
         'address',
+        'jam_masuk',
+        'jam_keluar',
+        'status',
+        'keterangan',
     ];
 
     /**
@@ -51,4 +55,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function absensis()
+    {
+        return $this->hasMany(Absensi::class);
+    }
 }

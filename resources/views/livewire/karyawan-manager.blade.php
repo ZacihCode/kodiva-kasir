@@ -3,42 +3,26 @@
         <!-- Header -->
         <div class="p-4 border-b flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
-                <h3 class="font-semibold text-gray-800 text-lg">Parkir Management</h3>
-                <p class="text-sm text-gray-500 mt-1">Kelola jenis layanan parkir</p>
+                <h3 class="font-semibold text-gray-800 text-lg">Manajemen Karyawan</h3>
+                <p class="text-sm text-gray-500 mt-1">Kelola semua data karyawan</p>
             </div>
             <div class="flex flex-col sm:flex-row gap-2">
-                <input wire:model.lazy="search" type="text" placeholder="Cari Parkir..."
+                <input wire:model.lazy="search" type="text" placeholder="Cari Nama..."
                     class="bg-gray-100 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-48">
                 <button wire:click="resetForm"
                     class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
                     <i class="fas fa-plus mr-2"></i>
-                    Tambah Parkir
+                    Tambah Karyawan
                 </button>
             </div>
         </div>
 
         <!-- Tabel Desktop -->
         <div class="hidden lg:block overflow-x-auto">
-            @if(count($selectedParkir) > 0)
+            @if(count($selectedKaryawan) > 0)
             <button wire:click="confirmBulkDelete"
-                class="group relative inline-flex items-center gap-2 px-4 py-2 mb-4 ml-6
-            bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 
-            text-white font-medium text-sm rounded-lg shadow-md hover:shadow-lg 
-            transform hover:scale-[1.02] active:scale-95 transition-all duration-150 ease-in-out
-            border border-red-400/20 hover:border-red-300/30 focus:outline-none focus:ring-2 focus:ring-red-500/30">
-
-                <svg class="w-4 h-4 group-hover:rotate-6 transition-transform duration-150"
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-
-                <span class="relative flex items-center">
-                    Delete Selected
-                    <span class="inline-flex items-center justify-center w-5 h-5 ml-1.5 bg-red-700/60 rounded-full text-xs font-semibold group-hover:bg-red-800/70 transition-colors duration-150">
-                        {{ count($selectedParkir) }}
-                    </span>
-                </span>
+                class="ml-6 mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                <i class="fas fa-trash mr-2"></i> Hapus Terpilih ({{ count($selectedKaryawan) }})
             </button>
             @endif
 
@@ -46,54 +30,72 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            <input type="checkbox" wire:model="selectAll" wire:click="toggleSelectAll" class="rounded border-gray-300">
+                            <input type="checkbox" wire:model="selectAll" wire:click="toggleSelectAll" class="rounded">
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jenis Parkir</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deskripsi</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Harga</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telepon</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alamat</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qr Code</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach ($parkirs as $parkir)
+                    @foreach ($users as $karyawan)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4">
-                            <input type="checkbox" wire:model="selectedParkir" wire:change="$refresh" :value="{{ $parkir->id }}" />
+                            <input type="checkbox" wire:model="selectedKaryawan" wire:change="$refresh" :value="{{ $karyawan->id }}" class="rounded">
                         </td>
-                        <td class="px-6 py-4">{{ $parkir->jenis_parkir }}</td>
-                        <td class="px-6 py-4">{{ $parkir->deskripsi }}</td>
-                        <td class="px-6 py-4">Rp{{ number_format($parkir->harga) }}</td>
-                        <td class="px-6 py-4">{{ \Carbon\Carbon::parse($parkir->created_at)->format('d M Y') }}</td>
+                        <td class="px-6 py-4">{{ $karyawan->name }}</td>
+                        <td class="px-6 py-4">{{ $karyawan->email }}</td>
+                        <td class="px-6 py-4">{{ $karyawan->phone }}</td>
+                        <td class="px-6 py-4">{{ $karyawan->address }}</td>
+                        <td class="border px-6 py-4">
+                            @php
+                            $qrPath = "qrcodes/karyawan_{$karyawan->id}.png";
+                            @endphp
+                            @if (file_exists(public_path($qrPath)))
+                            <img src="{{ asset($qrPath) }}" alt="QR Code" class="w-16 h-16 object-cover">
+                            @else
+                            <span class="text-sm text-gray-500 italic">Belum ada</span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4">
                             <div class="flex space-x-2">
-                                <button wire:click="edit({{ $parkir->id }})" class="text-green-600 hover:text-green-900 p-1"><i class="fas fa-edit"></i></button>
-                                <button wire:click="confirmDelete({{ $parkir->id }})" class="text-red-600 hover:text-red-900 p-1"><i class="fas fa-trash"></i></button>
+                                <button wire:click="edit({{ $karyawan->id }})" class="text-green-600 hover:text-green-900 p-1"><i class="fas fa-edit"></i></button>
+                                <button wire:click="confirmDelete({{ $karyawan->id }})" class="text-red-600 hover:text-red-900 p-1"><i class="fas fa-trash"></i></button>
                             </div>
                         </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
+
             <div class="mt-4">
-                {{ $parkirs->links() }}
+                {{ $users ->links() }}
             </div>
         </div>
 
-        <!-- Modal Form -->
+        <!-- Modal -->
         @if($showModal)
         <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
             <div class="bg-white p-6 rounded-lg w-full max-w-md">
-                <h3 class="text-lg font-bold mb-4">{{ $editMode ? 'Edit Parkir' : 'Tambah Parkir' }}</h3>
+                <h3 class="text-lg font-bold mb-4">{{ $editMode ? 'Edit Karyawan' : 'Tambah Karyawan' }}</h3>
                 <form wire:submit.prevent="save">
-                    <input wire:model="jenis_parkir" type="text" placeholder="Jenis Parkir" class="w-full mb-3 border px-3 py-2 rounded" />
-                    @error('jenis_parkir') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
+                    <input wire:model.defer="name" type="text" placeholder="Nama" class="w-full mb-3 border px-3 py-2 rounded" />
+                    @error('name') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
 
-                    <input wire:model="deskripsi" type="text" placeholder="Deskripsi" class="w-full mb-3 border px-3 py-2 rounded" />
-                    @error('deskripsi') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
+                    <input wire:model.defer="email" type="email" placeholder="Email" class="w-full mb-3 border px-3 py-2 rounded" />
+                    @error('email') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
 
-                    <input wire:model="harga" type="number" placeholder="Harga" class="w-full mb-3 border px-3 py-2 rounded" />
-                    @error('harga') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
+                    <input wire:model.defer="password" type="password" placeholder="Password" class="w-full mb-3 border px-3 py-2 rounded" />
+                    @error('password') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
+
+                    <input wire:model.defer="phone" type="text" placeholder="Telepon" class="w-full mb-3 border px-3 py-2 rounded" />
+                    @error('phone') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
+
+                    <textarea wire:model.defer="address" placeholder="Alamat" class="w-full mb-3 border px-3 py-2 rounded"></textarea>
+                    @error('address') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
 
                     <div class="flex justify-end space-x-2">
                         <button wire:click="$set('showModal', false)" type="button" class="bg-gray-300 px-4 py-2 rounded">Batal</button>
@@ -103,6 +105,7 @@
             </div>
         </div>
         @endif
+
         <!-- Modal -->
         <div x-data="{ showConfirm: @entangle('confirmingDelete') }" x-show="showConfirm" x-cloak
             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
@@ -126,7 +129,7 @@
                 <p class="mb-6 text-gray-600">Yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.</p>
                 <div class="flex justify-end space-x-3">
                     <button @click="showConfirm = false" class="px-4 py-2 bg-gray-300 rounded">Batal</button>
-                    <button wire:click="deleteParkirConfirmed" class="px-4 py-2 bg-red-600 text-white rounded">Hapus</button>
+                    <button wire:click="deleteKaryawanConfirmed" class="px-4 py-2 bg-red-600 text-white rounded">Hapus</button>
                 </div>
             </div>
         </div>
@@ -148,8 +151,8 @@
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95">
 
-                <h2 class="text-lg font-bold mb-4 text-gray-800">Hapus Beberapa Parkir</h2>
-                <p class="mb-6 text-gray-600">Apakah kamu yakin ingin menghapus {{ count($selectedParkir) }} Parkir terpilih?</p>
+                <h2 class="text-lg font-bold mb-4 text-gray-800">Hapus Beberapa Karyawan</h2>
+                <p class="mb-6 text-gray-600">Apakah kamu yakin ingin menghapus {{ count($selectedKaryawan) }} Karyawan terpilih?</p>
                 <div class="flex justify-end space-x-3">
                     <button @click="showConfirmBulk = false" class="px-4 py-2 bg-gray-300 rounded">Batal</button>
                     <button wire:click="deleteSelectedConfirmed" class="px-4 py-2 bg-red-600 text-white rounded">Hapus</button>
@@ -157,3 +160,4 @@
             </div>
         </div>
     </div>
+</div>

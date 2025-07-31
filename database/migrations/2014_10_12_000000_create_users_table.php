@@ -20,6 +20,14 @@ return new class extends Migration
             $table->string('password');
             $table->string('phone')->nullable();
             $table->text('address')->nullable();
+
+            // Tambahan field baru
+            $table->time('jam_masuk')->nullable();
+            $table->time('jam_keluar')->nullable();
+            $table->enum('status', ['hadir', 'tidak_hadir', 'terlambat', 'pulang', 'cuti'])->nullable();
+            $table->text('keterangan')->nullable();
+            $table->string('qr_code')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
         });

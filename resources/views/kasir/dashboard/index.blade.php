@@ -39,14 +39,19 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-gray-600 text-sm">Omset Hari Ini</p>
-                            <p class="text-2xl font-bold text-gray-800" id="omset-today">Rp 2.450.000</p>
+                            <p class="text-2xl font-bold text-green-600">Rp {{ number_format($omsetHariIni, 0, ',', '.') }}</p>
                         </div>
                         <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                             <i class="fas fa-chart-line text-green-600 text-lg"></i>
                         </div>
                     </div>
+                    @php
+                    $naik = $persentaseOmset >= 0;
+                    @endphp
                     <div class="mt-4 flex items-center text-sm">
-                        <span class="text-green-600 font-medium">↗ +12%</span>
+                        <span class="{{ $naik ? 'text-green-600' : 'text-red-600' }} font-medium">
+                            {{ $naik ? '↗ +' : '↘ ' }}{{ abs($persentaseOmset) }}%
+                        </span>
                         <span class="text-gray-600 ml-2">dari kemarin</span>
                     </div>
                 </div>
@@ -55,15 +60,20 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-gray-600 text-sm">Tiket Terjual</p>
-                            <p class="text-2xl font-bold text-gray-800" id="tickets-sold">245</p>
+                            <p class="text-2xl font-bold text-blue-600">{{ $tiketTerjual }}</p>
                         </div>
                         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                             <i class="fas fa-ticket-alt text-blue-600 text-lg"></i>
                         </div>
                     </div>
+                    @php
+                    $naikTiket = $persentaseTiket >= 0;
+                    @endphp
                     <div class="mt-4 flex items-center text-sm">
-                        <span class="text-blue-600 font-medium">↗ +8%</span>
-                        <span class="text-gray-600 ml-2">dari kemarin</span>
+                        <span class="{{ $naikTiket ? 'text-green-600' : 'text-red-600' }} font-medium">
+                            {{ $naikTiket ? '↗ +' : '↘ ' }}{{ abs($persentaseTiket) }}%
+                        </span>
+                        <span class="text-gray-600 ml-2">tiket dibanding kemarin</span>
                     </div>
                 </div>
 
@@ -87,7 +97,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-gray-600 text-sm">Parkir Aktif</p>
-                            <p class="text-2xl font-bold text-gray-800">87</p>
+                            <p class="text-2xl font-bold text-gray-800">0</p>
                         </div>
                         <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
                             <i class="fas fa-car text-orange-600 text-lg"></i>
@@ -106,11 +116,11 @@
                     <div class="flex items-center justify-between">
                         <h3 class="text-xl font-bold text-gray-800">Grafik Omset</h3>
                         <div class="flex space-x-2">
-                            <button
+                            <button id="btn-harian"
                                 class="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition-colors">Harian</button>
-                            <button
+                            <button id="btn-mingguan"
                                 class="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-300 transition-colors">Mingguan</button>
-                            <button
+                            <button id="btn-bulanan"
                                 class="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-300 transition-colors">Bulanan</button>
                         </div>
                     </div>
@@ -148,13 +158,14 @@
     </div>
     <script>
         const ctx = document.getElementById('omsetChart').getContext('2d');
-        const omsetChart = new Chart(ctx, {
+
+        let omsetChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+                labels: [],
                 datasets: [{
                     label: 'Omset (Rp)',
-                    data: [1200000, 1900000, 3000000, 2500000, 2200000, 3200000, 2800000],
+                    data: [],
                     borderColor: 'rgb(59, 130, 246)',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     borderWidth: 3,
@@ -182,6 +193,23 @@
                 }
             }
         });
+
+        function loadChartData(filter) {
+            fetch(`/api/omset?filter=${filter}`)
+                .then(res => res.json())
+                .then(data => {
+                    omsetChart.data.labels = data.labels;
+                    omsetChart.data.datasets[0].data = data.data;
+                    omsetChart.update();
+                });
+        }
+
+        // Default: harian
+        loadChartData('harian');
+
+        document.getElementById('btn-harian').addEventListener('click', () => loadChartData('harian'));
+        document.getElementById('btn-mingguan').addEventListener('click', () => loadChartData('mingguan'));
+        document.getElementById('btn-bulanan').addEventListener('click', () => loadChartData('bulanan'));
     </script>
 </body>
 

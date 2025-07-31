@@ -65,15 +65,28 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        $remember = $request->has('remember'); // ambil nilai dari checkbox
+        $remember = $request->has('remember');
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
-            return redirect()->intended('dashboard');
+
+            $user = Auth::user();
+
+            // Arahkan berdasarkan role
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.dashboard')->with('success', 'Login Admin Berhasil!');
+            } elseif ($user->role === 'kasir') {
+                return redirect()->route('kasir.kasir')->with('success', 'Login Kasir Berhasil!');
+            } elseif ($user->role === 'user') {
+                return redirect()->route('user.qrcode')->with('success', 'Login User Berhasil!');
+            }
+
+            // fallback
+            return redirect('/login')->with('error', 'Role tidak dikenali.');
         }
 
         return back()->withErrors([
             'email' => 'Email atau password salah.',
-        ])->withInput(); // agar checkbox tetap tercentang jika gagal
+        ])->withInput();
     }
 }

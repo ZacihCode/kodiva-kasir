@@ -3,9 +3,9 @@
 @section('content')
 <!-- Keuangan Page -->
 <div class="ml-0 md:ml-64 lg:ml-72 min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
+    <div class="max-w-7xl mx-auto space-y-8">
         <!-- Header -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4 fade-in">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 fade-in">
             <div>
                 <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Manajemen Keuangan</h2>
                 <p class="text-gray-600 mt-2">Pencatatan pemasukan dan pengeluaran</p>
@@ -21,7 +21,7 @@
         </div>
 
         <!-- Financial Summary Section -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
                 <div class="flex items-center justify-between">
                     <div>
@@ -68,72 +68,9 @@
             </div>
         </div>
 
-        <!-- Transaction Forms Section -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white rounded-2xl shadow-lg p-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-6">Tambah Pemasukan</h3>
-                <form class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
-                        <select
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option>Penjualan Tiket</option>
-                            <option>Parkir</option>
-                            <option>Kantin</option>
-                            <option>Lain-lain</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah</label>
-                        <input type="number"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Masukkan jumlah">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
-                        <textarea
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            rows="3"></textarea>
-                    </div>
-                    <button
-                        class="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors">
-                        Simpan Pemasukan
-                    </button>
-                </form>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-lg p-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-6">Tambah Pengeluaran</h3>
-                <form class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
-                        <select
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option>Listrik</option>
-                            <option>Gaji Karyawan</option>
-                            <option>Pemeliharaan</option>
-                            <option>Bahan Kimia</option>
-                            <option>Lain-lain</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah</label>
-                        <input type="number"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Masukkan jumlah">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
-                        <textarea
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            rows="3"></textarea>
-                    </div>
-                    <button
-                        class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors">
-                        Simpan Pengeluaran
-                    </button>
-                </form>
-            </div>
+        <!-- Keuangan Manager (Livewire Component) -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 fade-in">
+            <livewire:keuangan-manager />
         </div>
     </div>
 </div>

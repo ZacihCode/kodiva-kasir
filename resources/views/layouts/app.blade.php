@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Sistem Kasir Tiket' }}</title>
     <meta name="description" content="Sistem Kasir Tiket - Layanan Kasir terpercaya dengan kualitas terbaik">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -25,10 +26,11 @@
     <!-- Tambahkan ini -->
     <main>
         @yield('content')
-        
+
     </main>
     @include('components.loading-overlay')
     @livewireScripts
+    @stack('scripts')
 </body>
 
 </html>
