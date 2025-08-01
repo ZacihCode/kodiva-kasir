@@ -118,7 +118,7 @@ class DashboardController extends Controller
             $status = $absen->status === 'hadir' ? 'Hadir' : 'Tidak Hadir';
         } else {
             $now = Carbon::now()->format('H:i:s');
-            if ($now > '19:00:00') {
+            if ($now > '22:00:00') {
                 // Baru akan insert jika BELUM absen dan sekarang sudah lewat jam 19:00
                 Absensi::create([
                     'user_id' => $user->id,
