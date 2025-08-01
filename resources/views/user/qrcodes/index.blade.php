@@ -201,7 +201,7 @@
 
                     <div class="bg-white bg-opacity-30 rounded-lg p-4">
                         <div class="flex items-center justify-center space-x-2">
-                            @if($status === 'Sudah Absen')
+                            @if($status === 'Hadir')
                             <i class="fas fa-check-circle text-green-400 text-2xl"></i>
                             <span class="text-white text-xl font-bold">{{ $status }}</span>
                             @elseif($status === 'Belum Absen')
