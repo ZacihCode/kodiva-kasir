@@ -140,7 +140,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="mt-6 px-4 pb-4 h-full overflow-y-auto">
+    <nav class="mt-6 px-4 pb-4 h-full overflow-hidden">
         <div class="space-y-1">
             @php
             $role = auth()->user()->role;
