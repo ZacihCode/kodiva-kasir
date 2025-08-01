@@ -104,9 +104,10 @@ class DashboardController extends Controller
     public function qrcode()
     {
         $user = Auth::user();
-        $today = Carbon::now()->toDateString();
 
-        $absen = Absensi::where('user_id', $user->id)->where('tanggal', $today)->first();
+        $absen = Absensi::where('user_id', $user->id)
+            ->whereDate('tanggal', now())
+            ->first();
 
         // Cek apakah sudah absen
         $sudahAbsen = false;
@@ -122,7 +123,7 @@ class DashboardController extends Controller
                 // Baru akan insert jika BELUM absen dan sekarang sudah lewat jam 19:00
                 Absensi::create([
                     'user_id' => $user->id,
-                    'tanggal' => $today,
+                    'tanggal' => now(),
                     'status' => 'tidak hadir',
                     'keterangan' => 'Tidak hadir karena sudah lewat jam 19:00',
                 ]);
