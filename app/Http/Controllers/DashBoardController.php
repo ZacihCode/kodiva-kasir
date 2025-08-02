@@ -19,11 +19,19 @@ class DashboardController extends Controller
         $user = auth()->user();
         $userName = $user->name;
 
-        if ($user->role === 'admin') {
-            // Hari ini & kemarin
-            $today = Carbon::today();
-            $yesterday = Carbon::yesterday();
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
 
+        $totalKaryawan = User::where('role', 'user')->count();
+        $hadirHariIni = Absensi::whereDate('tanggal', $today)
+            ->where('status', 'hadir')
+            ->count();
+
+        $persentaseKehadiran = $totalKaryawan > 0
+            ? round(($hadirHariIni / $totalKaryawan) * 100, 2)
+            : 0;
+
+        if ($user->role === 'admin') {
             // Transaksi hari ini & kemarin
             $transaksiHariIni = Transaksi::whereDate('created_at', $today)->get();
             $transaksiKemarin = Transaksi::whereDate('created_at', $yesterday)->get();
@@ -41,8 +49,12 @@ class DashboardController extends Controller
             });
 
             // Persentase perubahan
-            $persentaseOmset = $omsetKemarin > 0 ? (($omsetHariIni - $omsetKemarin) / $omsetKemarin) * 100 : 0;
-            $persentaseTiket = $tiketKemarin > 0 ? (($tiketHariIni - $tiketKemarin) / $tiketKemarin) * 100 : 0;
+            $persentaseOmset = $omsetKemarin > 0
+                ? (($omsetHariIni - $omsetKemarin) / $omsetKemarin) * 100
+                : 0;
+            $persentaseTiket = $tiketKemarin > 0
+                ? (($tiketHariIni - $tiketKemarin) / $tiketKemarin) * 100
+                : 0;
 
             // Flash message jika pertama login
             if (!session()->has('success')) {
@@ -50,37 +62,23 @@ class DashboardController extends Controller
             }
 
             return view('admin.dashboard.index', [
-                'omsetHariIni'       => $omsetHariIni,
-                'tiketTerjual'       => $tiketHariIni,
-                'persentaseOmset'    => round($persentaseOmset, 2),
-                'persentaseTiket'    => round($persentaseTiket, 2),
-                'totalKaryawan'      => User::where('role', 'user')->count(),
-                'hadirHariIni'       => Absensi::whereDate('tanggal', $today)
-                    ->where('status', 'hadir')
-                    ->count(),
-                'persentaseKehadiran' => round(
-                    (Absensi::whereDate('tanggal', $today)
-                        ->where('status', 'hadir')
-                        ->count() / User::where('role', 'user')->count()) * 100,
-                    2
-                ),
+                'omsetHariIni'        => $omsetHariIni,
+                'tiketTerjual'        => $tiketHariIni,
+                'persentaseOmset'     => round($persentaseOmset, 2),
+                'persentaseTiket'     => round($persentaseTiket, 2),
+                'totalKaryawan'       => $totalKaryawan,
+                'hadirHariIni'        => $hadirHariIni,
+                'persentaseKehadiran' => $persentaseKehadiran,
             ]);
         } elseif ($user->role === 'kasir') {
             return view('kasir.dashboard.index', [
-                'omsetHariIni' => null,
-                'tiketTerjual' => null,
-                'persentaseOmset' => null,
-                'persentaseTiket' => null,
-                'totalKaryawan' => User::where('role', 'user')->count(),
-                'hadirHariIni' => Absensi::whereDate('tanggal', Carbon::today())
-                    ->where('status', 'hadir')
-                    ->count(),
-                'persentaseKehadiran' => round(
-                    (Absensi::whereDate('tanggal', Carbon::today())
-                        ->where('status', 'hadir')
-                        ->count() / User::where('role', 'user')->count()) * 100,
-                    2
-                ),
+                'omsetHariIni'        => null,
+                'tiketTerjual'        => null,
+                'persentaseOmset'     => null,
+                'persentaseTiket'     => null,
+                'totalKaryawan'       => $totalKaryawan,
+                'hadirHariIni'        => $hadirHariIni,
+                'persentaseKehadiran' => $persentaseKehadiran,
             ]);
         } else {
             return abort(403);
