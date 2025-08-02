@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/escpos-encoder@1.1.3/escpos-encoder.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -710,108 +711,57 @@
                 },
 
                 printReceipt() {
-                    const win = window.open('', '', 'width=400,height=600');
-                    if (!win) {
-                        showToast('error', 'Popup diblokir. Mohon izinkan untuk mencetak.');
-                        return;
+                    const plainText = [
+                        'WISATA SENDANG PLESUNG\n',
+                        'Struk Pembayaran\n',
+                        `${new Date().toLocaleString('id-ID')}\n`,
+                        `Kasir: Admin | Metode: ${this.paymentMethod === 'qris' ? 'QRIS' : 'Tunai'}\n`,
+                        this.platNomor ? `Plat: ${this.platNomor}\n` : '',
+                        '--------------------------\n',
+                        ...this.cart.map(item =>
+                            `${item.ticket.name} x${item.quantity}  Rp${this.formatRupiah(item.ticket.price * item.quantity)}\n`
+                        ),
+                        this.discountAmount > 0 ? `Diskon (${this.selectedDiscount}%)  -Rp${this.formatRupiah(this.discountAmount)}\n` : '',
+                        this.selectedParking > 0 ? `Parkir           Rp${this.formatRupiah(this.selectedParking)}\n` : '',
+                        '--------------------------\n',
+                        `TOTAL           Rp${this.formatRupiah(this.totalAll)}\n`,
+                        '\nTerima kasih atas kunjungan Anda!\n',
+                        'Simpan struk ini sebagai bukti pembayaran\n'
+                    ].join('');
+
+                    this.connectAndPrintViaBluetooth(plainText);
+                },
+
+                async connectAndPrintViaBluetooth(receiptText) {
+                    try {
+                        const encoder = new TextEncoder();
+                        const escposCommands = [
+                            '\x1B\x40', // Initialize printer
+                            receiptText,
+                            '\n\n\n',
+                            '\x1D\x56\x41' + '\x10' // Cut paper
+                        ].join('');
+                        const encoded = encoder.encode(escposCommands);
+
+                        const device = await navigator.bluetooth.requestDevice({
+                            filters: [{
+                                namePrefix: 'RPP'
+                            }], // Ganti sesuai printer kamu
+                            optionalServices: [0xFFE0]
+                        });
+
+                        const server = await device.gatt.connect();
+                        const service = await server.getPrimaryService(0xFFE0);
+                        const characteristic = await service.getCharacteristic(0xFFE1);
+
+                        await characteristic.writeValue(encoded);
+
+                        showToast('success', '✅ Struk berhasil dicetak.');
+                        this.resetTransaction();
+                    } catch (err) {
+                        console.error(err);
+                        showToast('error', '❌ Gagal mencetak via Bluetooth.');
                     }
-
-                    const receiptContent = `
-                        <html>
-                            <head>
-                                <title>Struk Pembayaran</title>
-                                <style>
-                                    body { 
-                                        font-family: 'Courier New', monospace; 
-                                        padding: 20px; 
-                                        max-width: 300px;
-                                        margin: 0 auto;
-                                        line-height: 1.4;
-                                    }
-                                    .header { 
-                                        text-align: center; 
-                                        border-bottom: 2px dashed #333;
-                                        padding-bottom: 10px;
-                                        margin-bottom: 15px;
-                                    }
-                                    .item { 
-                                        display: flex; 
-                                        justify-content: space-between; 
-                                        margin-bottom: 5px;
-                                    }
-                                    .total { 
-                                        border-top: 2px dashed #333;
-                                        padding-top: 10px;
-                                        margin-top: 10px;
-                                        font-weight: bold;
-                                        font-size: 1.1em;
-                                    }
-                                    .footer {
-                                        text-align: center;
-                                        margin-top: 20px;
-                                        font-size: 0.9em;
-                                        border-top: 1px dashed #333;
-                                        padding-top: 10px;
-                                    }
-                                    @media print {
-                                        body { margin: 0; padding: 10px; }
-                                    }
-                                </style>
-                            </head>
-                            <body>
-                                <div class="header">
-                                    <h2>WISATA SENDANG PLESUNGAN</h2>
-                                    <p>Struk Pembayaran</p>
-                                    <p>${new Date().toLocaleString('id-ID')}</p>
-                                    <p>Kasir: Admin | Metode: ${this.paymentMethod === 'qris' ? 'QRIS' : 'Tunai'}</p>
-                                    ${this.platNomor ? `<p>Plat: ${this.platNomor}</p>` : ''}
-                                </div>
-                                
-                                <div class="items">
-                                    ${this.cart.map(item => `
-                                        <div class="item">
-                                            <span>${item.ticket.name} x${item.quantity}</span>
-                                            <span>Rp ${this.formatRupiah(item.ticket.price * item.quantity)}</span>
-                                        </div>
-                                    `).join('')}
-                                    
-                                    ${this.discountAmount > 0 ? `
-                                        <div class="item">
-                                            <span>Diskon (${this.selectedDiscount}%)</span>
-                                            <span>-Rp ${this.formatRupiah(this.discountAmount)}</span>
-                                        </div>
-                                    ` : ''}
-                                    
-                                    ${this.selectedParking > 0 ? `
-                                        <div class="item">
-                                            <span>Parkir</span>
-                                            <span>Rp ${this.formatRupiah(this.selectedParking)}</span>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                                
-                                <div class="total">
-                                    <div class="item">
-                                        <span>TOTAL</span>
-                                        <span>Rp ${this.formatRupiah(this.totalAll)}</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="footer">
-                                    <p>Terima kasih atas kunjungan Anda!</p>
-                                    <p>Simpan struk ini sebagai bukti pembayaran</p>
-                                </div>
-                            </body>
-                        </html>
-                    `;
-
-                    win.document.write(receiptContent);
-                    win.document.close();
-                    win.print();
-                    win.close();
-
-                    // Reset cart after successful print
-                    this.resetTransaction();
                 },
 
                 resetTransaction() {
