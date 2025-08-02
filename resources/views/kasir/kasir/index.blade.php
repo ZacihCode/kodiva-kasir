@@ -163,6 +163,7 @@
             background-repeat: no-repeat;
             background-size: 1.5em 1.5em;
             padding-right: 2.5rem;
+            appearance: none;
         }
 
         .qris-container {
