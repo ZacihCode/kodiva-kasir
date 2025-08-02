@@ -28,7 +28,7 @@
         data-error="{{ session('error') }}"
         data-info="{{ session('info') ?: ($infoMessage ?? '') }}">
     </div>
-    @vite(['resources/js/ToastApp.jsx'])
+    @vite(['resources/js/app.jsx'])
     <!-- Auth Container -->
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
@@ -126,6 +126,12 @@
     </div>
 
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const toastRoot = document.getElementById('toast-root');
+            if (toastRoot?.dataset.success) showToast('success', toastRoot.dataset.success);
+            if (toastRoot?.dataset.error) showToast('error', toastRoot.dataset.error);
+            if (toastRoot?.dataset.info) showToast('info', toastRoot.dataset.info);
+        });
         // Toggle password visibility
         const toggle = document.getElementById('toggle-login-password');
         const input = document.getElementById('login-password');

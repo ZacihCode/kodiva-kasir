@@ -50,6 +50,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/kasir', [DashboardController::class, 'kasir'])->name('admin.kasir');
     Route::get('/laporan', [DashboardController::class, 'laporan'])->name('admin.laporan');
     Route::get('/slipgaji', [DashboardController::class, 'slipgaji'])->name('admin.slipgaji');
+    Route::get('/slipgaji/setting', [DashboardController::class, 'slipgajiSetting'])->name('admin.slipgaji.setting');
     Route::get('/parkir', [DashboardController::class, 'parkir'])->name('admin.parkir');
     Route::get('/diskon', [DashboardController::class, 'diskon'])->name('admin.diskon');
     Route::get('/karyawan', [DashboardController::class, 'karyawan'])->name('admin.karyawan');

@@ -1,21 +1,8 @@
 import React from "react";
-import ReactDOM from "react-dom/client";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// Ambil data dari Blade melalui data-* attributes
-const root = document.getElementById("toast-root");
-const successMessage = root?.dataset.success;
-const errorMessage = root?.dataset.error;
-const infoMessage = root?.dataset.info;
-
-// Tampilkan notifikasi kalau ada data dari Blade
-if (successMessage) toast.success(successMessage);
-if (errorMessage) toast.error(errorMessage);
-if (infoMessage) toast.info(infoMessage);
-
-// Komponen ToastContainer dengan konfigurasi custom
-const ToastApp = () => (
+export const ToastApp = () => (
   <ToastContainer
     position="top-right"
     autoClose={3000}
@@ -30,6 +17,20 @@ const ToastApp = () => (
   />
 );
 
-if (root) {
-  ReactDOM.createRoot(root).render(<ToastApp />);
-}
+export const showToast = (type, message) => {
+  switch (type) {
+    case 'success':
+      toast.success(message);
+      break;
+    case 'error':
+      toast.error(message);
+      break;
+    case 'warning':
+      toast.warning(message);
+      break;
+    case 'info':
+    default:
+      toast.info(message);
+      break;
+  }
+};

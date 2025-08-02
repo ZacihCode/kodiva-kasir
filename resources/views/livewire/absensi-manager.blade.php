@@ -16,7 +16,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-600 text-sm">Hadir Hari Ini</p>
-                    <p class="text-2xl font-bold text-green-600">{{ $hadirHariIni }}</p>
+                    <p class="text-2xl font-bold text-green-600">{{ $hadirHariIni }} / {{ $totalKaryawan }}</p>
                 </div>
                 <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                     <span class="text-green-600 text-xl">✅</span>
@@ -63,15 +63,15 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             <input type="checkbox" wire:model="selectAll" wire:click="toggleSelectAll" class="rounded border-gray-300">
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Keterangan</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Keterangan</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">

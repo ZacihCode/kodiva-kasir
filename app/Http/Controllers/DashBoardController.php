@@ -7,10 +7,13 @@ use App\Models\Transaksi;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Absensi;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 
 class DashboardController extends Controller
 {
+    public $totalKaryawan = 0;
+    public $hadirHariIni = 0;
     public function index()
     {
         $user = auth()->user();
@@ -51,6 +54,16 @@ class DashboardController extends Controller
                 'tiketTerjual'       => $tiketHariIni,
                 'persentaseOmset'    => round($persentaseOmset, 2),
                 'persentaseTiket'    => round($persentaseTiket, 2),
+                'totalKaryawan'      => User::where('role', 'user')->count(),
+                'hadirHariIni'       => Absensi::whereDate('tanggal', $today)
+                    ->where('status', 'hadir')
+                    ->count(),
+                'persentaseKehadiran' => round(
+                    (Absensi::whereDate('tanggal', $today)
+                        ->where('status', 'hadir')
+                        ->count() / User::where('role', 'user')->count()) * 100,
+                    2
+                ),
             ]);
         } elseif ($user->role === 'kasir') {
             return view('kasir.dashboard.index', [
@@ -58,6 +71,16 @@ class DashboardController extends Controller
                 'tiketTerjual' => null,
                 'persentaseOmset' => null,
                 'persentaseTiket' => null,
+                'totalKaryawan' => User::where('role', 'user')->count(),
+                'hadirHariIni' => Absensi::whereDate('tanggal', Carbon::today())
+                    ->where('status', 'hadir')
+                    ->count(),
+                'persentaseKehadiran' => round(
+                    (Absensi::whereDate('tanggal', Carbon::today())
+                        ->where('status', 'hadir')
+                        ->count() / User::where('role', 'user')->count()) * 100,
+                    2
+                ),
             ]);
         } else {
             return abort(403);
@@ -120,7 +143,7 @@ class DashboardController extends Controller
             $status = $absen->status === 'hadir' ? 'Hadir' : 'Tidak Hadir';
         } else {
             $now = Carbon::now()->format('H:i:s');
-            if ($now > '22:00:00') {
+            if ($now > '23:00:00') {
                 // Jika belum absen dan sekarang lewat jam 22:00
                 Absensi::create([
                     'user_id' => $user->id,
@@ -152,7 +175,7 @@ class DashboardController extends Controller
 
         // Cek apakah user sudah absen hari ini (bandingkan hanya tanggalnya)
         $existing = Absensi::where('user_id', $userId)
-            ->whereDate('tanggal', $tanggal) // <--- perhatikan ini
+            ->whereDate('tanggal', $tanggal)
             ->first();
 
         if ($existing) {
@@ -162,12 +185,37 @@ class DashboardController extends Controller
             ]);
         }
 
+        // Simpan absensi
         Absensi::create([
             'user_id' => $userId,
-            'tanggal' => $tanggal, // simpan full datetime
+            'tanggal' => $tanggal,
             'status'  => 'hadir',
             'keterangan' => 'Hadir tepat waktu',
         ]);
+
+        // ==== Tambahkan atau Update Slip Gaji ====
+        $user = \App\Models\User::findOrFail($userId);
+
+        $slip = \App\Models\SlipGaji::where('nama_karyawan', $user->name)->first();
+
+        if ($slip) {
+            // Sudah ada, update gaji
+            $slip->gaji_pokok += 50000;
+            $slip->total_gaji = ($slip->gaji_pokok + $slip->tunjangan) - $slip->potongan;
+            $slip->save();
+        } else {
+            // Belum ada, buat baru
+            \App\Models\SlipGaji::create([
+                'nama_karyawan' => $user->name,
+                'posisi' => $user->role ?? 'Karyawan', // sesuaikan jika posisi disimpan di field lain
+                'gaji_pokok' => 50000,
+                'tunjangan' => 0,
+                'potongan' => 0,
+                'total_gaji' => 50000,
+                'status' => 'Belum Terkirim',
+                'no_wa' => $user->phone ?? '0',
+            ]);
+        }
 
         return response()->json([
             'status' => 'success',
@@ -193,6 +241,11 @@ class DashboardController extends Controller
     public function slipgaji()
     {
         return view('admin.slipgaji.index');
+    }
+
+    public function slipgajiSetting()
+    {
+        return view('admin.slipgaji.setting');
     }
 
     public function parkir()

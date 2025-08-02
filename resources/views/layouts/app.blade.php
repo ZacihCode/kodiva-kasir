@@ -24,14 +24,34 @@
 
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
     @include('partials.sidebar')
-    <!-- Tambahkan ini -->
+
     <main>
         @yield('content')
-
     </main>
+
     @include('components.loading-overlay')
+
+    <!-- Toast Root -->
+    <div id="toast-root"
+        data-success="{{ session('success') }}"
+        data-error="{{ session('error') }}"
+        data-info="{{ session('info') }}"></div>
+
     @livewireScripts
     @stack('scripts')
+
+    <!-- React App Bundle -->
+    @vite('resources/js/app.jsx')
+
+    <!-- Jalankan showToast jika ada session -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const toastRoot = document.getElementById('toast-root');
+            if (toastRoot?.dataset.success) showToast('success', toastRoot.dataset.success);
+            if (toastRoot?.dataset.error) showToast('error', toastRoot.dataset.error);
+            if (toastRoot?.dataset.info) showToast('info', toastRoot.dataset.info);
+        });
+    </script>
 </body>
 
 </html>
