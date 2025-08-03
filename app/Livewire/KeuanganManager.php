@@ -20,6 +20,10 @@ class KeuanganManager extends Component
     public $keuanganIdToDelete;
     public $confirmingBulkDelete = false;
     public $showModal = false;
+    public $totalKeuangan = 0;
+    public $totalPemasukan = 0;
+    public $totalPengeluaran = 0;
+    public $labaBersih = 0;
 
     protected $rules = [
         'jenis_keuangan' => 'required|in:pemasukan,pengeluaran',
@@ -112,5 +116,13 @@ class KeuanganManager extends Component
             ->paginate(10);
 
         return view('livewire.keuangan-manager', compact('keuangans'));
+    }
+
+    public function mount()
+    {
+        $this->totalKeuangan = Keuangan::sum('jumlah');
+        $this->labaBersih = $this->totalKeuangan - ($this->totalPemasukan - $this->totalPengeluaran);
+        $this->totalPemasukan = Keuangan::where('jenis_keuangan', 'pemasukan')->sum('jumlah');
+        $this->totalPengeluaran = Keuangan::where('jenis_keuangan', 'pengeluaran')->sum('jumlah');
     }
 }

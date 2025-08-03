@@ -19,59 +19,7 @@
                 </button>
             </div>
         </div>
-
-        <!-- Financial Summary Section -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 text-sm">Pemasukan Hari Ini</p>
-                        <p class="text-2xl font-bold text-green-600">Rp 2.450.000</p>
-                    </div>
-                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                        <span class="text-green-600 text-xl">📈</span>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 text-sm">Pengeluaran Hari Ini</p>
-                        <p class="text-2xl font-bold text-red-600">Rp 450.000</p>
-                    </div>
-                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                        <span class="text-red-600 text-xl">📉</span>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 text-sm">Laba Bersih</p>
-                        <p class="text-2xl font-bold text-blue-600">Rp 2.000.000</p>
-                    </div>
-                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span class="text-blue-600 text-xl">💰</span>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 text-sm">Saldo Kas</p>
-                        <p class="text-2xl font-bold text-purple-600">Rp 15.500.000</p>
-                    </div>
-                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                        <span class="text-purple-600 text-xl">🏦</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Keuangan Manager (Livewire Component) -->
-        <div class="bg-white rounded-2xl shadow-lg p-6 fade-in">
-            <livewire:keuangan-manager />
-        </div>
+        <livewire:keuangan-manager />
     </div>
 </div>
 @endsection
