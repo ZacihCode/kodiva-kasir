@@ -19,7 +19,6 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $userName = $user->name;
 
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
@@ -48,10 +47,17 @@ class DashboardController extends Controller
             $omsetKemarin = $transaksiKemarin->sum('total');
 
             $tiketHariIni = $transaksiHariIni->sum(function ($trx) {
-                return is_array($trx->detail) ? count($trx->detail) : 0;
+                $details = is_string($trx->detail) ? json_decode($trx->detail, true) : $trx->detail;
+                return is_array($details)
+                    ? collect($details)->sum('quantity')
+                    : 0;
             });
+
             $tiketKemarin = $transaksiKemarin->sum(function ($trx) {
-                return is_array($trx->detail) ? count($trx->detail) : 0;
+                $details = is_string($trx->detail) ? json_decode($trx->detail, true) : $trx->detail;
+                return is_array($details)
+                    ? collect($details)->sum('quantity')
+                    : 0;
             });
 
             $persentaseOmset = $omsetKemarin > 0
@@ -251,7 +257,7 @@ class DashboardController extends Controller
 
             foreach ($details as $item) {
                 $name = $item['name'] ?? 'Tidak Diketahui';
-                $qty = $item['qty'] ?? 1;
+                $qty = $item['quantity'] ?? 1;
                 $tiketCounter[$name] = ($tiketCounter[$name] ?? 0) + $qty;
             }
         }
