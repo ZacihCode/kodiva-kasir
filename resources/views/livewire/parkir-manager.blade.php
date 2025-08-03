@@ -1,4 +1,30 @@
 <div>
+    <!-- Parking Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm">Pendapatan Hari Ini</p>
+                    <p class="text-2xl font-bold text-purple-600">Rp {{ number_format($pendapatanHariIni, 0, ',', '.') }}</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-sack-dollar text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm">Pendapatan Total</p>
+                    <p class="text-2xl font-bold text-purple-600">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-money-bill-trend-up text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="bg-white rounded-lg shadow mb-6">
         <!-- Header -->
         <div class="p-4 border-b flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">

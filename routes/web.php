@@ -96,3 +96,5 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/api/omset', [DashboardController::class, 'omsetData']);
+Route::get('/api/tiket', [DashboardController::class, 'getTiketData']);
+Route::get('/api/pengunjung', [DashboardController::class, 'getVisitorData']);

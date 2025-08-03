@@ -28,58 +28,6 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Parking Stats -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-600 text-sm">Kapasitas Total</p>
-                            <p class="text-2xl font-bold text-gray-800">120</p>
-                        </div>
-                        <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                            <span class="text-gray-600 text-xl">🏢</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-600 text-sm">Terisi</p>
-                            <p class="text-2xl font-bold text-blue-600">87</p>
-                        </div>
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span class="text-blue-600 text-xl">🚗</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-600 text-sm">Kosong</p>
-                            <p class="text-2xl font-bold text-green-600">33</p>
-                        </div>
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <span class="text-green-600 text-xl">✅</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-600 text-sm">Pendapatan Hari Ini</p>
-                            <p class="text-2xl font-bold text-purple-600">Rp 435.000</p>
-                        </div>
-                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                            <span class="text-purple-600 text-xl">💰</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <livewire:parkir-manager />
         </div>
     </div>

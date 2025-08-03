@@ -149,7 +149,7 @@
                     <p class="mb-6 text-gray-600">Yakin ingin menghapus slip gaji ini? Tindakan ini tidak dapat dibatalkan.</p>
                     <div class="flex justify-end space-x-3">
                         <button @click="showConfirm = false" class="px-4 py-2 bg-gray-300 rounded">Batal</button>
-                        <button wire:click="deleteConfirmed" class="px-4 py-2 bg-red-600 text-white rounded">Hapus</button>
+                        <button wire:click="deleteSlipConfirmed" class="px-4 py-2 bg-red-600 text-white rounded">Hapus</button>
                     </div>
                 </div>
             </div>

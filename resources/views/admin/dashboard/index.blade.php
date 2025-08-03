@@ -360,7 +360,6 @@
                     </div>
                 </div>
             </div>
-
             <livewire:transaksi-manager />
         </div>
     </div>

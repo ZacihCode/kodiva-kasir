@@ -172,10 +172,12 @@
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
                     </div>
-                    <button class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                        <i class="fas fa-plus mr-2"></i>
-                        Transaksi Baru
-                    </button>
+                    <a href="{{ route('admin.kasir') }}">
+                        <button class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                            <i class="fas fa-plus mr-2"></i>
+                            Transaksi Baru
+                        </button>
+                    </a>
                 </div>
             </div>
 
@@ -358,7 +360,6 @@
                     </div>
                 </div>
             </div>
-
             <livewire:transaksi-manager />
         </div>
     </div>

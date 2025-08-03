@@ -18,6 +18,7 @@ class ParkirManager extends Component
     public $confirmingBulkDelete = false;
     public $serviceIdToDelete;
     public $showModal = false;
+    public $pendapatanHariIni, $totalPendapatan;
 
     use WithPagination;
 
@@ -105,5 +106,11 @@ class ParkirManager extends Component
             ->paginate(10);
 
         return view('livewire.parkir-manager', compact('parkirs'));
+    }
+
+    public function hitungPendapatan()
+    {
+        $this->pendapatanHariIni = Parkir::whereDate('created_at', today())->sum('harga');
+        $this->totalPendapatan = Parkir::sum('harga');
     }
 }

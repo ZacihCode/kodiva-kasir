@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 export const ToastApp = () => (
   <ToastContainer
     position="top-right"
-    autoClose={3000}
+    autoClose={2000}
     hideProgressBar={false}
     newestOnTop={true}
     closeOnClick
@@ -14,6 +14,7 @@ export const ToastApp = () => (
     draggable
     pauseOnHover
     theme="colored"
+    limit={5}
   />
 );
 

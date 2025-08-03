@@ -8,6 +8,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Absensi;
 use App\Models\User;
+use App\Models\SlipGaji;
+use App\Models\GajiSetting;
 use Illuminate\Http\JsonResponse;
 
 class DashboardController extends Controller
@@ -31,16 +33,20 @@ class DashboardController extends Controller
             ? round(($hadirHariIni / $totalKaryawan) * 100, 2)
             : 0;
 
-        if ($user->role === 'admin') {
-            // Transaksi hari ini & kemarin
+        $data = [
+            'totalKaryawan'       => $totalKaryawan,
+            'hadirHariIni'        => $hadirHariIni,
+            'persentaseKehadiran' => $persentaseKehadiran,
+        ];
+
+        // Hanya untuk role admin & kasir
+        if (in_array($user->role, ['admin', 'kasir'])) {
             $transaksiHariIni = Transaksi::whereDate('created_at', $today)->get();
             $transaksiKemarin = Transaksi::whereDate('created_at', $yesterday)->get();
 
-            // Hitung omset
             $omsetHariIni = $transaksiHariIni->sum('total');
             $omsetKemarin = $transaksiKemarin->sum('total');
 
-            // Hitung tiket
             $tiketHariIni = $transaksiHariIni->sum(function ($trx) {
                 return is_array($trx->detail) ? count($trx->detail) : 0;
             });
@@ -48,41 +54,34 @@ class DashboardController extends Controller
                 return is_array($trx->detail) ? count($trx->detail) : 0;
             });
 
-            // Persentase perubahan
             $persentaseOmset = $omsetKemarin > 0
                 ? (($omsetHariIni - $omsetKemarin) / $omsetKemarin) * 100
                 : 0;
+
             $persentaseTiket = $tiketKemarin > 0
                 ? (($tiketHariIni - $tiketKemarin) / $tiketKemarin) * 100
                 : 0;
 
-            // Flash message jika pertama login
-            if (!session()->has('success')) {
-                return redirect()->route('admin.dashboard')->with('success', 'Login Admin Berhasil!');
-            }
-
-            return view('admin.dashboard.index', [
-                'omsetHariIni'        => $omsetHariIni,
-                'tiketTerjual'        => $tiketHariIni,
-                'persentaseOmset'     => round($persentaseOmset, 2),
-                'persentaseTiket'     => round($persentaseTiket, 2),
-                'totalKaryawan'       => $totalKaryawan,
-                'hadirHariIni'        => $hadirHariIni,
-                'persentaseKehadiran' => $persentaseKehadiran,
+            $data = array_merge($data, [
+                'omsetHariIni'    => $omsetHariIni,
+                'tiketTerjual'    => $tiketHariIni,
+                'persentaseOmset' => round($persentaseOmset, 2),
+                'persentaseTiket' => round($persentaseTiket, 2),
             ]);
-        } elseif ($user->role === 'kasir') {
-            return view('kasir.dashboard.index', [
-                'omsetHariIni'        => null,
-                'tiketTerjual'        => null,
-                'persentaseOmset'     => null,
-                'persentaseTiket'     => null,
-                'totalKaryawan'       => $totalKaryawan,
-                'hadirHariIni'        => $hadirHariIni,
-                'persentaseKehadiran' => $persentaseKehadiran,
-            ]);
-        } else {
-            return abort(403);
         }
+
+        // Flash hanya sekali saat login
+        if (!session()->has('success')) {
+            session()->flash('success', $user->role === 'admin' ? 'Login Admin Berhasil!' : 'Login Kasir Berhasil!');
+        }
+
+        if ($user->role === 'admin') {
+            return view('admin.dashboard.index', $data);
+        } elseif ($user->role === 'kasir') {
+            return view('kasir.dashboard.index', $data);
+        }
+
+        return abort(403);
     }
 
     public function omsetData(Request $request)
@@ -169,9 +168,9 @@ class DashboardController extends Controller
         ]);
 
         $userId = $request->input('user_id');
-        $tanggal = now(); // gunakan full datetime
+        $tanggal = now();
 
-        // Cek apakah user sudah absen hari ini (bandingkan hanya tanggalnya)
+        // Cek apakah user sudah absen hari ini
         $existing = Absensi::where('user_id', $userId)
             ->whereDate('tanggal', $tanggal)
             ->first();
@@ -187,29 +186,33 @@ class DashboardController extends Controller
         Absensi::create([
             'user_id' => $userId,
             'tanggal' => $tanggal,
-            'status'  => 'hadir',
+            'status' => 'hadir',
             'keterangan' => 'Hadir tepat waktu',
         ]);
 
-        // ==== Tambahkan atau Update Slip Gaji ====
-        $user = \App\Models\User::findOrFail($userId);
+        // Ambil pengaturan gaji
+        $setting = GajiSetting::first();
+        $gajiPerHadir = $setting->gaji_per_hadir ?? 50000;
+        $tunjanganDefault = $setting->tunjangan_default ?? 0;
+        $potonganDefault = $setting->potongan_default ?? 0;
 
-        $slip = \App\Models\SlipGaji::where('nama_karyawan', $user->name)->first();
+        // Tambah atau update slip gaji
+        $user = User::findOrFail($userId);
+
+        $slip = SlipGaji::where('nama_karyawan', $user->name)->first();
 
         if ($slip) {
-            // Sudah ada, update gaji
-            $slip->gaji_pokok += 50000;
+            $slip->gaji_pokok += $gajiPerHadir;
             $slip->total_gaji = ($slip->gaji_pokok + $slip->tunjangan) - $slip->potongan;
             $slip->save();
         } else {
-            // Belum ada, buat baru
-            \App\Models\SlipGaji::create([
+            SlipGaji::create([
                 'nama_karyawan' => $user->name,
-                'posisi' => $user->role ?? 'Karyawan', // sesuaikan jika posisi disimpan di field lain
-                'gaji_pokok' => 50000,
-                'tunjangan' => 0,
-                'potongan' => 0,
-                'total_gaji' => 50000,
+                'posisi' => $user->role ?? 'Karyawan',
+                'gaji_pokok' => $gajiPerHadir,
+                'tunjangan' => $tunjanganDefault,
+                'potongan' => $potonganDefault,
+                'total_gaji' => ($gajiPerHadir + $tunjanganDefault) - $potonganDefault,
                 'status' => 'Belum Terkirim',
                 'no_wa' => $user->phone ?? '0',
             ]);
@@ -218,6 +221,77 @@ class DashboardController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => '✅ Absensi berhasil disimpan.'
+        ]);
+    }
+
+    public function getTiketData(Request $request)
+    {
+        $filter = $request->query('filter', 'harian'); // 'harian', 'mingguan', 'bulanan'
+
+        $query = Transaksi::selectRaw('DATE(created_at) as tanggal, detail');
+
+        switch ($filter) {
+            case 'mingguan':
+                $query->where('created_at', '>=', now()->subDays(7));
+                break;
+            case 'bulanan':
+                $query->where('created_at', '>=', now()->subDays(30));
+                break;
+            default:
+                $query->whereDate('created_at', now());
+        }
+
+        $result = $query->get();
+
+        $tiketCounter = [];
+
+        foreach ($result as $row) {
+            foreach ($row->detail as $item) {
+                $name = $item['name'];
+                $tiketCounter[$name] = ($tiketCounter[$name] ?? 0) + ($item['qty'] ?? 1);
+            }
+        }
+
+        return response()->json([
+            'labels' => array_keys($tiketCounter),
+            'data' => array_values($tiketCounter),
+        ]);
+    }
+
+    public function getVisitorData(Request $request)
+    {
+        $filter = $request->query('filter', 'harian'); // default harian
+
+        $query = Transaksi::selectRaw('DATE(created_at) as tanggal, COUNT(*) as jumlah')
+            ->groupBy('tanggal')
+            ->orderBy('tanggal', 'asc');
+
+        // Filter berdasarkan waktu
+        switch ($filter) {
+            case 'mingguan':
+                $query->where('created_at', '>=', now()->subDays(7));
+                break;
+            case 'bulanan':
+                $query->where('created_at', '>=', now()->subDays(30));
+                break;
+            default: // harian
+                $query->whereDate('created_at', now());
+        }
+
+        $data = $query->get();
+
+        // Format data untuk chart
+        $labels = [];
+        $counts = [];
+
+        foreach ($data as $row) {
+            $labels[] = date('d M', strtotime($row->tanggal));
+            $counts[] = (int) $row->jumlah;
+        }
+
+        return response()->json([
+            'labels' => $labels,
+            'data' => $counts,
         ]);
     }
 
