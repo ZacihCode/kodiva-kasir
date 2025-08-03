@@ -7,8 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Livewire\WithPagination;
 use Endroid\QrCode\Builder\Builder;
-use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Facades\File;
 
 #[\Livewire\Attributes\Layout('layouts.app')]
 class KaryawanManager extends Component
@@ -61,7 +60,13 @@ class KaryawanManager extends Component
             // Generate QR Code berisi ID, nama, dan email
             $qrData = "ID: {$user->id}\nNama: {$user->name}\nEmail: {$user->email}";
             $filename = "karyawan_{$user->id}.png";
-            $qrPath = public_path("qrcodes/{$filename}");
+            $qrFolder = public_path('qrcodes');
+            $qrPath = $qrFolder . DIRECTORY_SEPARATOR . $filename;
+
+            // Cek dan buat folder jika belum ada
+            if (!File::exists($qrFolder)) {
+                File::makeDirectory($qrFolder, 0755, true);
+            }
 
             Builder::create()
                 ->data($qrData)
