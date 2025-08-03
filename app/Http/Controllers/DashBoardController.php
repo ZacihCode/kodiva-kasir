@@ -246,9 +246,13 @@ class DashboardController extends Controller
         $tiketCounter = [];
 
         foreach ($result as $row) {
-            foreach ($row->detail as $item) {
-                $name = $item['name'];
-                $tiketCounter[$name] = ($tiketCounter[$name] ?? 0) + ($item['qty'] ?? 1);
+            $details = is_array($row->detail) ? $row->detail : json_decode($row->detail, true);
+            if (!$details || !is_array($details)) continue;
+
+            foreach ($details as $item) {
+                $name = $item['name'] ?? 'Tidak Diketahui';
+                $qty = $item['qty'] ?? 1;
+                $tiketCounter[$name] = ($tiketCounter[$name] ?? 0) + $qty;
             }
         }
 
@@ -280,7 +284,6 @@ class DashboardController extends Controller
 
         $data = $query->get();
 
-        // Format data untuk chart
         $labels = [];
         $counts = [];
 
