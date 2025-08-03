@@ -18,14 +18,30 @@ use App\Models\Transaksi;
 
 // Redirect ke dashboard jika sudah login
 Route::get('/', function () {
-    return Auth::check() ? redirect('admin.dashboard') : redirect('/login');
+    if (Auth::check()) {
+        $user = Auth::user();
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->role === 'kasir') {
+            return redirect()->route('kasir.dashboard');
+        } elseif ($user->role === 'user') {
+            return redirect()->route('user.qrcode');
+        }
+    }
+    return redirect('/login');
 });
 
 // Login Page
 Route::get('/login', function (Request $request) {
     if (auth()->check()) {
-        $userName = auth()->user()->name;
-        return redirect('admin.dashboard')->with('info', "Anda Sudah Login, $userName!");
+        $user = auth()->user();
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard')->with('info', "Anda Sudah Login, {$user->name}!");
+        } elseif ($user->role === 'kasir') {
+            return redirect()->route('kasir.dashboard')->with('info', "Anda Sudah Login, {$user->name}!");
+        } elseif ($user->role === 'user') {
+            return redirect()->route('user.qrcode')->with('info', "Anda Sudah Login, {$user->name}!");
+        }
     }
     return view('login.index', [
         'infoMessage' => $request->query('msg', '')
