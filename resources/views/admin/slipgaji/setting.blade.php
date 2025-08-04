@@ -10,10 +10,8 @@
 <body>
     @extends('layouts.app')
     @section('content')
-    <div class="ml-0 md:ml-64 lg:ml-72 min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto">
-            <livewire:gaji-setting-manager />
-        </div>
+    <div class="min-h-screen ml-6 mr-2 p-6">
+        <livewire:gaji-setting-manager />
     </div>
     @endsection
 </body>

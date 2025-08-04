@@ -30,7 +30,7 @@
     </div>
     @vite(['resources/js/app.jsx'])
     <!-- Auth Container -->
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div class="max-w-md w-full space-y-8">
             <!-- Login Form -->
             <div id="login-form" class="bg-white rounded-2xl shadow-xl p-8">

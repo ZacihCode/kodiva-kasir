@@ -60,10 +60,6 @@
         }
     }
 
-    .menu-toggle {
-        display: none;
-    }
-
     .overlay {
         display: none;
     }
@@ -77,10 +73,6 @@
 
         .sidebar.open {
             transform: translateX(0);
-        }
-
-        .menu-toggle {
-            display: flex;
         }
 
         .overlay {
@@ -98,12 +90,20 @@
             opacity: 1;
             pointer-events: auto;
         }
+
+        .main-content {
+            margin-left: 0;
+        }
     }
 
     /* Tablet Responsive */
     @media (max-width: 1024px) and (min-width: 769px) {
         .sidebar {
             width: 12rem;
+        }
+
+        .main-content {
+            margin-left: 12rem;
         }
     }
 
@@ -112,41 +112,99 @@
         .sidebar:hover {
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
+
+        .main-content {
+            margin-left: 18rem;
+            /* lg:w-72 */
+        }
+    }
+
+    @media (min-width: 769px) {
+        .main-content {
+            margin-left: 16rem;
+            /* w-64 */
+        }
+
+        body.sidebar-collapsed .sidebar {
+            display: none;
+        }
+
+        body.sidebar-collapsed .main-content {
+            margin-left: 0 !important;
+        }
     }
 </style>
-<!-- Mobile Menu Toggle -->
-<button class="menu-toggle fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg md:hidden">
-    <i class="fas fa-bars text-gray-600"></i>
-</button>
+
+<!-- Top Navbar -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md border-b border-gray-200">
+    <div class="flex items-center justify-between px-4 py-3">
+        <!-- Kiri: Burger Menu + Logo -->
+        <div class="flex items-center space-x-3">
+            <!-- Logo -->
+            <div class="flex items-center space-x-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 py-1 rounded-md">
+                <div class="bg-white bg-opacity-20 p-2 rounded-full">
+                    <img src="https://cdn.aceimg.com/1d462648b.png" alt="Sendang Plesungan" class="h-4 w-4 object-contain">
+                </div>
+                <h1 class="text-white text-lg font-bold hidden sm:block">Kasir Tiket</h1>
+            </div>
+            <!-- Burger Menu -->
+            <button class="p-2 rounded-lg hover:bg-gray-100" id="menuToggle">
+                <i class="fas fa-bars text-gray-600 text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Right: User Profile Dropdown -->
+        <div class="relative" x-data="{ open: false }">
+            <button @click="open = !open"
+                class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-100 focus:outline-none">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-white text-sm"></i>
+                </div>
+                <div class="hidden md:block text-left">
+                    <p class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</p>
+                    <p class="text-xs text-gray-500 capitalize">{{ auth()->user()->role }}</p>
+                </div>
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div x-show="open" @click.away="open = false" x-transition
+                class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-50" x-cloak>
+                <div class="px-4 py-3 border-b border-gray-100">
+                    <p class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</p>
+                    <p class="text-xs text-gray-500 capitalize">{{ auth()->user()->role }}</p>
+                </div>
+                @php
+                $role = auth()->user()->role;
+                $prefix = $role === 'admin' ? 'admin.' : ($role === 'kasir' ? 'kasir.' : 'user.');
+                @endphp
+                <a href="{{ route($prefix . 'setting') }}"
+                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <i class="fa-solid fa-gear mr-3 text-gray-400"></i>Pengaturan
+                </a>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit"
+                        class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                        <i class="fa-solid fa-right-from-bracket mr-3"></i>Keluar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
 
 <!-- Overlay untuk Mobile -->
 <div class="overlay" id="overlay"></div>
 
 <!-- Sidebar -->
-<div class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-2xl lg:w-72 h-screen overflow-y-auto" id="sidebar">
-    <!-- Header -->
-    <div class="flex items-center justify-center h-16 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 relative overflow-hidden">
-        <div class="absolute inset-0 bg-black opacity-10"></div>
-        <div class="relative z-10 flex items-center space-x-2">
-            <div class="bg-white bg-opacity-30 p-2 rounded-full">
-                <i class="fas fa-swimming-pool text-white text-2xl"></i>
-            </div>
-            <h1 class="text-white text-xl font-bold tracking-wide">Kasir Tiket</h1>
-        </div>
-        <!-- Close button for mobile -->
-        <button class="absolute top-4 right-4 text-white hover:text-gray-200 md:hidden" id="closeSidebar">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-
+<div class="sidebar fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-2xl lg:w-72 h-screen overflow-hidden" id="sidebar">
     <!-- Navigation -->
-    <nav class="mt-6 px-4 pb-4 h-full overflow-hidden">
+    <nav class="mt-24 px-4 pb-4 h-full overflow-hidden">
         <div class="space-y-1">
-            @php
-            $role = auth()->user()->role;
-            $prefix = $role === 'admin' ? 'admin.' : ($role === 'kasir' ? 'kasir.' : 'user.');
-            @endphp
-
             <a href="{{ route($prefix . 'dashboard') }}"
                 class="nav-item flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
             {{ request()->routeIs($prefix . 'dashboard') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
@@ -281,79 +339,35 @@
         </a>
         @endif
         @endauth
-
-
-        <!-- User Profile Section with Dropdown -->
-        <div class="mt-8 pt-4 border-t border-gray-200" x-data="{ open: false }">
-            <div class="relative">
-                <button @click="open = !open" class="w-full flex items-center px-4 py-3 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
-                        <i class="fas fa-user text-white text-sm"></i>
-                    </div>
-                    <div class="ml-3 text-left">
-                        <p class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</p>
-                        <p class="text-xs text-gray-500">{{ auth()->user()->role }}</p>
-                    </div>
-                    <svg class="w-4 h-4 ml-auto text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-
-                <!-- Dropdown Menu -->
-                <div x-show="open" @click.away="open = false" x-transition
-                    class="absolute right-4 mt-2 w-48 bg-white border rounded-lg shadow-lg z-50" x-cloak>
-                    <a href="{{ route($prefix . 'setting') }}"
-                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        <i class="fa-solid fa-gear mr-2"></i>Pengaturan
-                    </a>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit"
-                            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                            <i class="fa-solid fa-right-from-bracket mr-2"></i>Keluar
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div x-data="{open: false, date: new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), time: new Date().toLocaleTimeString('id-ID'),
-            init() {setInterval(() => {this.time = new Date().toLocaleTimeString('id-ID');}, 1000);}}">
-            <div class="px-4 py-3 border-b">
-                <p class="text-gray-800 font-semibold">📅 <span x-text="date"></span></p>
-                <p class="text-gray-600">⏰ <span x-text="time"></span></p>
-            </div>
-        </div>
-        <!-- Footer -->
-        <div class="text-center mt-4 pt-2 border-t border-white/10">
-            <p class="text-black font-semibold text-sm flex items-center justify-center gap-2">
-                <img src="https://cdn.aceimg.com/b127a1e12.png" alt="heart" class="w-4 h-4">
-                © 2025 <span class="text-black font-semibold">kodiva.id</span>
-                <i class="fas fa-sparkles text-yellow-400"></i>
-            </p>
-        </div>
     </nav>
 </div>
 
 <script>
-    // Mobile Menu Toggle
-    const menuToggle = document.querySelector('.menu-toggle');
+    const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
-    const closeSidebar = document.getElementById('closeSidebar');
+    const mainContent = document.querySelector('.main-content');
 
     menuToggle.addEventListener('click', () => {
-        sidebar.classList.add('open');
-        overlay.classList.add('active');
-    });
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
 
-    closeSidebar.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
+        if (window.innerWidth > 768) {
+            document.body.classList.toggle('sidebar-collapsed');
+        }
     });
 
     overlay.addEventListener('click', () => {
         sidebar.classList.remove('open');
         overlay.classList.remove('active');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            }
+        }
     });
 </script>

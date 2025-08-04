@@ -189,233 +189,231 @@
     </div>
     @vite(['resources/js/app.jsx'])
     @section('content')
-    <div class="ml-0 md:ml-64 lg:ml-72 min-h-screen p-4 sm:p-6 lg:p-8">
-        <div class="max-w-7xl mx-auto">
-            <!-- Enhanced Header -->
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 fade-in">
-                <div class="mb-4 lg:mb-0">
-                    <div class="flex items-center space-x-3 mb-2">
-                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center floating-icon">
-                            <i class="fas fa-cash-register text-white text-xl"></i>
-                        </div>
-                        <h2 class="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                            Menu Kasir
-                        </h2>
+    <div class="min-h-screen ml-6 mr-2 p-6">
+        <!-- Enhanced Header -->
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 fade-in">
+            <div class="mb-4 lg:mb-0">
+                <div class="flex items-center space-x-3 mb-2">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center floating-icon">
+                        <i class="fas fa-cash-register text-white text-xl"></i>
                     </div>
-                    <p class="text-gray-600 text-lg">Sistem kasir tiket renang modern dan efisien</p>
+                    <h2 class="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                        Menu Kasir
+                    </h2>
+                </div>
+                <p class="text-gray-600 text-lg">Sistem kasir tiket renang modern dan efisien</p>
+            </div>
+        </div>
+
+        <!-- Main Cashier Interface -->
+        <div class="flex flex-col xl:flex-row gap-8 mb-8">
+            <!-- Ticket Selection Panel -->
+            <div class="w-full xl:w-2/3 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-6 lg:p-8 scale-in border border-white/20">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800">
+                        <i class="fas fa-ticket-alt text-blue-500 mr-3"></i>
+                        Pilih Tiket
+                    </h3>
+                    <div class="text-sm text-gray-500">
+                        <span x-text="cart.length"></span> item dipilih
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <template x-for="ticket in ticketTypes" :key="ticket.id">
+                        <div class="ticket-card p-6 rounded-2xl" :class="{ 'selected': getQuantity(ticket) > 0 }">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-lg text-gray-800 mb-1" x-text="ticket.name"></h4>
+                                    <p class="text-sm text-gray-600 mb-3" x-text="ticket.description"></p>
+                                    <div class="text-2xl font-bold text-blue-600" x-text="'Rp ' + ticket.price.toLocaleString('id-ID')"></div>
+                                </div>
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-swimming-pool text-blue-600"></i>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <button class="quantity-button w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg"
+                                        @click="decreaseFromCart(ticket)"
+                                        :disabled="getQuantity(ticket) === 0">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <span class="text-2xl font-bold text-gray-800 min-w-[3rem] text-center" x-text="getQuantity(ticket)">0</span>
+                                    <button class="quantity-button w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg"
+                                        @click="addToCart(ticket)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-center mt-2">
+                                <div class="text-sm text-gray-500">Subtotal</div>
+                                <div class="font-bold text-gray-700" x-text="'Rp ' + (ticket.price * getQuantity(ticket)).toLocaleString('id-ID')"></div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Enhanced Options Section -->
+                <div class="mt-8 space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Discount Selection -->
+                        <div class="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-2xl border border-orange-100">
+                            <label class="flex items-center text-lg font-semibold text-gray-800 mb-3">
+                                <i class="fas fa-percentage text-orange-500 mr-2"></i>
+                                Pilih Diskon
+                            </label>
+                            <select x-model.number="selectedDiscount" class="custom-select w-full p-3 border-0 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-200">
+                                <option value="0">Tanpa Diskon</option>
+                                <template x-for="diskon in discountOptions" :key="diskon.id">
+                                    <option :value="diskon.percentage" x-text="diskon.name + ' - ' + diskon.percentage + '%'"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <!-- Parking Selection -->
+                        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-2xl border border-purple-100">
+                            <label class="flex items-center text-lg font-semibold text-gray-800 mb-3">
+                                <i class="fas fa-car text-purple-500 mr-2"></i>
+                                Jenis Parkir
+                            </label>
+                            <select x-model.number="selectedParking" class="custom-select w-full p-3 border-0 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200">
+                                <option value="0">Tanpa Parkir</option>
+                                <template x-for="park in parkingOptions" :key="park.id">
+                                    <option :value="park.fee" x-text="park.name + ' - Rp ' + park.fee.toLocaleString('id-ID')"></option>
+                                </template>
+                            </select>
+
+                            <!-- License Plate Input -->
+                            <div class="mt-4" x-show="selectedParking > 0" x-transition>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Plat Nomor Kendaraan</label>
+                                <input type="text"
+                                    x-model="platNomor"
+                                    class="w-full p-3 border-0 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200 uppercase"
+                                    placeholder="B 1234 ABC"
+                                    maxlength="15">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-100">
+                        <label class="flex items-center text-lg font-semibold text-gray-800 mb-3">
+                            <i class="fas fa-credit-card text-green-500 mr-2"></i>
+                            Metode Pembayaran
+                        </label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="flex items-center p-4 bg-white rounded-xl border-2 cursor-pointer transition-all duration-200"
+                                :class="paymentMethod === 'cash' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'">
+                                <input type="radio" x-model="paymentMethod" value="cash" class="sr-only">
+                                <i class="fas fa-money-bill-wave text-green-500 text-2xl mr-3"></i>
+                                <div>
+                                    <div class="font-semibold text-gray-800">Tunai</div>
+                                    <div class="text-sm text-gray-600">Bayar dengan uang cash</div>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-4 bg-white rounded-xl border-2 cursor-pointer transition-all duration-200"
+                                :class="paymentMethod === 'qris' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'">
+                                <input type="radio" x-model="paymentMethod" value="qris" class="sr-only">
+                                <i class="fas fa-qrcode text-green-500 text-2xl mr-3"></i>
+                                <div>
+                                    <div class="font-semibold text-gray-800">QRIS</div>
+                                    <div class="text-sm text-gray-600">Scan QR Code</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Main Cashier Interface -->
-            <div class="flex flex-col xl:flex-row gap-8 mb-8">
-                <!-- Ticket Selection Panel -->
-                <div class="w-full xl:w-2/3 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-6 lg:p-8 scale-in border border-white/20">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-2xl font-bold text-gray-800">
-                            <i class="fas fa-ticket-alt text-blue-500 mr-3"></i>
-                            Pilih Tiket
-                        </h3>
-                        <div class="text-sm text-gray-500">
-                            <span x-text="cart.length"></span> item dipilih
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <template x-for="ticket in ticketTypes" :key="ticket.id">
-                            <div class="ticket-card p-6 rounded-2xl" :class="{ 'selected': getQuantity(ticket) > 0 }">
-                                <div class="flex items-start justify-between mb-4">
-                                    <div class="flex-1">
-                                        <h4 class="font-bold text-lg text-gray-800 mb-1" x-text="ticket.name"></h4>
-                                        <p class="text-sm text-gray-600 mb-3" x-text="ticket.description"></p>
-                                        <div class="text-2xl font-bold text-blue-600" x-text="'Rp ' + ticket.price.toLocaleString('id-ID')"></div>
-                                    </div>
-                                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-swimming-pool text-blue-600"></i>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-3">
-                                        <button class="quantity-button w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg"
-                                            @click="decreaseFromCart(ticket)"
-                                            :disabled="getQuantity(ticket) === 0">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
-                                        <span class="text-2xl font-bold text-gray-800 min-w-[3rem] text-center" x-text="getQuantity(ticket)">0</span>
-                                        <button class="quantity-button w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg"
-                                            @click="addToCart(ticket)">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="text-center mt-2">
-                                    <div class="text-sm text-gray-500">Subtotal</div>
-                                    <div class="font-bold text-gray-700" x-text="'Rp ' + (ticket.price * getQuantity(ticket)).toLocaleString('id-ID')"></div>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- Enhanced Options Section -->
-                    <div class="mt-8 space-y-6">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <!-- Discount Selection -->
-                            <div class="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-2xl border border-orange-100">
-                                <label class="flex items-center text-lg font-semibold text-gray-800 mb-3">
-                                    <i class="fas fa-percentage text-orange-500 mr-2"></i>
-                                    Pilih Diskon
-                                </label>
-                                <select x-model.number="selectedDiscount" class="custom-select w-full p-3 border-0 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-200">
-                                    <option value="0">Tanpa Diskon</option>
-                                    <template x-for="diskon in discountOptions" :key="diskon.id">
-                                        <option :value="diskon.percentage" x-text="diskon.name + ' - ' + diskon.percentage + '%'"></option>
-                                    </template>
-                                </select>
-                            </div>
-
-                            <!-- Parking Selection -->
-                            <div class="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-2xl border border-purple-100">
-                                <label class="flex items-center text-lg font-semibold text-gray-800 mb-3">
-                                    <i class="fas fa-car text-purple-500 mr-2"></i>
-                                    Jenis Parkir
-                                </label>
-                                <select x-model.number="selectedParking" class="custom-select w-full p-3 border-0 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200">
-                                    <option value="0">Tanpa Parkir</option>
-                                    <template x-for="park in parkingOptions" :key="park.id">
-                                        <option :value="park.fee" x-text="park.name + ' - Rp ' + park.fee.toLocaleString('id-ID')"></option>
-                                    </template>
-                                </select>
-
-                                <!-- License Plate Input -->
-                                <div class="mt-4" x-show="selectedParking > 0" x-transition>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Plat Nomor Kendaraan</label>
-                                    <input type="text"
-                                        x-model="platNomor"
-                                        class="w-full p-3 border-0 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200 uppercase"
-                                        placeholder="B 1234 ABC"
-                                        maxlength="15">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Payment Method -->
-                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-100">
-                            <label class="flex items-center text-lg font-semibold text-gray-800 mb-3">
-                                <i class="fas fa-credit-card text-green-500 mr-2"></i>
-                                Metode Pembayaran
-                            </label>
-                            <div class="grid grid-cols-2 gap-4">
-                                <label class="flex items-center p-4 bg-white rounded-xl border-2 cursor-pointer transition-all duration-200"
-                                    :class="paymentMethod === 'cash' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'">
-                                    <input type="radio" x-model="paymentMethod" value="cash" class="sr-only">
-                                    <i class="fas fa-money-bill-wave text-green-500 text-2xl mr-3"></i>
-                                    <div>
-                                        <div class="font-semibold text-gray-800">Tunai</div>
-                                        <div class="text-sm text-gray-600">Bayar dengan uang cash</div>
-                                    </div>
-                                </label>
-                                <label class="flex items-center p-4 bg-white rounded-xl border-2 cursor-pointer transition-all duration-200"
-                                    :class="paymentMethod === 'qris' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'">
-                                    <input type="radio" x-model="paymentMethod" value="qris" class="sr-only">
-                                    <i class="fas fa-qrcode text-green-500 text-2xl mr-3"></i>
-                                    <div>
-                                        <div class="font-semibold text-gray-800">QRIS</div>
-                                        <div class="text-sm text-gray-600">Scan QR Code</div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
+            <!-- Enhanced Cart & Payment Panel -->
+            <div class="w-full xl:w-1/3 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-6 lg:p-8 slide-up border border-white/20">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800">
+                        <i class="fas fa-shopping-cart text-purple-500 mr-3"></i>
+                        Keranjang
+                    </h3>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-500">Items:</span>
+                        <span class="bg-purple-100 text-purple-600 px-2 py-1 rounded-full text-sm font-bold" x-text="cart.reduce((sum, item) => sum + item.quantity, 0)">0</span>
                     </div>
                 </div>
 
-                <!-- Enhanced Cart & Payment Panel -->
-                <div class="w-full xl:w-1/3 bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-6 lg:p-8 slide-up border border-white/20">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-2xl font-bold text-gray-800">
-                            <i class="fas fa-shopping-cart text-purple-500 mr-3"></i>
-                            Keranjang
-                        </h3>
+                <div class="space-y-3 mb-6 min-h-[300px] max-h-[400px] overflow-y-auto scrollbar-hide">
+                    <template x-if="cart.length === 0">
+                        <div class="text-center text-gray-500 mt-12">
+                            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-shopping-cart text-4xl text-gray-400"></i>
+                            </div>
+                            <p class="text-lg font-medium">Keranjang Kosong</p>
+                            <p class="text-sm">Pilih tiket untuk memulai transaksi</p>
+                        </div>
+                    </template>
+
+                    <template x-for="item in cart" :key="item.ticket.id">
+                        <div class="cart-item p-4 rounded-xl">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-gray-800" x-text="item.ticket.name"></h4>
+                                <button @click="decreaseFromCart(item.ticket)" class="text-red-500 hover:text-red-700 transition-colors">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-600">Qty:</span>
+                                    <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm font-bold" x-text="item.quantity"></span>
+                                </div>
+                                <span class="font-bold text-blue-600" x-text="'Rp ' + (item.ticket.price * item.quantity).toLocaleString('id-ID')"></span>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template x-if="selectedParking > 0 && platNomor">
+                        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 p-4 rounded-xl border border-purple-100">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-car text-purple-500"></i>
+                                    <span class="font-medium text-gray-700">Parkir</span>
+                                </div>
+                                <span class="font-bold text-purple-600" x-text="platNomor"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Enhanced Price Breakdown -->
+                <div class="border-t-2 border-gray-100 pt-6 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Subtotal:</span>
+                        <span class="font-semibold text-gray-800" x-text="'Rp ' + subtotal.toLocaleString('id-ID')"></span>
+                    </div>
+                    <div class="flex justify-between items-center" x-show="selectedDiscount > 0">
                         <div class="flex items-center space-x-2">
-                            <span class="text-sm text-gray-500">Items:</span>
-                            <span class="bg-purple-100 text-purple-600 px-2 py-1 rounded-full text-sm font-bold" x-text="cart.reduce((sum, item) => sum + item.quantity, 0)">0</span>
+                            <span class="text-orange-600">Diskon:</span>
+                            <span class="bg-orange-100 text-orange-600 px-2 py-1 rounded-full text-xs font-bold" x-text="selectedDiscount + '%'"></span>
                         </div>
+                        <span class="font-semibold text-orange-600" x-text="'- Rp ' + discountAmount.toLocaleString('id-ID')"></span>
                     </div>
-
-                    <div class="space-y-3 mb-6 min-h-[300px] max-h-[400px] overflow-y-auto scrollbar-hide">
-                        <template x-if="cart.length === 0">
-                            <div class="text-center text-gray-500 mt-12">
-                                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <i class="fas fa-shopping-cart text-4xl text-gray-400"></i>
-                                </div>
-                                <p class="text-lg font-medium">Keranjang Kosong</p>
-                                <p class="text-sm">Pilih tiket untuk memulai transaksi</p>
-                            </div>
-                        </template>
-
-                        <template x-for="item in cart" :key="item.ticket.id">
-                            <div class="cart-item p-4 rounded-xl">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h4 class="font-semibold text-gray-800" x-text="item.ticket.name"></h4>
-                                    <button @click="decreaseFromCart(item.ticket)" class="text-red-500 hover:text-red-700 transition-colors">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-2">
-                                        <span class="text-sm text-gray-600">Qty:</span>
-                                        <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm font-bold" x-text="item.quantity"></span>
-                                    </div>
-                                    <span class="font-bold text-blue-600" x-text="'Rp ' + (item.ticket.price * item.quantity).toLocaleString('id-ID')"></span>
-                                </div>
-                            </div>
-                        </template>
-
-                        <template x-if="selectedParking > 0 && platNomor">
-                            <div class="bg-gradient-to-r from-purple-50 to-indigo-50 p-4 rounded-xl border border-purple-100">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-2">
-                                        <i class="fas fa-car text-purple-500"></i>
-                                        <span class="font-medium text-gray-700">Parkir</span>
-                                    </div>
-                                    <span class="font-bold text-purple-600" x-text="platNomor"></span>
-                                </div>
-                            </div>
-                        </template>
+                    <div class="flex justify-between items-center" x-show="selectedParking > 0">
+                        <span class="text-purple-600">Biaya Parkir:</span>
+                        <span class="font-semibold text-purple-600" x-text="'Rp ' + selectedParking.toLocaleString('id-ID')"></span>
                     </div>
-
-                    <!-- Enhanced Price Breakdown -->
-                    <div class="border-t-2 border-gray-100 pt-6 space-y-3">
+                    <div class="border-t-2 border-gray-100 pt-3">
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Subtotal:</span>
-                            <span class="font-semibold text-gray-800" x-text="'Rp ' + subtotal.toLocaleString('id-ID')"></span>
+                            <span class="text-xl font-bold text-gray-800">Total Bayar:</span>
+                            <span class="text-2xl font-bold text-blue-600" x-text="'Rp ' + totalAll.toLocaleString('id-ID')">Rp 0</span>
                         </div>
-                        <div class="flex justify-between items-center" x-show="selectedDiscount > 0">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-orange-600">Diskon:</span>
-                                <span class="bg-orange-100 text-orange-600 px-2 py-1 rounded-full text-xs font-bold" x-text="selectedDiscount + '%'"></span>
-                            </div>
-                            <span class="font-semibold text-orange-600" x-text="'- Rp ' + discountAmount.toLocaleString('id-ID')"></span>
-                        </div>
-                        <div class="flex justify-between items-center" x-show="selectedParking > 0">
-                            <span class="text-purple-600">Biaya Parkir:</span>
-                            <span class="font-semibold text-purple-600" x-text="'Rp ' + selectedParking.toLocaleString('id-ID')"></span>
-                        </div>
-                        <div class="border-t-2 border-gray-100 pt-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-xl font-bold text-gray-800">Total Bayar:</span>
-                                <span class="text-2xl font-bold text-blue-600" x-text="'Rp ' + totalAll.toLocaleString('id-ID')">Rp 0</span>
-                            </div>
-                        </div>
-
-                        <button
-                            class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
-                            :class="{ 'pulse-border': cart.length > 0 }"
-                            :disabled="cart.length === 0"
-                            @click="paymentMethod === 'qris' ? showQrisModal = true : (saveTransaction(), showReceipt = true)">
-                            <i class="fas fa-credit-card mr-2"></i>
-                            Proses Pembayaran
-                        </button>
                     </div>
+
+                    <button
+                        class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
+                        :class="{ 'pulse-border': cart.length > 0 }"
+                        :disabled="cart.length === 0"
+                        @click="paymentMethod === 'qris' ? showQrisModal = true : (saveTransaction(), showReceipt = true)">
+                        <i class="fas fa-credit-card mr-2"></i>
+                        Proses Pembayaran
+                    </button>
                 </div>
             </div>
         </div>

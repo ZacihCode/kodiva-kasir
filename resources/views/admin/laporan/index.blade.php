@@ -201,317 +201,315 @@
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
     @extends('layouts.app')
     @section('content')
-    <div class="ml-0 md:ml-64 lg:ml-72 min-h-screen p-4 sm:p-6 lg:p-8">
-        <div class="max-w-7xl mx-auto">
-            <!-- Enhanced Header -->
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 fade-in">
-                <div class="mb-4 lg:mb-0">
-                    <div class="flex items-center space-x-3 mb-2">
-                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center floating">
-                            <i class="fas fa-chart-line text-white text-xl"></i>
-                        </div>
-                        <h2 class="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent">
-                            Laporan & Analisis
-                        </h2>
+    <div class="min-h-screen ml-6 mr-2 p-6">
+        <!-- Enhanced Header -->
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 fade-in">
+            <div class="mb-4 lg:mb-0">
+                <div class="flex items-center space-x-3 mb-2">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center floating">
+                        <i class="fas fa-chart-line text-white text-xl"></i>
                     </div>
-                    <p class="text-gray-600 text-lg">Dashboard analitik komprehensif untuk insight bisnis</p>
+                    <h2 class="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent">
+                        Laporan & Analisis
+                    </h2>
                 </div>
+                <p class="text-gray-600 text-lg">Dashboard analitik komprehensif untuk insight bisnis</p>
+            </div>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                <div class="relative">
+                    <input type="date"
+                        class="w-full sm:w-auto border-0 rounded-2xl px-4 py-3 bg-white/80 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all duration-300">
+                </div>
+                <button class="filter-button text-white px-6 py-3 rounded-2xl font-medium shadow-lg">
+                    <i class="fas fa-filter mr-2"></i>
+                    Filter Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Enhanced Control Panel -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-6 lg:p-8 mb-8 scale-in border border-white/20">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                    <div class="relative">
-                        <input type="date"
-                            class="w-full sm:w-auto border-0 rounded-2xl px-4 py-3 bg-white/80 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all duration-300">
-                    </div>
+                    <select class="custom-select border-0 rounded-2xl px-4 py-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300 font-medium">
+                        <option>📅 Hari Ini</option>
+                        <option>📅 Minggu Ini</option>
+                        <option>📅 Bulan Ini</option>
+                        <option>📅 Tahun Ini</option>
+                        <option>📅 Custom Range</option>
+                    </select>
                     <button class="filter-button text-white px-6 py-3 rounded-2xl font-medium shadow-lg">
-                        <i class="fas fa-filter mr-2"></i>
-                        Filter Data
+                        <i class="fas fa-chart-bar mr-2"></i>
+                        Generate Laporan
+                    </button>
+                </div>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                    <button class="export-button text-white px-6 py-3 rounded-2xl font-medium shadow-lg">
+                        <i class="fas fa-file-pdf mr-2"></i>
+                        Export PDF
+                    </button>
+                    <button class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-6 py-3 rounded-2xl font-medium shadow-lg transition-all duration-300 hover:shadow-xl transform hover:scale-105">
+                        <i class="fas fa-file-excel mr-2"></i>
+                        Export Excel
                     </button>
                 </div>
             </div>
+        </div>
 
-            <!-- Enhanced Control Panel -->
-            <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-6 lg:p-8 mb-8 scale-in border border-white/20">
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                        <select class="custom-select border-0 rounded-2xl px-4 py-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300 font-medium">
-                            <option>📅 Hari Ini</option>
-                            <option>📅 Minggu Ini</option>
-                            <option>📅 Bulan Ini</option>
-                            <option>📅 Tahun Ini</option>
-                            <option>📅 Custom Range</option>
-                        </select>
-                        <button class="filter-button text-white px-6 py-3 rounded-2xl font-medium shadow-lg">
-                            <i class="fas fa-chart-bar mr-2"></i>
-                            Generate Laporan
-                        </button>
+        <!-- Enhanced Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 xl:gap-6 mb-8">
+            <div class="stat-card bg-white w-full rounded-3xl shadow-lg p-6 xl:p-8 flex flex-col justify-between transition hover:shadow-xl duration-300 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-gray-500 text-xs uppercase font-semibold">Total Pengunjung</p>
+                        <p class="text-2xl xl:text-3xl font-bold text-blue-600 mt-2">1,245</p>
                     </div>
-                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-                        <button class="export-button text-white px-6 py-3 rounded-2xl font-medium shadow-lg">
-                            <i class="fas fa-file-pdf mr-2"></i>
-                            Export PDF
-                        </button>
-                        <button class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-6 py-3 rounded-2xl font-medium shadow-lg transition-all duration-300 hover:shadow-xl transform hover:scale-105">
-                            <i class="fas fa-file-excel mr-2"></i>
-                            Export Excel
-                        </button>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-users text-white text-lg"></i>
                     </div>
+                </div>
+                <div class="flex items-center justify-between mt-4">
+                    <span class="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full"><i class="fas fa-arrow-up mr-1"></i>+15%</span>
+                    <span class="text-xs text-gray-500">vs periode lalu</span>
                 </div>
             </div>
 
-            <!-- Enhanced Summary Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 xl:gap-6 mb-8">
-                <div class="stat-card bg-white w-full rounded-3xl shadow-lg p-6 xl:p-8 flex flex-col justify-between transition hover:shadow-xl duration-300 card-hover">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <p class="text-gray-500 text-xs uppercase font-semibold">Total Pengunjung</p>
-                            <p class="text-2xl xl:text-3xl font-bold text-blue-600 mt-2">1,245</p>
-                        </div>
-                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-users text-white text-lg"></i>
-                        </div>
+            <div class="stat-card bg-white w-full rounded-3xl shadow-lg p-6 xl:p-8 flex flex-col justify-between transition hover:shadow-xl duration-300 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-gray-500 text-xs uppercase font-semibold">Omset Total</p>
+                        <p class="text-2xl xl:text-3xl font-bold text-emerald-600 mt-2">18.675.000</p>
+                        <p class="text-sm text-gray-400">Rupiah</p>
                     </div>
-                    <div class="flex items-center justify-between mt-4">
-                        <span class="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full"><i class="fas fa-arrow-up mr-1"></i>+15%</span>
-                        <span class="text-xs text-gray-500">vs periode lalu</span>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-money-bill-wave text-white text-lg"></i>
                     </div>
                 </div>
-
-                <div class="stat-card bg-white w-full rounded-3xl shadow-lg p-6 xl:p-8 flex flex-col justify-between transition hover:shadow-xl duration-300 card-hover">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <p class="text-gray-500 text-xs uppercase font-semibold">Omset Total</p>
-                            <p class="text-2xl xl:text-3xl font-bold text-emerald-600 mt-2">18.675.000</p>
-                            <p class="text-sm text-gray-400">Rupiah</p>
-                        </div>
-                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-money-bill-wave text-white text-lg"></i>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between mt-4">
-                        <span class="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full"><i class="fas fa-arrow-up mr-1"></i>+22%</span>
-                        <span class="text-xs text-gray-500">vs periode lalu</span>
-                    </div>
-                </div>
-
-                <div class="stat-card bg-white w-full rounded-3xl shadow-lg p-6 xl:p-8 flex flex-col justify-between transition hover:shadow-xl duration-300 card-hover">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <p class="text-gray-500 text-xs uppercase font-semibold">Rata-rata per Hari</p>
-                            <p class="text-2xl xl:text-3xl font-bold text-purple-600 mt-2">2.669.000</p>
-                            <p class="text-sm text-gray-400">Rupiah</p>
-                        </div>
-                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-chart-line text-white text-lg"></i>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between mt-4">
-                        <span class="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full"><i class="fas fa-arrow-up mr-1"></i>+8%</span>
-                        <span class="text-xs text-gray-500">vs periode lalu</span>
-                    </div>
-                </div>
-
-                <div class="stat-card bg-white w-full rounded-3xl shadow-lg p-6 xl:p-8 flex flex-col justify-between transition hover:shadow-xl duration-300 card-hover">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <p class="text-gray-500 text-xs uppercase font-semibold">Laba Bersih</p>
-                            <p class="text-2xl xl:text-3xl font-bold text-orange-600 mt-2">14.140.000</p>
-                            <p class="text-sm text-gray-400">Rupiah (75.7%)</p>
-                        </div>
-                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center">
-                            <i class="fa-solid fa-chart-line text-white text-lg"></i>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between mt-4">
-                        <span class="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full"><i class="fas fa-arrow-up mr-1"></i>+18%</span>
-                        <span class="text-xs text-gray-500">vs periode lalu</span>
-                    </div>
+                <div class="flex items-center justify-between mt-4">
+                    <span class="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full"><i class="fas fa-arrow-up mr-1"></i>+22%</span>
+                    <span class="text-xs text-gray-500">vs periode lalu</span>
                 </div>
             </div>
 
-            <!-- Enhanced Charts Section -->
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
-                <!-- Ticket Sales Chart -->
-                <div class="chart-container rounded-3xl shadow-xl p-6 lg:p-8 slide-up border border-white/20">
-                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-4 lg:mb-0">
-                            <i class="fas fa-ticket-alt text-orange-500 mr-3"></i>
-                            Penjualan per Jenis Tiket
-                        </h3>
-                        <div class="flex flex-wrap gap-2">
-                            <button id="btn-tiket-harian"
-                                class="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl text-sm font-medium hover:from-orange-600 hover:to-orange-700 transition-all duration-300 shadow-lg transform hover:scale-105">
-                                Harian
-                            </button>
-                            <button id="btn-tiket-mingguan"
-                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all duration-300">
-                                Mingguan
-                            </button>
-                            <button id="btn-tiket-bulanan"
-                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all duration-300">
-                                Bulanan
-                            </button>
-                        </div>
+            <div class="stat-card bg-white w-full rounded-3xl shadow-lg p-6 xl:p-8 flex flex-col justify-between transition hover:shadow-xl duration-300 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-gray-500 text-xs uppercase font-semibold">Rata-rata per Hari</p>
+                        <p class="text-2xl xl:text-3xl font-bold text-purple-600 mt-2">2.669.000</p>
+                        <p class="text-sm text-gray-400">Rupiah</p>
                     </div>
-                    <div class="relative h-80 lg:h-96">
-                        <canvas id="ticketChart" class="w-full h-full"></canvas>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-chart-line text-white text-lg"></i>
                     </div>
                 </div>
-
-                <!-- Visitor Trend Chart -->
-                <div class="chart-container rounded-3xl shadow-xl p-6 lg:p-8 slide-up border border-white/20">
-                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-4 lg:mb-0">
-                            <i class="fas fa-chart-area text-green-500 mr-3"></i>
-                            Trend Pengunjung
-                        </h3>
-                        <div class="flex flex-wrap gap-2">
-                            <button id="btn-visitor-harian"
-                                class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl text-sm font-medium hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg transform hover:scale-105">
-                                Harian
-                            </button>
-                            <button id="btn-visitor-mingguan"
-                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all duration-300">
-                                Mingguan
-                            </button>
-                            <button id="btn-visitor-bulanan"
-                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all duration-300">
-                                Bulanan
-                            </button>
-                        </div>
-                    </div>
-                    <div class="relative h-80 lg:h-96">
-                        <canvas id="visitorChart" class="w-full h-full"></canvas>
-                    </div>
+                <div class="flex items-center justify-between mt-4">
+                    <span class="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full"><i class="fas fa-arrow-up mr-1"></i>+8%</span>
+                    <span class="text-xs text-gray-500">vs periode lalu</span>
                 </div>
             </div>
 
-            <!-- Enhanced Detailed Reports -->
-            <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-6 lg:p-8 border border-white/20">
-                <div class="flex items-center justify-between mb-8">
-                    <h3 class="text-2xl font-bold text-gray-800">
-                        <i class="fas fa-file-alt text-indigo-500 mr-3"></i>
-                        Laporan Detail Komprehensif
+            <div class="stat-card bg-white w-full rounded-3xl shadow-lg p-6 xl:p-8 flex flex-col justify-between transition hover:shadow-xl duration-300 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-gray-500 text-xs uppercase font-semibold">Laba Bersih</p>
+                        <p class="text-2xl xl:text-3xl font-bold text-orange-600 mt-2">14.140.000</p>
+                        <p class="text-sm text-gray-400">Rupiah (75.7%)</p>
+                    </div>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-chart-line text-white text-lg"></i>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between mt-4">
+                    <span class="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full"><i class="fas fa-arrow-up mr-1"></i>+18%</span>
+                    <span class="text-xs text-gray-500">vs periode lalu</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Charts Section -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+            <!-- Ticket Sales Chart -->
+            <div class="chart-container rounded-3xl shadow-xl p-6 lg:p-8 slide-up border border-white/20">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 lg:mb-0">
+                        <i class="fas fa-ticket-alt text-orange-500 mr-3"></i>
+                        Penjualan per Jenis Tiket
                     </h3>
-                    <div class="flex items-center space-x-2">
-                        <div class="w-3 h-3 bg-green-400 rounded-full pulse-ring"></div>
-                        <span class="text-sm text-gray-500">Live Data</span>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="btn-tiket-harian"
+                            class="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl text-sm font-medium hover:from-orange-600 hover:to-orange-700 transition-all duration-300 shadow-lg transform hover:scale-105">
+                            Harian
+                        </button>
+                        <button id="btn-tiket-mingguan"
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all duration-300">
+                            Mingguan
+                        </button>
+                        <button id="btn-tiket-bulanan"
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all duration-300">
+                            Bulanan
+                        </button>
+                    </div>
+                </div>
+                <div class="relative h-80 lg:h-96">
+                    <canvas id="ticketChart" class="w-full h-full"></canvas>
+                </div>
+            </div>
+
+            <!-- Visitor Trend Chart -->
+            <div class="chart-container rounded-3xl shadow-xl p-6 lg:p-8 slide-up border border-white/20">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 lg:mb-0">
+                        <i class="fas fa-chart-area text-green-500 mr-3"></i>
+                        Trend Pengunjung
+                    </h3>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="btn-visitor-harian"
+                            class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl text-sm font-medium hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg transform hover:scale-105">
+                            Harian
+                        </button>
+                        <button id="btn-visitor-mingguan"
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all duration-300">
+                            Mingguan
+                        </button>
+                        <button id="btn-visitor-bulanan"
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all duration-300">
+                            Bulanan
+                        </button>
+                    </div>
+                </div>
+                <div class="relative h-80 lg:h-96">
+                    <canvas id="visitorChart" class="w-full h-full"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Detailed Reports -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-6 lg:p-8 border border-white/20">
+            <div class="flex items-center justify-between mb-8">
+                <h3 class="text-2xl font-bold text-gray-800">
+                    <i class="fas fa-file-alt text-indigo-500 mr-3"></i>
+                    Laporan Detail Komprehensif
+                </h3>
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 bg-green-400 rounded-full pulse-ring"></div>
+                    <span class="text-sm text-gray-500">Live Data</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Financial Report -->
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-100 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-chart-pie text-green-500 mr-2"></i>
+                            Laporan Keuangan
+                        </h4>
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-dollar-sign text-green-600"></i>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
+                            <span class="text-gray-700 font-medium">💰 Pemasukan</span>
+                            <span class="font-bold text-green-600">Rp 18.675.000</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
+                            <span class="text-gray-700 font-medium">💸 Pengeluaran</span>
+                            <span class="font-bold text-red-600">Rp 4.535.000</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-green-100 rounded-xl">
+                            <span class="text-gray-700 font-medium">🎯 Laba Kotor</span>
+                            <span class="font-bold text-green-700">Rp 14.140.000</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-green-100 rounded-xl">
+                            <span class="text-gray-700 font-medium">📊 Margin</span>
+                            <span class="font-bold text-green-700">75.7%</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Financial Report -->
-                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-100 card-hover">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-xl font-bold text-gray-800">
-                                <i class="fas fa-chart-pie text-green-500 mr-2"></i>
-                                Laporan Keuangan
-                            </h4>
-                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-dollar-sign text-green-600"></i>
+                <!-- Ticket Report -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-ticket-alt text-blue-500 mr-2"></i>
+                            Laporan Tiket
+                        </h4>
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-chart-bar text-blue-600"></i>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                <span class="text-gray-700 font-medium">Tiket Dewasa</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-bold text-blue-600">845</span>
+                                <span class="text-sm text-gray-500 ml-1">(68%)</span>
                             </div>
                         </div>
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
-                                <span class="text-gray-700 font-medium">💰 Pemasukan</span>
-                                <span class="font-bold text-green-600">Rp 18.675.000</span>
+                        <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span class="text-gray-700 font-medium">Tiket Anak</span>
                             </div>
-                            <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
-                                <span class="text-gray-700 font-medium">💸 Pengeluaran</span>
-                                <span class="font-bold text-red-600">Rp 4.535.000</span>
+                            <div class="text-right">
+                                <span class="font-bold text-green-600">285</span>
+                                <span class="text-sm text-gray-500 ml-1">(23%)</span>
                             </div>
-                            <div class="flex justify-between items-center p-3 bg-green-100 rounded-xl">
-                                <span class="text-gray-700 font-medium">🎯 Laba Kotor</span>
-                                <span class="font-bold text-green-700">Rp 14.140.000</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                                <span class="text-gray-700 font-medium">Tiket VIP</span>
                             </div>
-                            <div class="flex justify-between items-center p-3 bg-green-100 rounded-xl">
-                                <span class="text-gray-700 font-medium">📊 Margin</span>
-                                <span class="font-bold text-green-700">75.7%</span>
+                            <div class="text-right">
+                                <span class="font-bold text-purple-600">85</span>
+                                <span class="text-sm text-gray-500 ml-1">(7%)</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                                <span class="text-gray-700 font-medium">Tiket Lansia</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-bold text-orange-600">30</span>
+                                <span class="text-sm text-gray-500 ml-1">(2%)</span>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Ticket Report -->
-                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100 card-hover">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-xl font-bold text-gray-800">
-                                <i class="fas fa-ticket-alt text-blue-500 mr-2"></i>
-                                Laporan Tiket
-                            </h4>
-                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-chart-bar text-blue-600"></i>
-                            </div>
-                        </div>
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
-                                <div class="flex items-center space-x-2">
-                                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-                                    <span class="text-gray-700 font-medium">Tiket Dewasa</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="font-bold text-blue-600">845</span>
-                                    <span class="text-sm text-gray-500 ml-1">(68%)</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
-                                <div class="flex items-center space-x-2">
-                                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                                    <span class="text-gray-700 font-medium">Tiket Anak</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="font-bold text-green-600">285</span>
-                                    <span class="text-sm text-gray-500 ml-1">(23%)</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
-                                <div class="flex items-center space-x-2">
-                                    <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
-                                    <span class="text-gray-700 font-medium">Tiket VIP</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="font-bold text-purple-600">85</span>
-                                    <span class="text-sm text-gray-500 ml-1">(7%)</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
-                                <div class="flex items-center space-x-2">
-                                    <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
-                                    <span class="text-gray-700 font-medium">Tiket Lansia</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="font-bold text-orange-600">30</span>
-                                    <span class="text-sm text-gray-500 ml-1">(2%)</span>
-                                </div>
-                            </div>
+                <!-- Employee Report -->
+                <div class="bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-2xl border border-purple-100 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-users text-purple-500 mr-2"></i>
+                            Laporan Karyawan
+                        </h4>
+                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user-tie text-purple-600"></i>
                         </div>
                     </div>
-
-                    <!-- Employee Report -->
-                    <div class="bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-2xl border border-purple-100 card-hover">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-xl font-bold text-gray-800">
-                                <i class="fas fa-users text-purple-500 mr-2"></i>
-                                Laporan Karyawan
-                            </h4>
-                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-user-tie text-purple-600"></i>
-                            </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
+                            <span class="text-gray-700 font-medium">📊 Rata-rata Kehadiran</span>
+                            <span class="font-bold text-purple-600">87%</span>
                         </div>
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
-                                <span class="text-gray-700 font-medium">📊 Rata-rata Kehadiran</span>
-                                <span class="font-bold text-purple-600">87%</span>
-                            </div>
-                            <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
-                                <span class="text-gray-700 font-medium">⏰ Total Jam Kerja</span>
-                                <span class="font-bold text-purple-600">1,260 jam</span>
-                            </div>
-                            <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
-                                <span class="text-gray-700 font-medium">⏱️ Lembur</span>
-                                <span class="font-bold text-orange-600">45 jam</span>
-                            </div>
-                            <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
-                                <span class="text-gray-700 font-medium">❌ Absen</span>
-                                <span class="font-bold text-red-600">3 karyawan</span>
-                            </div>
+                        <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
+                            <span class="text-gray-700 font-medium">⏰ Total Jam Kerja</span>
+                            <span class="font-bold text-purple-600">1,260 jam</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
+                            <span class="text-gray-700 font-medium">⏱️ Lembur</span>
+                            <span class="font-bold text-orange-600">45 jam</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white/50 rounded-xl">
+                            <span class="text-gray-700 font-medium">❌ Absen</span>
+                            <span class="font-bold text-red-600">3 karyawan</span>
                         </div>
                     </div>
                 </div>

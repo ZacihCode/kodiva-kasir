@@ -25,11 +25,17 @@
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
     @include('partials.sidebar')
 
-    <main>
+    <main class="main-content pt-16 transition-all duration-300">
         @yield('content')
     </main>
-
-    @include('components.loading-overlay')
+    <!-- Footer -->
+    <div class="bg-white border-t border-gray-200 py-4 text-center text-sm text-gray-500">
+        <p class="text-black font-semibold text-sm flex items-center justify-center gap-2">
+            <img src="https://cdn.aceimg.com/b127a1e12.png" alt="heart" class="w-4 h-4">
+            © {{ date('Y') }} <span class="text-black font-semibold">kodiva.id</span>
+            <i class="fas fa-sparkles text-yellow-400"></i>
+        </p>
+    </div>
 
     <!-- Toast Root -->
     <div id="toast-root"
