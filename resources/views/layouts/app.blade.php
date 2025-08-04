@@ -32,7 +32,7 @@
     <div class="bg-white border-t border-gray-200 py-4 text-center text-sm text-gray-500">
         <p class="text-black font-semibold text-sm flex items-center justify-center gap-2">
             <img src="https://cdn.aceimg.com/b127a1e12.png" alt="heart" class="w-4 h-4">
-            © {{ date('Y') }} <span class="text-black font-semibold">kodiva.id</span>
+            © {{ date('Y') }} <span class="text-black font-semibold">KODIVA.ID</span>
             <i class="fas fa-sparkles text-yellow-400"></i>
         </p>
     </div>
