@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scan Absensi</title>
+    <title>Wisata Sendang Plesungan - Absensi</title>
     <style>
         @keyframes fade-in {
             from {

@@ -24,6 +24,7 @@ class KeuanganManager extends Component
     public $totalPemasukan = 0;
     public $totalPengeluaran = 0;
     public $labaBersih = 0;
+    public $tanggalFilter = null;
 
     protected $rules = [
         'jenis_keuangan' => 'required|in:pemasukan,pengeluaran',
@@ -111,9 +112,19 @@ class KeuanganManager extends Component
 
     public function render()
     {
-        $keuangans = Keuangan::where('kategori', 'like', '%' . $this->search . '%')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $query = Keuangan::query();
+
+        // Filter berdasarkan kategori (pencarian)
+        if ($this->search) {
+            $query->where('kategori', 'like', '%' . $this->search . '%');
+        }
+
+        // Filter berdasarkan tanggal
+        if ($this->tanggalFilter) {
+            $query->whereDate('created_at', $this->tanggalFilter);
+        }
+
+        $keuangans = $query->orderBy('created_at', 'desc')->paginate(10);
 
         return view('livewire.keuangan-manager', compact('keuangans'));
     }
