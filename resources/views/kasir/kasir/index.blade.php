@@ -561,6 +561,8 @@
     @endsection
 
     <script>
+        const COLS = 32
+
         function cashierSystem() {
             return {
                 cart: [],
@@ -708,26 +710,92 @@
                     return value.toLocaleString('id-ID');
                 },
 
-                printReceipt() {
-                    const plainText = [
-                        'WISATA SENDANG PLESUNG\n',
-                        'Struk Pembayaran\n',
-                        `${new Date().toLocaleString('id-ID')}\n`,
-                        `Kasir: Admin | Metode: ${this.paymentMethod === 'qris' ? 'QRIS' : 'Tunai'}\n`,
-                        this.platNomor ? `Plat: ${this.platNomor}\n` : '',
-                        '--------------------------\n',
-                        ...this.cart.map(item =>
-                            `${item.ticket.name} x${item.quantity}  Rp${this.formatRupiah(item.ticket.price * item.quantity)}\n`
-                        ),
-                        this.discountAmount > 0 ? `Diskon (${this.selectedDiscount}%)  -Rp${this.formatRupiah(this.discountAmount)}\n` : '',
-                        this.selectedParking > 0 ? `Parkir           Rp${this.formatRupiah(this.selectedParking)}\n` : '',
-                        '--------------------------\n',
-                        `TOTAL           Rp${this.formatRupiah(this.totalAll)}\n`,
-                        '\nTerima kasih atas kunjungan Anda!\n',
-                        'Simpan struk ini sebagai bukti pembayaran\n'
-                    ].join('');
+                wrapText(str) {
+                    const words = String(str).split(/\s+/);
+                    const lines = [];
+                    let line = '';
+                    for (const w of words) {
+                        if ((line + (line ? ' ' : '') + w).length <= COLS) {
+                            line += (line ? ' ' : '') + w;
+                        } else {
+                            if (line) lines.push(line);
+                            // kalau 1 kata > COLS, paksa pecah
+                            if (w.length > COLS) {
+                                let s = w;
+                                while (s.length > COLS) {
+                                    lines.push(s.slice(0, COLS));
+                                    s = s.slice(COLS);
+                                }
+                                line = s;
+                            } else {
+                                line = w;
+                            }
+                        }
+                    }
+                    if (line) lines.push(line);
+                    return lines;
+                },
 
-                    this.connectAndPrintViaBluetooth(plainText);
+                // kiri-kanan (teks, nominal) agar pas 1 baris
+                lineLR(left, right) {
+                    const l = left.length;
+                    const r = right.length;
+                    if (l + r >= COLS) return left.slice(0, Math.max(0, COLS - r - 1)) + ' ' + right;
+                    return left + ' '.repeat(COLS - l - r) + right;
+                },
+
+                CRLF(s) {
+                    return s.replace(/\n/g, '\r\n');
+                },
+
+                printReceipt() {
+                    const now = new Date().toLocaleString('id-ID');
+                    const metode = this.paymentMethod === 'qris' ? 'QRIS' : 'Tunai';
+
+                    // Bangun konten dengan wrap 32 kolom
+                    const body = [];
+
+                    // Item
+                    for (const item of this.cart) {
+                        const name = `${item.ticket.name} x${item.quantity}`;
+                        const price = `Rp${this.formatRupiah(item.ticket.price * item.quantity)}`;
+                        body.push(lineLR(name, price));
+                    }
+                    if (this.discountAmount > 0) {
+                        body.push(lineLR(`Diskon (${this.selectedDiscount}%)`, `-Rp${this.formatRupiah(this.discountAmount)}`));
+                    }
+                    if (this.selectedParking > 0) {
+                        body.push(lineLR(`Parkir`, `Rp${this.formatRupiah(this.selectedParking)}`));
+                    }
+
+                    const totalLine = lineLR('TOTAL', `Rp${this.formatRupiah(this.totalAll)}`);
+
+                    // ESC/POS buffer builder
+                    let esc = '';
+                    esc += '\x1B\x40'; // ESC @  -> reset
+                    esc += '\x1B\x74\x10'; // ESC t 16 -> codepage 1252 (aman utk Latin). Kalau buruk, coba \x00 (CP437)
+                    esc += '\x1B\x32'; // ESC 2 -> default line spacing
+                    esc += '\x1B\x61\x01'; // ESC a 1 -> center
+                    esc += '\x1B\x45\x01'; // ESC E 1 -> bold on
+                    wrapText('WISATA SENDANG PLESUNG').forEach(l => esc += l + '\r\n');
+                    esc += '\x1B\x45\x00'; // bold off
+                    wrapText('Struk Pembayaran').forEach(l => esc += l + '\r\n');
+                    esc += now + '\r\n';
+                    esc += '\x1B\x61\x00'; // left
+                    esc += lineLR('Kasir: Admin', `Metode: ${metode}`) + '\r\n';
+                    if (this.platNomor) esc += `Plat: ${this.platNomor}\r\n`;
+                    esc += '-'.repeat(COLS) + '\r\n';
+
+                    body.forEach(l => esc += CRLF(l) + '\r\n');
+                    esc += '-'.repeat(COLS) + '\r\n';
+                    esc += totalLine + '\r\n\r\n';
+                    wrapText('Terima kasih atas kunjungan Anda!').forEach(l => esc += l + '\r\n');
+                    wrapText('Simpan struk ini sebagai bukti pembayaran').forEach(l => esc += l + '\r\n');
+
+                    esc += '\r\n\r\n\r\n';
+                    esc += '\x1D\x56\x00'; // GS V 0 -> partial cut (kalau printer mendukung)
+
+                    this.connectAndPrintViaBluetooth(esc);
                 },
 
                 async connectAndPrintViaBluetooth(receiptText) {
