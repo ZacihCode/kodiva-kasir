@@ -752,48 +752,45 @@
                     const now = new Date().toLocaleString('id-ID');
                     const metode = this.paymentMethod === 'qris' ? 'QRIS' : 'Tunai';
 
-                    // Bangun konten dengan wrap 32 kolom
                     const body = [];
-
-                    // Item
                     for (const item of this.cart) {
                         const name = `${item.ticket.name} x${item.quantity}`;
                         const price = `Rp${this.formatRupiah(item.ticket.price * item.quantity)}`;
-                        body.push(lineLR(name, price));
+                        body.push(this.lineLR(name, price)); // <- this.
                     }
                     if (this.discountAmount > 0) {
-                        body.push(lineLR(`Diskon (${this.selectedDiscount}%)`, `-Rp${this.formatRupiah(this.discountAmount)}`));
+                        body.push(this.lineLR(`Diskon (${this.selectedDiscount}%)`, `-Rp${this.formatRupiah(this.discountAmount)}`)); // <- this.
                     }
                     if (this.selectedParking > 0) {
-                        body.push(lineLR(`Parkir`, `Rp${this.formatRupiah(this.selectedParking)}`));
+                        body.push(this.lineLR('Parkir', `Rp${this.formatRupiah(this.selectedParking)}`)); // <- this.
                     }
 
-                    const totalLine = lineLR('TOTAL', `Rp${this.formatRupiah(this.totalAll)}`);
+                    const totalLine = this.lineLR('TOTAL', `Rp${this.formatRupiah(this.totalAll)}`); // <- this.
 
-                    // ESC/POS buffer builder
                     let esc = '';
-                    esc += '\x1B\x40'; // ESC @  -> reset
-                    esc += '\x1B\x74\x10'; // ESC t 16 -> codepage 1252 (aman utk Latin). Kalau buruk, coba \x00 (CP437)
-                    esc += '\x1B\x32'; // ESC 2 -> default line spacing
-                    esc += '\x1B\x61\x01'; // ESC a 1 -> center
-                    esc += '\x1B\x45\x01'; // ESC E 1 -> bold on
-                    wrapText('WISATA SENDANG PLESUNG').forEach(l => esc += l + '\r\n');
+                    esc += '\x1B\x40'; // reset
+                    esc += '\x1B\x74\x00'; // codepage CP437 (cocok untuk RPP-02)
+                    esc += '\x1B\x4D\x01'; // Font B (≈42 kolom) kalau COLS kamu 42; kalau tetap 32, pakai \x1B\x4D\x00
+                    esc += '\x1B\x32'; // default line spacing
+                    esc += '\x1B\x61\x01'; // center
+                    esc += '\x1B\x45\x01'; // bold on
+                    this.wrapText('WISATA SENDANG PLESUNG').forEach(l => esc += l + '\r\n'); // <- this.
                     esc += '\x1B\x45\x00'; // bold off
-                    wrapText('Struk Pembayaran').forEach(l => esc += l + '\r\n');
+                    this.wrapText('Struk Pembayaran').forEach(l => esc += l + '\r\n'); // <- this.
                     esc += now + '\r\n';
                     esc += '\x1B\x61\x00'; // left
-                    esc += lineLR('Kasir: Admin', `Metode: ${metode}`) + '\r\n';
+                    esc += this.lineLR('Kasir: Admin', `Metode: ${metode}`) + '\r\n'; // <- this.
                     if (this.platNomor) esc += `Plat: ${this.platNomor}\r\n`;
                     esc += '-'.repeat(COLS) + '\r\n';
 
-                    body.forEach(l => esc += CRLF(l) + '\r\n');
+                    body.forEach(l => esc += this.CRLF(l) + '\r\n'); // <- this.
                     esc += '-'.repeat(COLS) + '\r\n';
                     esc += totalLine + '\r\n\r\n';
-                    wrapText('Terima kasih atas kunjungan Anda!').forEach(l => esc += l + '\r\n');
-                    wrapText('Simpan struk ini sebagai bukti pembayaran').forEach(l => esc += l + '\r\n');
+                    this.wrapText('Terima kasih atas kunjungan Anda!').forEach(l => esc += l + '\r\n'); // <- this.
+                    this.wrapText('Simpan struk ini sebagai bukti pembayaran').forEach(l => esc += l + '\r\n'); // <- this.
 
                     esc += '\r\n\r\n\r\n';
-                    esc += '\x1D\x56\x00'; // GS V 0 -> partial cut (kalau printer mendukung)
+                    esc += '\x1D\x56\x00'; // partial cut
 
                     this.connectAndPrintViaBluetooth(esc);
                 },
