@@ -824,6 +824,15 @@
                 },
 
                 async printReceipt() {
+                    // 1) pastikan printer dulu SELAGI masih dalam user gesture klik
+                    try {
+                        await this.ensurePrinter();
+                    } catch (e) {
+                        console.error(e);
+                        showToast('error', 'Tidak bisa mengakses Bluetooth: ' + e.message);
+                        return;
+                    }
+
                     const now = new Date().toLocaleString('id-ID');
                     const metode = this.paymentMethod === 'qris' ? 'QRIS' : 'Tunai';
 
@@ -845,32 +854,28 @@
                     // ====== ESC/POS text ======
                     let esc = '';
                     esc += '\x1B\x40'; // reset
-                    esc += '\x1B\x74\x00'; // codepage CP437
+                    esc += '\x1B\x74\x00'; // CP437
                     esc += '\x1B\x4D\x01'; // Font B (42 col)
-                    esc += '\x1B\x32'; // default line spacing
+                    esc += '\x1B\x32'; // line spacing
 
-                    // center + logo (opsional)
-                    esc += '\x1B\x61\x01'; // center
-
-                    // --- LOGO ---
+                    // --- LOGO (boleh async di sini karena sudah pastikan printer di atas) ---
                     let logo = null;
                     try {
-                        // pakai logo same-origin kalau bisa (lebih aman)
                         logo = await this.makeLogoRaster('/assets/logo.png', 360);
                     } catch (e) {
-                        console.warn('Logo gagal diproses (CORS/tainted). Lanjut tanpa logo.', e);
+                        console.warn('Logo gagal diproses, lanjut tanpa logo.', e);
                     }
 
-                    // header text
-                    esc += '\x1B\x61\x01'; // center (berlaku utk TEKS header di bawah)
-                    esc += '\x1B\x45\x01';
+                    // header
+                    esc += '\x1B\x61\x01'; // center
+                    esc += '\x1B\x45\x01'; // bold on
                     this.wrapText('WISATA SENDANG PLESUNG').forEach(l => esc += l + '\r\n');
-                    esc += '\x1B\x45\x00';
+                    esc += '\x1B\x45\x00'; // bold off
                     this.wrapText('Struk Pembayaran').forEach(l => esc += l + '\r\n');
                     esc += now + '\r\n';
 
-                    // left content
-                    esc += '\x1B\x61\x00';
+                    // body
+                    esc += '\x1B\x61\x00'; // left
                     esc += this.lineLR('Kasir: Admin', `Metode: ${metode}`) + '\r\n';
                     if (this.platNomor) esc += `Plat: ${this.platNomor}\r\n`;
                     esc += '-'.repeat(COLS) + '\r\n';
@@ -878,23 +883,24 @@
                     esc += '-'.repeat(COLS) + '\r\n';
                     esc += totalLine + '\r\n\r\n';
 
-                    // footer center
-                    esc += '\x1B\x61\x01';
+                    // footer
+                    esc += '\x1B\x61\x01'; // center
                     esc += 'Terima kasih atas kunjungan Anda!\r\n';
                     esc += 'Simpan struk ini sebagai bukti pembayaran\r\n';
                     esc += 'Kritik dan saran ke 082176623820\r\n';
                     esc += '\r\n\r\n';
                     esc += '\x1B\x61\x00';
-                    esc += '\x1D\x56\x00';
+                    esc += '\x1D\x56\x00'; // cut
 
-                    // === gabung: perintah center utk LOGO + LOGO + teks ===
+                    // payload = center logo + logo + text
                     const encoder = new TextEncoder();
-                    const preLogoCmds = encoder.encode('\x1B\x61\x01'); // center dulu
+                    const preLogoCmds = encoder.encode('\x1B\x61\x01');
                     const payload = logo ?
                         this.concatUint8([preLogoCmds, logo, encoder.encode(esc)]) :
-                        encoder.encode(esc); // fallback tanpa logo
+                        encoder.encode(esc);
 
-                    await this.connectAndPrintViaBluetooth(payload);
+                    // 2) kirim (di sini jangan panggil ensurePrinter lagi, sudah tadi)
+                    await this.connectAndPrintViaBluetooth(payload, /*skipEnsure=*/ true);
                 },
 
                 async ensurePrinter() {
@@ -950,14 +956,10 @@
                     }
                 },
 
-                async connectAndPrintViaBluetooth(payload) {
-                    // payload bisa string atau Uint8Array
+                async connectAndPrintViaBluetooth(payload, skipEnsure = false) {
                     if (typeof payload === 'string') payload = new TextEncoder().encode(payload);
+                    if (!skipEnsure) await this.ensurePrinter(); // default masih aman untuk pemakaian lain
 
-                    // pastikan konek ke printer yang sudah pernah dipair
-                    await this.ensurePrinter();
-
-                    // tulis per 20 byte
                     const CHUNK = 20;
                     for (let i = 0; i < payload.length; i += CHUNK) {
                         const slice = payload.slice(i, i + CHUNK);
@@ -968,6 +970,7 @@
                         }
                         await new Promise(r => setTimeout(r, 8));
                     }
+                    showToast('success', '✅ Struk terkirim.');
                 },
 
                 resetTransaction() {
