@@ -900,7 +900,7 @@
                     // header
                     esc += '\x1B\x61\x01'; // center
                     esc += '\x1B\x45\x01'; // bold on
-                    this.wrapText('WISATA SENDANG PLESUNG').forEach(l => esc += l + '\r\n');
+                    this.wrapText('WISATA SENDANG PLESUNGAN').forEach(l => esc += l + '\r\n');
                     esc += '\x1B\x45\x00'; // bold off
                     this.wrapText('Struk Pembayaran').forEach(l => esc += l + '\r\n');
                     esc += now + '\r\n';
