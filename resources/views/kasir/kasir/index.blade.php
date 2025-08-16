@@ -309,8 +309,8 @@
                                 :class="paymentMethod === 'cash' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'">
                                 <input type="radio" x-model="paymentMethod" value="cash" class="sr-only" />
                                 <i class="fas fa-money-bill-wave text-green-500 text-xl sm:text-2xl"></i>
+                                <div class="font-semibold text-gray-800 text-sm sm:text-base">Tunai</div>
                                 <div class="leading-tight">
-                                    <div class="font-semibold text-gray-800 text-sm sm:text-base">Tunai</div>
                                     <div class="text-xs sm:text-sm text-gray-600">Bayar dengan uang cash</div>
                                 </div>
                             </label>
@@ -320,8 +320,8 @@
                                 :class="paymentMethod === 'qris' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'">
                                 <input type="radio" x-model="paymentMethod" value="qris" class="sr-only" />
                                 <i class="fas fa-qrcode text-green-500 text-xl sm:text-2xl"></i>
+                                <div class="font-semibold text-gray-800 text-sm sm:text-base">QRIS</div>
                                 <div class="leading-tight">
-                                    <div class="font-semibold text-gray-800 text-sm sm:text-base">QRIS</div>
                                     <div class="text-xs sm:text-sm text-gray-600">Scan QR Code</div>
                                 </div>
                             </label>
