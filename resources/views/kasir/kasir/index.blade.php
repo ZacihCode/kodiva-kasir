@@ -798,18 +798,15 @@
                     this.connectAndPrintViaBluetooth(esc);
                 },
 
-                async connectAndPrintViaBluetooth(receiptText) {
-                    // ESC/POS minimal: init + teks + 3 LF (tanpa cutter)
-                    const encoder = new TextEncoder();
-                    const payload = encoder.encode('\x1B\x40' + receiptText + '\n\n\n');
+                async connectAndPrintViaBluetooth(escposText) {
+                    const encoder = new TextEncoder(); // UTF-8; aman karena kita hanya pakai ASCII
+                    const payload = encoder.encode(escposText);
 
-                    // kandidat UUID yang sering dipakai printer thermal BLE
                     const CANDIDATE_SERVICES = [
-                        0xff00, 0xfff0, 0xffe0, // vendor short UUIDs
+                        0xff00, 0xfff0, 0xffe0,
                         '0000ff00-0000-1000-8000-00805f9b34fb',
                         '0000fff0-0000-1000-8000-00805f9b34fb',
-                        '0000ffe0-0000-1000-8000-00805f9b34fb',
-                        0x18f0, 0x180f, 0x180a // sering ada tambahan battery/info
+                        '0000ffe0-0000-1000-8000-00805f9b34fb'
                     ];
 
                     try {
@@ -819,36 +816,32 @@
                             }],
                             optionalServices: CANDIDATE_SERVICES
                         });
-
                         const server = await device.gatt.connect();
 
-                        // cari service yang punya characteristic writeable
                         let writableChar = null;
                         const services = await server.getPrimaryServices();
                         for (const svc of services) {
                             const chars = await svc.getCharacteristics();
                             for (const ch of chars) {
-                                const props = ch.properties;
-                                if (props.write || props.writeWithoutResponse) {
+                                if (ch.properties.write || ch.properties.writeWithoutResponse) {
                                     writableChar = ch;
                                     break;
                                 }
                             }
                             if (writableChar) break;
                         }
+                        if (!writableChar) throw new Error('Tidak menemukan characteristic tulis.');
 
-                        if (!writableChar) throw new Error('Tidak menemukan characteristic yang bisa ditulis.');
-
-                        // tulis per 20 byte (MTU umum)
+                        // kirim per 20 byte + jeda kecil
                         const CHUNK = 20;
                         for (let i = 0; i < payload.length; i += CHUNK) {
                             const slice = payload.slice(i, i + CHUNK);
                             if (writableChar.properties.write) {
-                                await writableChar.writeValue(slice); // with response
+                                await writableChar.writeValue(slice);
                             } else {
-                                await writableChar.writeValueWithoutResponse(slice); // faster, no response
+                                await writableChar.writeValueWithoutResponse(slice);
                             }
-                            await new Promise(r => setTimeout(r, 10)); // jeda kecil
+                            await new Promise(r => setTimeout(r, 8));
                         }
 
                         showToast('success', '✅ Struk terkirim via BLE.');
