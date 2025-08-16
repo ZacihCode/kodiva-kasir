@@ -561,7 +561,7 @@
     @endsection
 
     <script>
-        const COLS = 32
+        const COLS = 42
 
         function cashierSystem() {
             return {
@@ -575,6 +575,15 @@
                 parkingOptions: [],
                 ticketTypes: [],
                 platNomor: '',
+
+                btDevice: null,
+                btChar: null,
+                BT_SERVICE_HINTS: [
+                    0xff00, 0xfff0, 0xffe0,
+                    '0000ff00-0000-1000-8000-00805f9b34fb',
+                    '0000fff0-0000-1000-8000-00805f9b34fb',
+                    '0000ffe0-0000-1000-8000-00805f9b34fb'
+                ],
 
                 async init() {
                     try {
@@ -748,104 +757,216 @@
                     return s.replace(/\n/g, '\r\n');
                 },
 
-                printReceipt() {
+                // gabung beberapa Uint8Array
+                concatUint8(arrays) {
+                    let total = arrays.reduce((s, a) => s + (a ? a.length : 0), 0);
+                    let out = new Uint8Array(total);
+                    let offset = 0;
+                    for (const a of arrays) {
+                        if (!a) continue;
+                        out.set(a, offset);
+                        offset += a.length;
+                    }
+                    return out;
+                },
+
+                // konversi gambar ke ESC/POS raster (GS v 0) lebar max 384 dot (58mm)
+                async makeLogoRaster(url, maxWidth = 384) {
+                    // Hindari CORS: pakai URL yang sama origin atau dataURL
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.src = url;
+                    await img.decode();
+
+                    // resize proporsional
+                    const scale = Math.min(1, maxWidth / img.width);
+                    const w = Math.round(img.width * scale);
+                    const h = Math.round(img.height * scale);
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+
+                    const data = ctx.getImageData(0, 0, w, h).data;
+
+                    // pack 1-bit per pixel (threshold)
+                    const bytesPerRow = Math.ceil(w / 8);
+                    const bitmap = new Uint8Array(bytesPerRow * h);
+                    const threshold = 180; // atur kontras logo
+
+                    for (let y = 0; y < h; y++) {
+                        for (let x = 0; x < w; x++) {
+                            const i = (y * w + x) * 4;
+                            const r = data[i],
+                                g = data[i + 1],
+                                b = data[i + 2];
+                            const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                            const bit = gray < threshold ? 1 : 0; // 1 = hitam
+                            const byteIndex = y * bytesPerRow + (x >> 3);
+                            bitmap[byteIndex] |= bit << (7 - (x & 7));
+                        }
+                    }
+
+                    // GS v 0 m=0 (normal)
+                    const header = new Uint8Array(8);
+                    header[0] = 0x1D;
+                    header[1] = 0x76;
+                    header[2] = 0x30;
+                    header[3] = 0x00;
+                    header[4] = bytesPerRow & 0xFF; // xL
+                    header[5] = (bytesPerRow >> 8) & 0xFF; // xH
+                    header[6] = h & 0xFF; // yL
+                    header[7] = (h >> 8) & 0xFF; // yH
+
+                    return this.concatUint8([header, bitmap, new TextEncoder().encode('\r\n')]);
+                },
+
+                async printReceipt() {
                     const now = new Date().toLocaleString('id-ID');
                     const metode = this.paymentMethod === 'qris' ? 'QRIS' : 'Tunai';
 
+                    // ====== isi item ======
                     const body = [];
                     for (const item of this.cart) {
                         const name = `${item.ticket.name} x${item.quantity}`;
                         const price = `Rp${this.formatRupiah(item.ticket.price * item.quantity)}`;
-                        body.push(this.lineLR(name, price)); // <- this.
+                        body.push(this.lineLR(name, price));
                     }
                     if (this.discountAmount > 0) {
-                        body.push(this.lineLR(`Diskon (${this.selectedDiscount}%)`, `-Rp${this.formatRupiah(this.discountAmount)}`)); // <- this.
+                        body.push(this.lineLR(`Diskon (${this.selectedDiscount}%)`, `-Rp${this.formatRupiah(this.discountAmount)}`));
                     }
                     if (this.selectedParking > 0) {
-                        body.push(this.lineLR('Parkir', `Rp${this.formatRupiah(this.selectedParking)}`)); // <- this.
+                        body.push(this.lineLR('Parkir', `Rp${this.formatRupiah(this.selectedParking)}`));
                     }
+                    const totalLine = this.lineLR('TOTAL', `Rp${this.formatRupiah(this.totalAll)}`);
 
-                    const totalLine = this.lineLR('TOTAL', `Rp${this.formatRupiah(this.totalAll)}`); // <- this.
-
+                    // ====== ESC/POS text ======
                     let esc = '';
                     esc += '\x1B\x40'; // reset
-                    esc += '\x1B\x74\x00'; // codepage CP437 (cocok untuk RPP-02)
-                    esc += '\x1B\x4D\x01'; // Font B (≈42 kolom) kalau COLS kamu 42; kalau tetap 32, pakai \x1B\x4D\x00
+                    esc += '\x1B\x74\x00'; // codepage CP437
+                    esc += '\x1B\x4D\x01'; // Font B (42 col)
                     esc += '\x1B\x32'; // default line spacing
+
+                    // center + logo (opsional)
                     esc += '\x1B\x61\x01'; // center
-                    esc += '\x1B\x45\x01'; // bold on
-                    this.wrapText('WISATA SENDANG PLESUNG').forEach(l => esc += l + '\r\n'); // <- this.
-                    esc += '\x1B\x45\x00'; // bold off
-                    this.wrapText('Struk Pembayaran').forEach(l => esc += l + '\r\n'); // <- this.
+
+                    // --- LOGO ---
+                    let logo = null;
+                    try {
+                        // pakai logo same-origin kalau bisa (lebih aman)
+                        logo = await this.makeLogoRaster('/assets/logo.png', 360);
+                    } catch (e) {
+                        console.warn('Logo gagal diproses (CORS/tainted). Lanjut tanpa logo.', e);
+                    }
+
+                    // header text
+                    esc += '\x1B\x61\x01'; // center (berlaku utk TEKS header di bawah)
+                    esc += '\x1B\x45\x01';
+                    this.wrapText('WISATA SENDANG PLESUNG').forEach(l => esc += l + '\r\n');
+                    esc += '\x1B\x45\x00';
+                    this.wrapText('Struk Pembayaran').forEach(l => esc += l + '\r\n');
                     esc += now + '\r\n';
-                    esc += '\x1B\x61\x00'; // left
-                    esc += this.lineLR('Kasir: Admin', `Metode: ${metode}`) + '\r\n'; // <- this.
+
+                    // left content
+                    esc += '\x1B\x61\x00';
+                    esc += this.lineLR('Kasir: Admin', `Metode: ${metode}`) + '\r\n';
                     if (this.platNomor) esc += `Plat: ${this.platNomor}\r\n`;
                     esc += '-'.repeat(COLS) + '\r\n';
-
-                    body.forEach(l => esc += this.CRLF(l) + '\r\n'); // <- this.
+                    body.forEach(l => esc += this.CRLF(l) + '\r\n');
                     esc += '-'.repeat(COLS) + '\r\n';
                     esc += totalLine + '\r\n\r\n';
-                    this.wrapText('Terima kasih atas kunjungan Anda!').forEach(l => esc += l + '\r\n'); // <- this.
-                    this.wrapText('Simpan struk ini sebagai bukti pembayaran').forEach(l => esc += l + '\r\n'); // <- this.
 
-                    esc += '\r\n\r\n\r\n';
-                    esc += '\x1D\x56\x00'; // partial cut
+                    // footer center
+                    esc += '\x1B\x61\x01';
+                    esc += 'Terima kasih atas kunjungan Anda!\r\n';
+                    esc += 'Simpan struk ini sebagai bukti pembayaran\r\n';
+                    esc += 'Kritik dan saran ke 082176623820\r\n';
+                    esc += '\r\n\r\n';
+                    esc += '\x1B\x61\x00';
+                    esc += '\x1D\x56\x00';
 
-                    this.connectAndPrintViaBluetooth(esc);
+                    // === gabung: perintah center utk LOGO + LOGO + teks ===
+                    const encoder = new TextEncoder();
+                    const preLogoCmds = encoder.encode('\x1B\x61\x01'); // center dulu
+                    const payload = logo ?
+                        this.concatUint8([preLogoCmds, logo, encoder.encode(esc)]) :
+                        encoder.encode(esc); // fallback tanpa logo
+
+                    await this.connectAndPrintViaBluetooth(payload);
                 },
 
-                async connectAndPrintViaBluetooth(escposText) {
-                    const encoder = new TextEncoder(); // UTF-8; aman karena kita hanya pakai ASCII
-                    const payload = encoder.encode(escposText);
+                async ensurePrinter() {
+                    // sudah siap?
+                    if (this.btChar && this.btDevice?.gatt?.connected) return;
 
-                    const CANDIDATE_SERVICES = [
-                        0xff00, 0xfff0, 0xffe0,
-                        '0000ff00-0000-1000-8000-00805f9b34fb',
-                        '0000fff0-0000-1000-8000-00805f9b34fb',
-                        '0000ffe0-0000-1000-8000-00805f9b34fb'
-                    ];
-
+                    // coba ambil dari daftar device yang SUDAH diizinkan origin ini
                     try {
-                        const device = await navigator.bluetooth.requestDevice({
-                            filters: [{
-                                namePrefix: 'RPP'
-                            }],
-                            optionalServices: CANDIDATE_SERVICES
-                        });
-                        const server = await device.gatt.connect();
+                        const allowed = await navigator.bluetooth.getDevices(); // tidak munculkan prompt
+                        const savedId = localStorage.getItem('printer_id') || null;
 
-                        let writableChar = null;
-                        const services = await server.getPrimaryServices();
+                        // prioritas: id yang disimpan, kalau tidak ada—cari yang namanya RPP
+                        let dev = allowed.find(d => savedId ? d.id === savedId : (d.name?.startsWith('RPP')));
+
+                        if (!dev) {
+                            // first-time pairing (perlu user gesture – klik tombol cetak sudah gesture)
+                            dev = await navigator.bluetooth.requestDevice({
+                                filters: [{
+                                    namePrefix: 'RPP'
+                                }],
+                                optionalServices: this.BT_SERVICE_HINTS
+                            });
+                            localStorage.setItem('printer_id', dev.id);
+                        }
+
+                        this.btDevice = dev;
+
+                        // auto-reconnect on disconnect
+                        this.btDevice.addEventListener('gattserverdisconnected', () => {
+                            this.btChar = null;
+                        });
+
+                        // connect kalau belum
+                        if (!this.btDevice.gatt.connected) {
+                            await this.btDevice.gatt.connect();
+                        }
+
+                        // cari/writeable characteristic (cache)
+                        const services = await this.btDevice.gatt.getPrimaryServices();
                         for (const svc of services) {
                             const chars = await svc.getCharacteristics();
                             for (const ch of chars) {
                                 if (ch.properties.write || ch.properties.writeWithoutResponse) {
-                                    writableChar = ch;
+                                    this.btChar = ch;
                                     break;
                                 }
                             }
-                            if (writableChar) break;
+                            if (this.btChar) break;
                         }
-                        if (!writableChar) throw new Error('Tidak menemukan characteristic tulis.');
+                        if (!this.btChar) throw new Error('Characteristic tulis tidak ditemukan.');
+                    } catch (e) {
+                        throw e;
+                    }
+                },
 
-                        // kirim per 20 byte + jeda kecil
-                        const CHUNK = 20;
-                        for (let i = 0; i < payload.length; i += CHUNK) {
-                            const slice = payload.slice(i, i + CHUNK);
-                            if (writableChar.properties.write) {
-                                await writableChar.writeValue(slice);
-                            } else {
-                                await writableChar.writeValueWithoutResponse(slice);
-                            }
-                            await new Promise(r => setTimeout(r, 8));
+                async connectAndPrintViaBluetooth(payload) {
+                    // payload bisa string atau Uint8Array
+                    if (typeof payload === 'string') payload = new TextEncoder().encode(payload);
+
+                    // pastikan konek ke printer yang sudah pernah dipair
+                    await this.ensurePrinter();
+
+                    // tulis per 20 byte
+                    const CHUNK = 20;
+                    for (let i = 0; i < payload.length; i += CHUNK) {
+                        const slice = payload.slice(i, i + CHUNK);
+                        if (this.btChar.properties.write) {
+                            await this.btChar.writeValue(slice);
+                        } else {
+                            await this.btChar.writeValueWithoutResponse(slice);
                         }
-
-                        showToast('success', '✅ Struk terkirim via BLE.');
-                        this.resetTransaction();
-                    } catch (err) {
-                        console.error(err);
-                        showToast('error', '❌ Gagal BLE: ' + err.message);
+                        await new Promise(r => setTimeout(r, 8));
                     }
                 },
 
