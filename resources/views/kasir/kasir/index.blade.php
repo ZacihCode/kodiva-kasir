@@ -732,33 +732,43 @@
 
                 async connectAndPrintViaBluetooth(receiptText) {
                     try {
-                        const encoder = new TextEncoder();
-                        const escposCommands = [
-                            '\x1B\x40', // Initialize printer
+                        const SERVICE_UUID = 0xFFE0; // ganti sesuai manual
+                        const CHAR_UUID = 0xFFE1; // ganti sesuai manual
+
+                        // ESC/POS init + teks + 3x LF (tanpa cut)
+                        const encoder = new TextEncoder(); // UTF-8; untuk aman pakai hanya ASCII dulu
+                        const data = [
+                            '\x1B\x40', // Initialize
                             receiptText,
-                            '\n\n\n',
-                            '\x1D\x56\x41' + '\x10' // Cut paper
+                            '\n\n\n'
                         ].join('');
-                        const encoded = encoder.encode(escposCommands);
+                        const bytes = encoder.encode(data);
 
                         const device = await navigator.bluetooth.requestDevice({
                             filters: [{
                                 namePrefix: 'RPP'
-                            }], // Ganti sesuai printer kamu
-                            optionalServices: [0xFFE0]
+                            }], // atau services: [SERVICE_UUID]
+                            optionalServices: [SERVICE_UUID]
                         });
 
                         const server = await device.gatt.connect();
-                        const service = await server.getPrimaryService(0xFFE0);
-                        const characteristic = await service.getCharacteristic(0xFFE1);
+                        const service = await server.getPrimaryService(SERVICE_UUID);
+                        const characteristic = await service.getCharacteristic(CHAR_UUID);
 
-                        await characteristic.writeValue(encoded);
+                        // Tulis per 20 byte (MTU umum)
+                        const CHUNK = 20;
+                        for (let i = 0; i < bytes.length; i += CHUNK) {
+                            const chunk = bytes.slice(i, i + CHUNK);
+                            await characteristic.writeValue(chunk); // jika error, coba writeValueWithResponse
+                            // kecilkan jeda kalau perlu
+                            await new Promise(r => setTimeout(r, 10));
+                        }
 
-                        showToast('success', '✅ Struk berhasil dicetak.');
+                        showToast('success', '✅ Struk berhasil dikirim ke printer (BLE).');
                         this.resetTransaction();
                     } catch (err) {
                         console.error(err);
-                        showToast('error', '❌ Gagal mencetak via Bluetooth.');
+                        showToast('error', '❌ Gagal mencetak via Bluetooth (cek jenis printer/UUID/MTU).');
                     }
                 },
 
