@@ -303,23 +303,26 @@
                             <i class="fas fa-credit-card text-green-500 mr-2"></i>
                             Metode Pembayaran
                         </label>
-                        <div class="grid grid-cols-2 gap-4">
-                            <label class="flex items-center p-4 bg-white rounded-xl border-2 cursor-pointer transition-all duration-200"
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+                            <label
+                                class="group w-full rounded-xl border-2 bg-white cursor-pointer transition-all duration-200 p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 min-h-[64px]"
                                 :class="paymentMethod === 'cash' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'">
-                                <input type="radio" x-model="paymentMethod" value="cash" class="sr-only">
-                                <i class="fas fa-money-bill-wave text-green-500 text-2xl mr-3"></i>
-                                <div>
-                                    <div class="font-semibold text-gray-800">Tunai</div>
-                                    <div class="text-sm text-gray-600">Bayar dengan uang cash</div>
+                                <input type="radio" x-model="paymentMethod" value="cash" class="sr-only" />
+                                <i class="fas fa-money-bill-wave text-green-500 text-xl sm:text-2xl"></i>
+                                <div class="leading-tight">
+                                    <div class="font-semibold text-gray-800 text-sm sm:text-base">Tunai</div>
+                                    <div class="text-xs sm:text-sm text-gray-600">Bayar dengan uang cash</div>
                                 </div>
                             </label>
-                            <label class="flex items-center p-4 bg-white rounded-xl border-2 cursor-pointer transition-all duration-200"
+
+                            <label
+                                class="group w-full rounded-xl border-2 bg-white cursor-pointer transition-all duration-200 p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 min-h-[64px]"
                                 :class="paymentMethod === 'qris' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'">
-                                <input type="radio" x-model="paymentMethod" value="qris" class="sr-only">
-                                <i class="fas fa-qrcode text-green-500 text-2xl mr-3"></i>
-                                <div>
-                                    <div class="font-semibold text-gray-800">QRIS</div>
-                                    <div class="text-sm text-gray-600">Scan QR Code</div>
+                                <input type="radio" x-model="paymentMethod" value="qris" class="sr-only" />
+                                <i class="fas fa-qrcode text-green-500 text-xl sm:text-2xl"></i>
+                                <div class="leading-tight">
+                                    <div class="font-semibold text-gray-800 text-sm sm:text-base">QRIS</div>
+                                    <div class="text-xs sm:text-sm text-gray-600">Scan QR Code</div>
                                 </div>
                             </label>
                         </div>
@@ -410,7 +413,7 @@
                         class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
                         :class="{ 'pulse-border': cart.length > 0 }"
                         :disabled="cart.length === 0"
-                        @click="paymentMethod === 'qris' ? showQrisModal = true : (saveTransaction(), showReceipt = true)">
+                        @click="paymentMethod === 'qris' ? (showQrisModal = true) : (showReceipt = true)">
                         <i class="fas fa-credit-card mr-2"></i>
                         Proses Pembayaran
                     </button>
@@ -463,8 +466,9 @@
                     <i class="fas fa-times mr-2"></i>
                     Batal
                 </button>
-                <button class="flex-1 bg-white text-purple-600 py-3 rounded-xl font-bold hover:bg-gray-100 transition-all duration-200"
-                    @click="showQrisModal = false; saveTransaction(); showReceipt = true">
+                <button
+                    class="flex-1 bg-white text-purple-600 py-3 rounded-xl font-bold hover:bg-gray-100 transition-all duration-200"
+                    @click="showQrisModal = false; showReceipt = true">
                     <i class="fas fa-check mr-2"></i>
                     Sudah Bayar
                 </button>
@@ -834,6 +838,21 @@
                     return this.concatUint8([header, bitmap, new TextEncoder().encode('\r\n')]);
                 },
 
+                async remoteToDataURL(url) {
+                    const res = await fetch(url, {
+                        mode: 'cors',
+                        cache: 'force-cache'
+                    });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const blob = await res.blob();
+                    return await new Promise((resolve, reject) => {
+                        const r = new FileReader();
+                        r.onerror = reject;
+                        r.onload = () => resolve(r.result);
+                        r.readAsDataURL(blob);
+                    });
+                },
+
                 async printReceipt() {
                     // 1) pastikan printer dulu SELAGI masih dalam user gesture klik
                     try {
@@ -872,7 +891,8 @@
                     // --- LOGO (boleh async di sini karena sudah pastikan printer di atas) ---
                     let logo = null;
                     try {
-                        logo = await this.makeLogoRaster('/assets/logo.png', 360);
+                        const dataURL = await this.remoteToDataURL('https://cdn.aceimg.com/1d462648b.png');
+                        logo = await this.makeLogoRaster(dataURL, 360);
                     } catch (e) {
                         console.warn('Logo gagal diproses, lanjut tanpa logo.', e);
                     }
@@ -983,6 +1003,7 @@
                         }
                         await new Promise(r => setTimeout(r, 8));
                     }
+                    saveTransaction();
                     showToast('success', '✅ Struk terkirim.');
                 },
 
