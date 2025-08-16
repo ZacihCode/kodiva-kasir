@@ -731,44 +731,63 @@
                 },
 
                 async connectAndPrintViaBluetooth(receiptText) {
+                    // ESC/POS minimal: init + teks + 3 LF (tanpa cutter)
+                    const encoder = new TextEncoder();
+                    const payload = encoder.encode('\x1B\x40' + receiptText + '\n\n\n');
+
+                    // kandidat UUID yang sering dipakai printer thermal BLE
+                    const CANDIDATE_SERVICES = [
+                        0xff00, 0xfff0, 0xffe0, // vendor short UUIDs
+                        '0000ff00-0000-1000-8000-00805f9b34fb',
+                        '0000fff0-0000-1000-8000-00805f9b34fb',
+                        '0000ffe0-0000-1000-8000-00805f9b34fb',
+                        0x18f0, 0x180f, 0x180a // sering ada tambahan battery/info
+                    ];
+
                     try {
-                        const SERVICE_UUID = 0xFFE0; // ganti sesuai manual
-                        const CHAR_UUID = 0xFFE1; // ganti sesuai manual
-
-                        // ESC/POS init + teks + 3x LF (tanpa cut)
-                        const encoder = new TextEncoder(); // UTF-8; untuk aman pakai hanya ASCII dulu
-                        const data = [
-                            '\x1B\x40', // Initialize
-                            receiptText,
-                            '\n\n\n'
-                        ].join('');
-                        const bytes = encoder.encode(data);
-
                         const device = await navigator.bluetooth.requestDevice({
                             filters: [{
                                 namePrefix: 'RPP'
-                            }], // atau services: [SERVICE_UUID]
-                            optionalServices: [SERVICE_UUID]
+                            }],
+                            optionalServices: CANDIDATE_SERVICES
                         });
 
                         const server = await device.gatt.connect();
-                        const service = await server.getPrimaryService(SERVICE_UUID);
-                        const characteristic = await service.getCharacteristic(CHAR_UUID);
 
-                        // Tulis per 20 byte (MTU umum)
-                        const CHUNK = 20;
-                        for (let i = 0; i < bytes.length; i += CHUNK) {
-                            const chunk = bytes.slice(i, i + CHUNK);
-                            await characteristic.writeValue(chunk); // jika error, coba writeValueWithResponse
-                            // kecilkan jeda kalau perlu
-                            await new Promise(r => setTimeout(r, 10));
+                        // cari service yang punya characteristic writeable
+                        let writableChar = null;
+                        const services = await server.getPrimaryServices();
+                        for (const svc of services) {
+                            const chars = await svc.getCharacteristics();
+                            for (const ch of chars) {
+                                const props = ch.properties;
+                                if (props.write || props.writeWithoutResponse) {
+                                    writableChar = ch;
+                                    break;
+                                }
+                            }
+                            if (writableChar) break;
                         }
 
-                        showToast('success', '✅ Struk berhasil dikirim ke printer (BLE).');
+                        if (!writableChar) throw new Error('Tidak menemukan characteristic yang bisa ditulis.');
+
+                        // tulis per 20 byte (MTU umum)
+                        const CHUNK = 20;
+                        for (let i = 0; i < payload.length; i += CHUNK) {
+                            const slice = payload.slice(i, i + CHUNK);
+                            if (writableChar.properties.write) {
+                                await writableChar.writeValue(slice); // with response
+                            } else {
+                                await writableChar.writeValueWithoutResponse(slice); // faster, no response
+                            }
+                            await new Promise(r => setTimeout(r, 10)); // jeda kecil
+                        }
+
+                        showToast('success', '✅ Struk terkirim via BLE.');
                         this.resetTransaction();
                     } catch (err) {
                         console.error(err);
-                        showToast('error', '❌ Gagal mencetak via Bluetooth (cek jenis printer/UUID/MTU).');
+                        showToast('error', '❌ Gagal BLE: ' + err.message);
                     }
                 },
 
