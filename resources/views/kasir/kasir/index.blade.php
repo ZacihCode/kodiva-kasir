@@ -914,52 +914,39 @@
                     await this.connectAndPrintViaBluetooth(payload, /*skipEnsure=*/ true);
                 },
 
-                async ensurePrinter() {
-                    // 0) Cek dukungan & HTTPS
-                    if (!('bluetooth' in navigator)) {
-                        throw new Error('Browser tidak mendukung Web Bluetooth.');
-                    }
-                    if (!window.isSecureContext) {
-                        throw new Error('Akses Bluetooth butuh HTTPS atau localhost.');
-                    }
+                async ensurePrinter(interactive = false) {
+                    if (!('bluetooth' in navigator)) throw new Error('Browser tidak mendukung Web Bluetooth.');
+                    if (!window.isSecureContext) throw new Error('Akses Bluetooth butuh HTTPS atau localhost.');
 
-                    // 1) Jika sudah terkoneksi, selesai
                     if (this.btChar && this.btDevice?.gatt?.connected) return;
 
                     try {
-                        // 2) Pastikan adapter Bluetooth tersedia
                         const available = await navigator.bluetooth.getAvailability?.();
-                        if (available === false) {
-                            throw new Error('Bluetooth adapter tidak tersedia / dimatikan di OS.');
-                        }
+                        if (available === false) throw new Error('Bluetooth adapter tidak tersedia / dimatikan di OS.');
 
-                        // 3) Cari device yang sudah diizinkan sebelumnya
                         const allowed = await navigator.bluetooth.getDevices?.() || [];
                         const savedId = localStorage.getItem('printer_id') || null;
                         let dev = allowed.find(d => savedId ? d.id === savedId : (d.name?.startsWith('RPP')));
 
-                        // 4) Kalau belum ada, minta user pilih
+                        // ⬇️ bedanya di sini: hanya minta dialog kalau interactive = true
                         if (!dev) {
+                            if (!interactive) {
+                                throw new Error('Printer belum dipilih untuk origin ini. (Lewati di init)');
+                            }
                             dev = await navigator.bluetooth.requestDevice({
-                                acceptAllDevices: true,
+                                acceptAllDevices: true, // lebih fleksibel
                                 optionalServices: this.BT_SERVICE_HINTS
                             });
                             localStorage.setItem('printer_id', dev.id);
                         }
 
                         this.btDevice = dev;
-
-                        // 5) Auto reset char saat disconnect
                         this.btDevice.addEventListener('gattserverdisconnected', () => {
                             this.btChar = null;
                         });
 
-                        // 6) Connect jika belum
-                        if (!this.btDevice.gatt.connected) {
-                            await this.btDevice.gatt.connect();
-                        }
+                        if (!this.btDevice.gatt.connected) await this.btDevice.gatt.connect();
 
-                        // 7) Cari characteristic writeable (cache)
                         const services = await this.btDevice.gatt.getPrimaryServices();
                         for (const svc of services) {
                             const chars = await svc.getCharacteristics();
@@ -973,24 +960,12 @@
                         }
                         if (!this.btChar) throw new Error('Characteristic tulis tidak ditemukan pada printer.');
                     } catch (e) {
-                        // Mapping error agar toast kamu lebih jelas
                         const name = e?.name || '';
-                        if (name === 'NotAllowedError') {
-                            // user cancel / blokir permission
-                            throw new Error('Akses ditolak. Pilih perangkat pada dialog atau izinkan Bluetooth.');
-                        }
-                        if (name === 'NotFoundError') {
-                            throw new Error('Printer “RPP…” tidak ditemukan. Nyalakan printer & pastikan namePrefix cocok.');
-                        }
-                        if (name === 'SecurityError') {
-                            throw new Error('Harus diakses via HTTPS atau localhost.');
-                        }
-                        if (name === 'NetworkError') {
-                            throw new Error('Gagal connect ke perangkat. Coba matikan/nyalakan Bluetooth atau printer.');
-                        }
-                        // default
-                        throw e;
-                        showToast('error', e.message);
+                        if (name === 'NotAllowedError') throw new Error('Akses ditolak. Pilih perangkat pada dialog atau izinkan Bluetooth.');
+                        if (name === 'NotFoundError') throw new Error('Printer tidak ditemukan. Nyalakan printer & dekatkan perangkat.');
+                        if (name === 'SecurityError') throw new Error('Harus diakses via HTTPS atau localhost.');
+                        if (name === 'NetworkError') throw new Error('Gagal connect. Coba matikan/nyalakan Bluetooth atau printer.');
+                        throw e; // biarkan caller yang tampilkan toast
                     }
                 },
 
