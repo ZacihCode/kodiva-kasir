@@ -626,6 +626,17 @@
                         // Show user-friendly error message
                         showToast('error', 'Gagal memuat data. Silakan refresh halaman.');
                     }
+
+                    // 👇 Tambahkan ini (tanpa memunculkan dialog)
+                    if ('bluetooth' in navigator) {
+                        requestAnimationFrame(() => {
+                            this.ensurePrinter( /*interactive=*/ false)
+                                .then(() => console.log('Auto-connected to', this.btDevice?.name))
+                                .catch(() => {
+                                    /* diam saja kalau belum pernah pair */
+                                });
+                        });
+                    }
                 },
 
                 async saveTransaction() {
@@ -826,7 +837,7 @@
                 async printReceipt() {
                     // 1) pastikan printer dulu SELAGI masih dalam user gesture klik
                     try {
-                        await this.ensurePrinter();
+                        await this.ensurePrinter(true);
                     } catch (e) {
                         console.error(e);
                         showToast('error', 'Tidak bisa mengakses Bluetooth: ' + e.message);
@@ -930,9 +941,7 @@
                         // 4) Kalau belum ada, minta user pilih
                         if (!dev) {
                             dev = await navigator.bluetooth.requestDevice({
-                                filters: [{
-                                    namePrefix: 'RPP'
-                                }],
+                                acceptAllDevices: true,
                                 optionalServices: this.BT_SERVICE_HINTS
                             });
                             localStorage.setItem('printer_id', dev.id);
@@ -981,6 +990,7 @@
                         }
                         // default
                         throw e;
+                        showToast('error', e.message);
                     }
                 },
 
