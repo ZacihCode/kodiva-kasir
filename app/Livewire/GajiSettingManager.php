@@ -37,7 +37,7 @@ class GajiSettingManager extends Component
                 'tunjangan_default' => $this->tunjangan_default,
                 'potongan_default' => $this->potongan_default,
             ]);
-            session()->flash('message', '✅ Pengaturan gaji berhasil disimpan.');
+            $this->dispatch('toast', type: 'success', message: 'Pengaturan gaji berhasil disimpan.');
             return;
         }
 
@@ -52,9 +52,9 @@ class GajiSettingManager extends Component
                 'tunjangan_default' => $this->tunjangan_default,
                 'potongan_default' => $this->potongan_default,
             ]);
-            session()->flash('message', '✅ Pengaturan gaji berhasil diperbarui.');
+            $this->dispatch('toast', type: 'success', message: 'Pengaturan gaji berhasil diperbarui.');
         } else {
-            session()->flash('message', 'ℹ️ Tidak ada perubahan yang disimpan.');
+            $this->dispatch('toast', type: 'info', message: 'Tidak ada perubahan yang disimpan.');
         }
         $this->editable = false;
     }

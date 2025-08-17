@@ -23,12 +23,6 @@
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 to-cyan-50 min-h-screen">
-    <div id="toast-root"
-        data-success="{{ session('success') }}"
-        data-error="{{ session('error') }}"
-        data-info="{{ session('info') ?: ($infoMessage ?? '') }}">
-    </div>
-    @vite(['resources/js/app.jsx'])
     <!-- Auth Container -->
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div class="max-w-md w-full space-y-8">

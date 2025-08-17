@@ -42,7 +42,7 @@ class AccountSettings extends Component
         $user->save();
 
         $this->editMode = false;
-        session()->flash('success_profile', '✅ Profil berhasil diperbarui.');
+        $this->dispatch('toast', type: 'success', message: 'Profil berhasil diperbarui!');
     }
 
     public function updatePassword()
@@ -64,7 +64,7 @@ class AccountSettings extends Component
         $user->save();
 
         $this->reset(['current_password', 'new_password', 'confirm_password']);
-        session()->flash('success_password', '✅ Password berhasil diperbarui.');
+        $this->dispatch('toast', type: 'success', message: 'Password berhasil diperbarui!');
     }
 
     public function render()

@@ -137,12 +137,6 @@
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
     @extends('layouts.app')
-    <div id="toast-root"
-        data-success="{{ session('success') }}"
-        data-error="{{ session('error') }}"
-        data-info="{{ session('info') ?: ($infoMessage ?? '') }}">
-    </div>
-    @vite(['resources/js/app.jsx'])
     @section('content')
     <div class="min-h-screen ml-6 mr-2 p-6">
         <!-- Enhanced Header -->

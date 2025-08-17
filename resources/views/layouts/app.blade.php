@@ -24,6 +24,12 @@
 
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
     @include('partials.sidebar')
+    <!-- Toast Root -->
+    <div id="toast-root"
+        data-success="{{ session('success') }}"
+        data-error="{{ session('error') }}"
+        data-info="{{ session('info') ?: ($infoMessage ?? '') }}">
+    </div>
 
     <main class="main-content pt-16 transition-all duration-300">
         @yield('content')
@@ -37,25 +43,20 @@
         </p>
     </div>
 
-    <!-- Toast Root -->
-    <div id="toast-root"
-        data-success="{{ session('success') }}"
-        data-error="{{ session('error') }}"
-        data-info="{{ session('info') }}"></div>
-
     @livewireScripts
+    @vite(['resources/js/app.jsx'])
     @stack('scripts')
-
-    <!-- React App Bundle -->
-    @vite('resources/js/app.jsx')
 
     <!-- Jalankan showToast jika ada session -->
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const toastRoot = document.getElementById('toast-root');
-            if (toastRoot?.dataset.success) showToast('success', toastRoot.dataset.success);
-            if (toastRoot?.dataset.error) showToast('error', toastRoot.dataset.error);
-            if (toastRoot?.dataset.info) showToast('info', toastRoot.dataset.info);
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('toast', ({
+                type,
+                message
+            }) => {
+                // showToast sudah diexpose global oleh app.jsx
+                if (window.showToast) window.showToast(type, message);
+            });
         });
     </script>
 </body>
