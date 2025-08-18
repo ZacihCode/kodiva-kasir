@@ -891,8 +891,7 @@
                     // --- LOGO (boleh async di sini karena sudah pastikan printer di atas) ---
                     let logo = null;
                     try {
-                        const dataURL = await this.remoteToDataURL('https://cdn.aceimg.com/1d462648b.png');
-                        logo = await this.makeLogoRaster(dataURL, 360);
+                        logo = await this.makeLogoRaster('/assets/logo.png', 360);
                     } catch (e) {
                         console.warn('Logo gagal diproses, lanjut tanpa logo.', e);
                     }
@@ -991,7 +990,7 @@
 
                 async connectAndPrintViaBluetooth(payload, skipEnsure = false) {
                     if (typeof payload === 'string') payload = new TextEncoder().encode(payload);
-                    if (!skipEnsure) await this.ensurePrinter(); // default masih aman untuk pemakaian lain
+                    if (!skipEnsure) await this.ensurePrinter();
 
                     const CHUNK = 20;
                     for (let i = 0; i < payload.length; i += CHUNK) {
@@ -1003,8 +1002,13 @@
                         }
                         await new Promise(r => setTimeout(r, 8));
                     }
-                    saveTransaction();
-                    showToast('success', '✅ Struk terkirim.');
+
+                    try {
+                        await this.saveTransaction();
+                        showToast('success', '✅ Struk terkirim & transaksi disimpan.');
+                    } catch (e) {
+                        showToast('warning', 'Struk terkirim, tetapi gagal menyimpan transaksi.');
+                    }
                 },
 
                 resetTransaction() {
