@@ -202,6 +202,17 @@
                 </div>
                 <p class="text-gray-600 text-lg">Sistem kasir tiket renang modern dan efisien</p>
             </div>
+            <div class="flex items-center gap-2">
+                <span x-text="btStatus"
+                    class="text-xs px-2 py-1 rounded"
+                    :class="btStatus==='Connected' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'">
+                </span>
+                <span class="text-xs text-slate-500" x-text="btName ? ('(' + btName + ')') : ''"></span>
+                <button @click="quickReconnect()"
+                    class="text-xs px-3 py-1 rounded bg-slate-800 text-white hover:bg-slate-700">
+                    Reconnect
+                </button>
+            </div>
         </div>
 
         <!-- Main Cashier Interface -->
@@ -658,12 +669,56 @@
 
                 btDevice: null,
                 btChar: null,
+                btStatus: 'Disconnected',
+                btName: '',
                 BT_SERVICE_HINTS: [
                     0xff00, 0xfff0, 0xffe0,
                     '0000ff00-0000-1000-8000-00805f9b34fb',
                     '0000fff0-0000-1000-8000-00805f9b34fb',
                     '0000ffe0-0000-1000-8000-00805f9b34fb'
                 ],
+
+                wait(ms) {
+                    return new Promise(r => setTimeout(r, ms));
+                },
+                updateBtStatus() {
+                    const connected = !!(this.btChar && this.btDevice?.gatt?.connected);
+                    this.btStatus = connected ? 'Connected' : 'Disconnected';
+                    this.btName = this.btDevice?.name || (localStorage.getItem('printer_name') || '');
+                },
+
+                async tryConnect(dev, tries = 3, baseDelay = 500) {
+                    for (let i = 0; i < tries; i++) {
+                        try {
+                            if (dev.gatt.connected) return;
+                            // kadang perlu disconnect dulu biar bersih
+                            try {
+                                dev.gatt.disconnect();
+                            } catch (_) {}
+                            await this.wait(50);
+                            await dev.gatt.connect();
+                            return; // sukses
+                        } catch (e) {
+                            if (e.name !== 'NetworkError' && e.name !== 'NotFoundError') throw e;
+                            // backoff
+                            await this.wait(baseDelay * (i + 1));
+                        }
+                    }
+                    throw new Error('Gagal connect setelah beberapa percobaan (NetworkError).');
+                },
+
+                async ensureAdvertising(dev, timeout = 2000) {
+                    if (!dev.watchAdvertisements) return; // nggak semua platform support
+                    try {
+                        await dev.watchAdvertisements();
+                    } catch (_) {}
+                    await Promise.race([
+                        new Promise(res => dev.addEventListener('advertisementreceived', () => res(), {
+                            once: true
+                        })),
+                        this.wait(timeout)
+                    ]);
+                },
 
                 // === helpers kolom 3 ===
                 padLeft(s, w) {
@@ -750,7 +805,7 @@
                     }
 
                     try {
-                        this.logoBytes = await this.makeLogoRaster('/assets/logo.png', 160);
+                        this.logoBytes = await this.makeLogoRaster('/assets/logo.png', 140);
                     } catch (e) {
                         console.warn('Preload logo gagal:', e);
                     }
@@ -768,8 +823,10 @@
 
                     // auto-reconnect (tanpa dialog) saat halaman dibuka
                     if ('bluetooth' in navigator) {
-                        requestAnimationFrame(() => {
-                            this.ensurePrinter(false).catch(() => {});
+                        requestAnimationFrame(async () => {
+                            await this.ensurePrinter(false).catch(() => {});
+                            this.updateBtStatus(); // <— TAMBAHKAN
+                            this.initHooks();
                         });
                     }
                 },
@@ -818,7 +875,7 @@
                         }
                     } catch (error) {
                         console.error("Gagal simpan transaksi:", error);
-                        showToast('error', 'Gagal menyimpan transaksi. Silakan coba lagi.');
+                        throw error;
                     }
                 },
 
@@ -892,59 +949,6 @@
                         r = right.length;
                     if (l + r >= COLS) return left.slice(0, Math.max(0, COLS - r - 1)) + ' ' + right;
                     return left + ' '.repeat(COLS - l - r) + right;
-                },
-
-                // === helpers untuk tabel 3 kolom (Nama / Qty / Harga) ===
-                padLeft(s, w) {
-                    s = String(s);
-                    return s.length >= w ? s.slice(-w) : ' '.repeat(w - s.length) + s;
-                },
-                padRight(s, w) {
-                    s = String(s);
-                    return s.length >= w ? s.slice(0, w) : s + ' '.repeat(w - s.length);
-                },
-                wrapN(str, width) {
-                    const words = String(str).split(/\s+/);
-                    const lines = [];
-                    let line = '';
-                    for (const w of words) {
-                        if ((line + (line ? ' ' : '') + w).length <= width) {
-                            line += (line ? ' ' : '') + w;
-                        } else {
-                            if (line) lines.push(line);
-                            if (w.length > width) {
-                                let s = w;
-                                while (s.length > width) {
-                                    lines.push(s.slice(0, width));
-                                    s = s.slice(width);
-                                }
-                                line = s;
-                            } else {
-                                line = w;
-                            }
-                        }
-                    }
-                    if (line) lines.push(line);
-                    return lines;
-                },
-                rowItem(name, qty, priceStr) {
-                    const nameW = 26,
-                        qtyW = 4,
-                        priceW = COLS - nameW - qtyW - 1; // +1 spasi
-                    const nameLines = this.wrapN(name, nameW);
-                    let out = '';
-                    nameLines.forEach((ln, i) => {
-                        if (i === 0) {
-                            out += this.padRight(ln, nameW) + ' ' + this.padLeft(qty, qtyW) + this.padLeft(priceStr, priceW) + '\r\n';
-                        } else {
-                            out += this.padRight(ln, nameW) + '\r\n';
-                        }
-                    });
-                    return out;
-                },
-
-                CRLF(s) {
-                    return s.replace(/\n/g, '\r\n');
                 },
 
                 concatUint8(arrays) {
@@ -1073,6 +1077,33 @@
                     };
                 },
 
+                async quickReconnect() {
+                    try {
+                        await this.ensurePrinter(true);
+                        this.updateBtStatus(); // <— TAMBAHKAN
+                        showToast('success', `Terhubung ke ${this.btDevice?.name || 'printer'}.`);
+                    } catch (e) {
+                        showToast('error', e.message || 'Gagal reconnect.');
+                    }
+                },
+
+                initHooks() {
+                    // Saat tab kembali aktif, coba cek koneksi tanpa dialog
+                    document.addEventListener('visibilitychange', async () => {
+                        if (document.visibilityState === 'visible') {
+                            try {
+                                await this.ensurePrinter(false);
+                            } catch (_) {}
+                            this.updateBtStatus();
+                        }
+                    });
+
+                    // Jika Bluetooth adapter on/off, refresh status
+                    try {
+                        navigator.bluetooth.addEventListener?.('availabilitychanged', () => this.updateBtStatus());
+                    } catch (_) {}
+                },
+
                 async printReceipt() {
                     // simpan transaksi dulu supaya dapat ID
                     let trxId = null;
@@ -1102,11 +1133,10 @@
                     esc += '\x1B\x32'; // line spacing
 
                     // Logo kecil (opsional)
-                    // ====== Di printReceipt(), pakai logo cache (tanpa proses ulang) ======
                     let logo = this.logoBytes;
                     if (!logo) {
                         try {
-                            logo = await this.makeLogoRaster('/assets/logo.png', 160);
+                            logo = await this.makeLogoRaster('/assets/logo.png', 140);
                             this.logoBytes = logo;
                         } catch {}
                     }
@@ -1185,71 +1215,131 @@
                 async ensurePrinter(interactive = false) {
                     if (!('bluetooth' in navigator)) throw new Error('Browser tidak mendukung Web Bluetooth.');
                     if (!window.isSecureContext) throw new Error('Akses Bluetooth butuh HTTPS atau localhost.');
-
                     if (this.btChar && this.btDevice?.gatt?.connected) return;
+
+                    const prefixRe = /^(RPP|MPT|POS|QR|PT-)/i; // umum printer thermal
+                    const savedId = localStorage.getItem('printer_id') || null;
+                    const savedName = localStorage.getItem('printer_name') || null;
+                    const savedSvc = localStorage.getItem('printer_svc') || null;
+                    const savedChr = localStorage.getItem('printer_chr') || null;
 
                     try {
                         const available = await navigator.bluetooth.getAvailability?.();
                         if (available === false) throw new Error('Bluetooth adapter tidak tersedia / dimatikan di OS.');
 
-                        const allowed = await navigator.bluetooth.getDevices?.() || [];
-                        const savedId = localStorage.getItem('printer_id') || null;
-                        let dev = allowed.find(d => savedId ? d.id === savedId : (d.name?.startsWith('RPP')));
+                        const allowed = (await navigator.bluetooth.getDevices?.()) || [];
+                        let dev = null;
+
+                        if (savedId) dev = allowed.find(d => d.id === savedId) || null;
+                        if (!dev && savedName) dev = allowed.find(d => (d.name || '') === savedName) || null;
+                        if (!dev) dev = allowed.find(d => prefixRe.test(d.name || '')) || null;
+                        if (!dev && allowed.length) dev = allowed[0];
 
                         if (!dev) {
-                            if (!interactive) throw new Error('Printer belum dipilih untuk origin ini. (Lewati di init)');
+                            if (!interactive) throw new Error('Belum ada printer yang diizinkan untuk origin ini.');
+                            // pakai filter agar permission lebih stabil
                             dev = await navigator.bluetooth.requestDevice({
-                                acceptAllDevices: true,
+                                filters: [{
+                                        namePrefix: 'RPP'
+                                    },
+                                    {
+                                        namePrefix: 'MPT'
+                                    },
+                                    {
+                                        namePrefix: 'POS'
+                                    },
+                                    {
+                                        namePrefix: 'QR'
+                                    },
+                                    {
+                                        namePrefix: 'PT-'
+                                    }
+                                ],
                                 optionalServices: this.BT_SERVICE_HINTS
                             });
-                            localStorage.setItem('printer_id', dev.id);
                         }
 
                         this.btDevice = dev;
                         this.btDevice.addEventListener('gattserverdisconnected', () => {
                             this.btChar = null;
+                            this.updateBtStatus();
                         });
 
-                        if (!this.btDevice.gatt.connected) await this.btDevice.gatt.connect();
+                        // Tunggu device advertising supaya connect() nggak lempar NetworkError
+                        await this.ensureAdvertising(dev, 1500);
 
-                        const services = await this.btDevice.gatt.getPrimaryServices();
-                        for (const svc of services) {
-                            const chars = await svc.getCharacteristics();
-                            for (const ch of chars) {
-                                if (ch.properties.write || ch.properties.writeWithoutResponse) {
-                                    this.btChar = ch;
-                                    break;
+                        // Coba connect dengan retry (bersihin koneksi stale)
+                        await this.tryConnect(dev, 3, 500);
+
+                        // === Cari characteristic tulis ===
+                        let svc = null,
+                            chr = null;
+                        try {
+                            if (savedSvc) {
+                                svc = await dev.gatt.getPrimaryService(savedSvc);
+                                if (savedChr) {
+                                    chr = await svc.getCharacteristic(savedChr);
+                                    if (!(chr.properties.write || chr.properties.writeWithoutResponse)) chr = null;
                                 }
                             }
-                            if (this.btChar) break;
+                        } catch (_) {
+                            /* fallback ke scan semua */
                         }
-                        if (!this.btChar) throw new Error('Characteristic tulis tidak ditemukan pada printer.');
+
+                        if (!chr) {
+                            const services = await dev.gatt.getPrimaryServices();
+                            outer: for (const s of services) {
+                                const chars = await s.getCharacteristics();
+                                for (const c of chars) {
+                                    if (c.properties.write || c.properties.writeWithoutResponse) {
+                                        svc = s;
+                                        chr = c;
+                                        break outer;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!chr) throw new Error('Characteristic tulis tidak ditemukan pada printer.');
+
+                        this.btChar = chr;
+
+                        // Simpan hint untuk sesi berikutnya (id sering berubah, nama & uuid lebih stabil)
+                        try {
+                            localStorage.setItem('printer_id', dev.id || '');
+                            if (dev.name) localStorage.setItem('printer_name', dev.name);
+                            if (svc?.uuid) localStorage.setItem('printer_svc', svc.uuid);
+                            if (chr?.uuid) localStorage.setItem('printer_chr', chr.uuid);
+                        } catch (_) {}
+                        this.updateBtStatus();
+
                     } catch (e) {
                         const name = e?.name || '';
                         if (name === 'NotAllowedError') throw new Error('Akses ditolak. Pilih perangkat pada dialog atau izinkan Bluetooth.');
                         if (name === 'NotFoundError') throw new Error('Printer tidak ditemukan. Nyalakan printer & dekatkan perangkat.');
                         if (name === 'SecurityError') throw new Error('Harus diakses via HTTPS atau localhost.');
-                        if (name === 'NetworkError') throw new Error('Gagal connect. Coba matikan/nyalakan Bluetooth atau printer.');
+                        if (name === 'NetworkError') throw new Error('Gagal connect. Coba aktifkan/printer-advertising lalu ulangi.');
                         throw e;
                     }
                 },
 
                 async connectAndPrintViaBluetooth(payload, skipEnsure = false) {
                     if (typeof payload === 'string') payload = new TextEncoder().encode(payload);
-                    if (!skipEnsure) await this.ensurePrinter();
+                    if (!skipEnsure) await this.ensurePrinter(true);
 
                     const CHUNK = 20; // BLE ATT default
-                    const NEEDS_DELAY = this.btChar.properties.writeWithoutResponse ? 1 : 0; // ms
+                    const NEEDS_DELAY = this.btChar.properties.writeWithoutResponse ? 8 : 0; // 8–10ms aman
                     for (let i = 0; i < payload.length; i += CHUNK) {
                         const slice = payload.slice(i, i + CHUNK);
                         if (this.btChar.properties.write) {
-                            await this.btChar.writeValue(slice); // ada ack
+                            await this.btChar.writeValue(slice);
                         } else {
                             await this.btChar.writeValueWithoutResponse(slice);
                         }
-                        if (NEEDS_DELAY) await new Promise(r => setTimeout(r, NEEDS_DELAY));
+                        if (NEEDS_DELAY) await this.wait(NEEDS_DELAY);
                     }
                     showToast('success', 'Struk terkirim.');
+                    this.updateBtStatus();
                 },
 
                 resetTransaction() {
