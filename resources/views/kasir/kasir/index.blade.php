@@ -297,6 +297,35 @@
                         </div>
                     </div>
 
+                    <!-- Customer Identity -->
+                    <div class="bg-gradient-to-r from-sky-50 to-cyan-50 p-6 rounded-2xl border border-sky-100">
+                        <label class="flex items-center text-lg font-semibold text-gray-800 mb-3">
+                            <i class="fas fa-user text-sky-500 mr-2"></i>
+                            Identitas Pengunjung
+                        </label>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">Nama</label>
+                                <input type="text"
+                                    x-model.trim="customerName"
+                                    class="w-full p-3 border-0 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all duration-200"
+                                    placeholder="Nama lengkap">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">No. HP</label>
+                                <input type="tel"
+                                    x-model.trim="customerPhone"
+                                    inputmode="tel" pattern="[0-9+ ]*"
+                                    class="w-full p-3 border-0 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all duration-200"
+                                    placeholder="08xxxxxxxxxx">
+                            </div>
+                        </div>
+
+                        <p class="mt-2 text-xs text-gray-500">Opsional. Membantu identifikasi pengunjung saat diperlukan.</p>
+                    </div>
+
                     <!-- Payment Method -->
                     <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-100">
                         <label class="flex items-center text-lg font-semibold text-gray-800 mb-3">
@@ -325,6 +354,47 @@
                                     <div class="text-xs sm:text-sm text-gray-600">Scan QR Code</div>
                                 </div>
                             </label>
+                        </div>
+                    </div>
+
+                    <!-- Cash Amount -->
+                    <div class="mt-4 rounded-2xl bg-white/70 p-4 border border-green-100"
+                        x-show="paymentMethod === 'cash'"
+                        x-transition>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nominal Bayar</label>
+
+                        <div class="flex items-center gap-3">
+                            <div class="relative flex-1">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
+                                <input type="number"
+                                    min="0" step="1000" inputmode="numeric"
+                                    x-model.number="cashGiven"
+                                    class="w-full pl-10 p-3 border-0 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
+                                    placeholder="0" />
+                            </div>
+                            <!-- Tombol cepat: set ke total -->
+                            <button type="button"
+                                class="px-3 py-2 rounded-lg text-sm bg-green-100 text-green-700 hover:bg-green-200"
+                                @click="cashGiven = totalAll">
+                                Pas
+                            </button>
+                        </div>
+
+                        <div class="mt-3 text-sm space-y-1">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total</span>
+                                <span class="font-semibold" x-text="'Rp ' + totalAll.toLocaleString('id-ID')"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Nominal Bayar</span>
+                                <span class="font-semibold" x-text="'Rp ' + (cashGiven || 0).toLocaleString('id-ID')"></span>
+                            </div>
+                            <div class="flex justify-between"
+                                :class="(cashGiven - totalAll) >= 0 ? 'text-emerald-600' : 'text-red-600'">
+                                <span x-text="(cashGiven - totalAll) >= 0 ? 'Kembalian' : 'Kurang'"></span>
+                                <span class="font-bold"
+                                    x-text="'Rp ' + Math.abs((cashGiven - totalAll) || 0).toLocaleString('id-ID')"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -579,6 +649,13 @@
                 parkingOptions: [],
                 ticketTypes: [],
                 platNomor: '',
+                cashGiven: 0,
+                userPhone: '',
+                userAddress: '',
+                lastTrxId: null,
+                customerName: '',
+                customerPhone: '',
+                logoBytes: null,
 
                 btDevice: null,
                 btChar: null,
@@ -588,6 +665,49 @@
                     '0000fff0-0000-1000-8000-00805f9b34fb',
                     '0000ffe0-0000-1000-8000-00805f9b34fb'
                 ],
+
+                // === helpers kolom 3 ===
+                padLeft(s, w) {
+                    s = String(s);
+                    return s.length >= w ? s.slice(-w) : ' '.repeat(w - s.length) + s;
+                },
+                padRight(s, w) {
+                    s = String(s);
+                    return s.length >= w ? s.slice(0, w) : s + ' '.repeat(w - s.length);
+                },
+                wrapN(str, width) {
+                    const words = String(str).split(/\s+/);
+                    const lines = [];
+                    let line = '';
+                    for (const w of words) {
+                        if ((line + (line ? ' ' : '') + w).length <= width) line += (line ? ' ' : '') + w;
+                        else {
+                            if (line) lines.push(line);
+                            if (w.length > width) {
+                                let s = w;
+                                while (s.length > width) {
+                                    lines.push(s.slice(0, width));
+                                    s = s.slice(width);
+                                }
+                                line = s;
+                            } else line = w;
+                        }
+                    }
+                    if (line) lines.push(line);
+                    return lines;
+                },
+                rowItem(name, qty, priceStr) {
+                    const nameW = 26,
+                        qtyW = 4,
+                        priceW = COLS - nameW - qtyW - 1;
+                    const nameLines = this.wrapN(name, nameW);
+                    let out = '';
+                    nameLines.forEach((ln, i) => {
+                        if (i === 0) out += this.padRight(ln, nameW) + ' ' + this.padLeft(qty, qtyW) + this.padLeft(priceStr, priceW) + '\r\n';
+                        else out += this.padRight(ln, nameW) + '\r\n';
+                    });
+                    return out;
+                },
 
                 async init() {
                     try {
@@ -627,18 +747,30 @@
                         }));
                     } catch (error) {
                         console.error("Gagal fetch data:", error);
-                        // Show user-friendly error message
                         showToast('error', 'Gagal memuat data. Silakan refresh halaman.');
                     }
 
-                    // 👇 Tambahkan ini (tanpa memunculkan dialog)
+                    try {
+                        this.logoBytes = await this.makeLogoRaster('/assets/logo.png', 160);
+                    } catch (e) {
+                        console.warn('Preload logo gagal:', e);
+                    }
+
+                    try {
+                        const userRes = await fetch('/api/user', {
+                            credentials: 'include'
+                        });
+                        if (userRes.ok) {
+                            const me = await userRes.json();
+                            this.userPhone = me.phone || me.telepon || me.no_hp || '';
+                            this.userAddress = me.address || me.alamat || '';
+                        }
+                    } catch (_) {}
+
+                    // auto-reconnect (tanpa dialog) saat halaman dibuka
                     if ('bluetooth' in navigator) {
                         requestAnimationFrame(() => {
-                            this.ensurePrinter( /*interactive=*/ false)
-                                .then(() => console.log('Auto-connected to', this.btDevice?.name))
-                                .catch(() => {
-                                    /* diam saja kalau belum pernah pair */
-                                });
+                            this.ensurePrinter(false).catch(() => {});
                         });
                     }
                 },
@@ -648,7 +780,6 @@
                         showToast('warning', 'Keranjang masih kosong!');
                         return;
                     }
-
                     try {
                         const res = await fetch(`/api/transaksi`, {
                             method: 'POST',
@@ -666,6 +797,8 @@
                                 parkir: this.selectedParking,
                                 total: this.totalAll,
                                 plat_nomor: this.platNomor,
+                                customer_name: this.customerName,
+                                customer_phone: this.customerPhone,
                                 detail: this.cart.map(item => ({
                                     name: item.ticket.name,
                                     quantity: item.quantity,
@@ -677,8 +810,10 @@
 
                         const result = await res.json();
                         if (res.ok) {
-                            console.log("Transaksi berhasil:", result);
+                            const newId = result?.id || result?.data?.id;
+                            this.lastTrxId = newId ?? null;
                             showToast('success', 'Transaksi berhasil disimpan!');
+                            return newId; // <- penting, kembalikan id
                         } else {
                             throw new Error(result.message || 'Gagal menyimpan transaksi');
                         }
@@ -690,23 +825,19 @@
 
                 addToCart(ticket) {
                     const index = this.cart.findIndex(i => i.ticket.id === ticket.id);
-                    if (index !== -1) {
-                        this.cart[index].quantity++;
-                    } else {
-                        this.cart.push({
-                            ticket,
-                            quantity: 1
-                        });
-                    }
+                    if (index !== -1) this.cart[index].quantity++;
+                    else this.cart.push({
+                        ticket,
+                        quantity: 1
+                    });
                     showToast('success', `${ticket.name} ditambahkan ke keranjang`);
                 },
 
                 decreaseFromCart(ticket) {
                     const index = this.cart.findIndex(i => i.ticket.id === ticket.id);
                     if (index !== -1) {
-                        if (this.cart[index].quantity > 1) {
-                            this.cart[index].quantity--;
-                        } else {
+                        if (this.cart[index].quantity > 1) this.cart[index].quantity--;
+                        else {
                             this.cart.splice(index, 1);
                             showToast('info', `${ticket.name} dihapus dari keranjang`);
                         }
@@ -719,19 +850,17 @@
                 },
 
                 get subtotal() {
-                    return this.cart.reduce((sum, item) => sum + (item.ticket.price * item.quantity), 0);
+                    return this.cart.reduce((s, it) => s + (it.ticket.price * it.quantity), 0);
                 },
-
                 get discountAmount() {
                     return Math.round(this.subtotal * (this.selectedDiscount / 100));
                 },
-
                 get totalAll() {
                     return Math.max(0, this.subtotal - this.discountAmount + this.selectedParking);
                 },
 
-                formatRupiah(value) {
-                    return value.toLocaleString('id-ID');
+                formatRupiah(v) {
+                    return v.toLocaleString('id-ID');
                 },
 
                 wrapText(str) {
@@ -743,7 +872,6 @@
                             line += (line ? ' ' : '') + w;
                         } else {
                             if (line) lines.push(line);
-                            // kalau 1 kata > COLS, paksa pecah
                             if (w.length > COLS) {
                                 let s = w;
                                 while (s.length > COLS) {
@@ -760,19 +888,66 @@
                     return lines;
                 },
 
-                // kiri-kanan (teks, nominal) agar pas 1 baris
                 lineLR(left, right) {
-                    const l = left.length;
-                    const r = right.length;
+                    const l = left.length,
+                        r = right.length;
                     if (l + r >= COLS) return left.slice(0, Math.max(0, COLS - r - 1)) + ' ' + right;
                     return left + ' '.repeat(COLS - l - r) + right;
+                },
+
+                // === helpers untuk tabel 3 kolom (Nama / Qty / Harga) ===
+                padLeft(s, w) {
+                    s = String(s);
+                    return s.length >= w ? s.slice(-w) : ' '.repeat(w - s.length) + s;
+                },
+                padRight(s, w) {
+                    s = String(s);
+                    return s.length >= w ? s.slice(0, w) : s + ' '.repeat(w - s.length);
+                },
+                wrapN(str, width) {
+                    const words = String(str).split(/\s+/);
+                    const lines = [];
+                    let line = '';
+                    for (const w of words) {
+                        if ((line + (line ? ' ' : '') + w).length <= width) {
+                            line += (line ? ' ' : '') + w;
+                        } else {
+                            if (line) lines.push(line);
+                            if (w.length > width) {
+                                let s = w;
+                                while (s.length > width) {
+                                    lines.push(s.slice(0, width));
+                                    s = s.slice(width);
+                                }
+                                line = s;
+                            } else {
+                                line = w;
+                            }
+                        }
+                    }
+                    if (line) lines.push(line);
+                    return lines;
+                },
+                rowItem(name, qty, priceStr) {
+                    const nameW = 26,
+                        qtyW = 4,
+                        priceW = COLS - nameW - qtyW - 1; // +1 spasi
+                    const nameLines = this.wrapN(name, nameW);
+                    let out = '';
+                    nameLines.forEach((ln, i) => {
+                        if (i === 0) {
+                            out += this.padRight(ln, nameW) + ' ' + this.padLeft(qty, qtyW) + this.padLeft(priceStr, priceW) + '\r\n';
+                        } else {
+                            out += this.padRight(ln, nameW) + '\r\n';
+                        }
+                    });
+                    return out;
                 },
 
                 CRLF(s) {
                     return s.replace(/\n/g, '\r\n');
                 },
 
-                // gabung beberapa Uint8Array
                 concatUint8(arrays) {
                     let total = arrays.reduce((s, a) => s + (a ? a.length : 0), 0);
                     let out = new Uint8Array(total);
@@ -785,151 +960,226 @@
                     return out;
                 },
 
-                // konversi gambar ke ESC/POS raster (GS v 0) lebar max 384 dot (58mm)
-                async makeLogoRaster(url, maxWidth = 384) {
-                    // Hindari CORS: pakai URL yang sama origin atau dataURL
+                // === raster logo: kecil + latar putih + handle alpha ===
+                async makeLogoRaster(url, maxWidth = 160) {
                     const img = new Image();
                     img.crossOrigin = 'anonymous';
                     img.src = url;
                     await img.decode();
 
-                    // resize proporsional
-                    const scale = Math.min(1, maxWidth / img.width);
-                    const w = Math.round(img.width * scale);
-                    const h = Math.round(img.height * scale);
+                    // --- canvas asal untuk baca pixel ---
+                    const src = document.createElement('canvas');
+                    src.width = img.width;
+                    src.height = img.height;
+                    const sctx = src.getContext('2d', {
+                        willReadFrequently: true
+                    });
+                    // latar putih supaya PNG transparan tidak jadi hitam
+                    sctx.fillStyle = '#FFFFFF';
+                    sctx.fillRect(0, 0, src.width, src.height);
+                    sctx.drawImage(img, 0, 0);
 
+                    // --- trim pinggiran putih/transparan ---
+                    const {
+                        x,
+                        y,
+                        w,
+                        h
+                    } = this._trimBounds(sctx, src.width, src.height);
+                    const scale = Math.min(1, maxWidth / w);
+                    const W = Math.max(1, Math.round(w * scale));
+                    const H = Math.max(1, Math.round(h * scale));
+
+                    // canvas final setelah trim + resize
                     const canvas = document.createElement('canvas');
-                    canvas.width = w;
-                    canvas.height = h;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, w, h);
+                    canvas.width = W;
+                    canvas.height = H;
+                    const ctx = canvas.getContext('2d', {
+                        willReadFrequently: true
+                    });
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, W, H);
+                    ctx.drawImage(src, x, y, w, h, 0, 0, W, H);
 
-                    const data = ctx.getImageData(0, 0, w, h).data;
+                    const data = ctx.getImageData(0, 0, W, H).data;
 
-                    // pack 1-bit per pixel (threshold)
-                    const bytesPerRow = Math.ceil(w / 8);
-                    const bitmap = new Uint8Array(bytesPerRow * h);
-                    const threshold = 180; // atur kontras logo
+                    // 1-bit packing
+                    const bytesPerRow = Math.ceil(W / 8);
+                    const bitmap = new Uint8Array(bytesPerRow * H);
+                    const threshold = 195; // naikkan utk garis lebih tipis
 
-                    for (let y = 0; y < h; y++) {
-                        for (let x = 0; x < w; x++) {
-                            const i = (y * w + x) * 4;
-                            const r = data[i],
+                    for (let yy = 0; yy < H; yy++) {
+                        for (let xx = 0; xx < W; xx++) {
+                            const i = (yy * W + xx) * 4;
+                            let r = data[i],
                                 g = data[i + 1],
-                                b = data[i + 2];
-                            const gray = 0.299 * r + 0.587 * g + 0.114 * b;
-                            const bit = gray < threshold ? 1 : 0; // 1 = hitam
-                            const byteIndex = y * bytesPerRow + (x >> 3);
-                            bitmap[byteIndex] |= bit << (7 - (x & 7));
+                                b = data[i + 2],
+                                a = data[i + 3];
+                            let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                            if (a < 255) { // komposit di atas putih
+                                const alp = a / 255;
+                                gray = gray * alp + 255 * (1 - alp);
+                            }
+                            const bit = gray < threshold ? 1 : 0;
+                            const byteIndex = yy * bytesPerRow + (xx >> 3);
+                            bitmap[byteIndex] |= bit << (7 - (xx & 7));
                         }
                     }
 
-                    // GS v 0 m=0 (normal)
-                    const header = new Uint8Array(8);
-                    header[0] = 0x1D;
-                    header[1] = 0x76;
-                    header[2] = 0x30;
-                    header[3] = 0x00;
-                    header[4] = bytesPerRow & 0xFF; // xL
-                    header[5] = (bytesPerRow >> 8) & 0xFF; // xH
-                    header[6] = h & 0xFF; // yL
-                    header[7] = (h >> 8) & 0xFF; // yH
+                    // GS v 0 (raster bit image)
+                    const header = new Uint8Array([
+                        0x1D, 0x76, 0x30, 0x00,
+                        bytesPerRow & 0xFF, (bytesPerRow >> 8) & 0xFF,
+                        H & 0xFF, (H >> 8) & 0xFF
+                    ]);
 
                     return this.concatUint8([header, bitmap, new TextEncoder().encode('\r\n')]);
                 },
 
-                async remoteToDataURL(url) {
-                    const res = await fetch(url, {
-                        mode: 'cors',
-                        cache: 'force-cache'
-                    });
-                    if (!res.ok) throw new Error('HTTP ' + res.status);
-                    const blob = await res.blob();
-                    return await new Promise((resolve, reject) => {
-                        const r = new FileReader();
-                        r.onerror = reject;
-                        r.onload = () => resolve(r.result);
-                        r.readAsDataURL(blob);
-                    });
+                _trimBounds(ctx, w, h) {
+                    const img = ctx.getImageData(0, 0, w, h).data;
+                    const white = 250; // >250 dianggap putih
+                    const alphaMin = 10; // <10 dianggap transparan
+                    let top = h,
+                        left = w,
+                        right = -1,
+                        bottom = -1;
+
+                    for (let y = 0; y < h; y++) {
+                        for (let x = 0; x < w; x++) {
+                            const i = (y * w + x) * 4;
+                            const r = img[i],
+                                g = img[i + 1],
+                                b = img[i + 2],
+                                a = img[i + 3];
+                            if (a > alphaMin && !(r > white && g > white && b > white)) {
+                                if (x < left) left = x;
+                                if (x > right) right = x;
+                                if (y < top) top = y;
+                                if (y > bottom) bottom = y;
+                            }
+                        }
+                    }
+                    if (right < 0) return {
+                        x: 0,
+                        y: 0,
+                        w: 1,
+                        h: 1
+                    }; // semua putih
+                    return {
+                        x: left,
+                        y: top,
+                        w: right - left + 1,
+                        h: bottom - top + 1
+                    };
                 },
 
                 async printReceipt() {
-                    // 1) pastikan printer dulu SELAGI masih dalam user gesture klik
+                    // simpan transaksi dulu supaya dapat ID
+                    let trxId = null;
+                    try {
+                        trxId = await this.saveTransaction();
+                    } catch (e) {
+                        showToast('error', 'Gagal menyimpan transaksi: ' + (e?.message || ''));
+                        return;
+                    }
+
+                    // pairing / connect (di gesture klik yang sama)
                     try {
                         await this.ensurePrinter(true);
                     } catch (e) {
-                        console.error(e);
                         showToast('error', 'Tidak bisa mengakses Bluetooth: ' + e.message);
                         return;
                     }
 
                     const now = new Date().toLocaleString('id-ID');
-                    const metode = this.paymentMethod === 'qris' ? 'QRIS' : 'Tunai';
+                    const metode = (this.paymentMethod === 'qris') ? 'Cashless' : 'Cash';
 
-                    // ====== isi item ======
-                    const body = [];
-                    for (const item of this.cart) {
-                        const name = `${item.ticket.name} x${item.quantity}`;
-                        const price = `Rp${this.formatRupiah(item.ticket.price * item.quantity)}`;
-                        body.push(this.lineLR(name, price));
-                    }
-                    if (this.discountAmount > 0) {
-                        body.push(this.lineLR(`Diskon (${this.selectedDiscount}%)`, `-Rp${this.formatRupiah(this.discountAmount)}`));
-                    }
-                    if (this.selectedParking > 0) {
-                        body.push(this.lineLR('Parkir', `Rp${this.formatRupiah(this.selectedParking)}`));
-                    }
-                    const totalLine = this.lineLR('TOTAL', `Rp${this.formatRupiah(this.totalAll)}`);
-
-                    // ====== ESC/POS text ======
+                    // ===== ESC/POS =====
                     let esc = '';
                     esc += '\x1B\x40'; // reset
                     esc += '\x1B\x74\x00'; // CP437
                     esc += '\x1B\x4D\x01'; // Font B (42 col)
                     esc += '\x1B\x32'; // line spacing
 
-                    // --- LOGO (boleh async di sini karena sudah pastikan printer di atas) ---
-                    let logo = null;
-                    try {
-                        logo = await this.makeLogoRaster('/assets/logo.png', 360);
-                    } catch (e) {
-                        console.warn('Logo gagal diproses, lanjut tanpa logo.', e);
+                    // Logo kecil (opsional)
+                    // ====== Di printReceipt(), pakai logo cache (tanpa proses ulang) ======
+                    let logo = this.logoBytes;
+                    if (!logo) {
+                        try {
+                            logo = await this.makeLogoRaster('/assets/logo.png', 160);
+                            this.logoBytes = logo;
+                        } catch {}
                     }
 
-                    // header
-                    esc += '\x1B\x61\x01'; // center
-                    esc += '\x1B\x45\x01'; // bold on
+                    // Header tengah
+                    esc += '\x1B\x61\x01';
+                    esc += '\x1B\x45\x01';
                     this.wrapText('WISATA SENDANG PLESUNGAN').forEach(l => esc += l + '\r\n');
-                    esc += '\x1B\x45\x00'; // bold off
-                    this.wrapText('Struk Pembayaran').forEach(l => esc += l + '\r\n');
-                    esc += now + '\r\n';
+                    esc += '\x1B\x45\x00';
 
-                    // body
-                    esc += '\x1B\x61\x00'; // left
-                    esc += this.lineLR('Kasir: Admin', `Metode: ${metode}`) + '\r\n';
-                    if (this.platNomor) esc += `Plat: ${this.platNomor}\r\n`;
-                    esc += '-'.repeat(COLS) + '\r\n';
-                    body.forEach(l => esc += this.CRLF(l) + '\r\n');
-                    esc += '-'.repeat(COLS) + '\r\n';
-                    esc += totalLine + '\r\n\r\n';
+                    // Alamat & Telp dari user login
+                    if (this.userAddress) this.wrapText(this.userAddress).forEach(l => esc += l + '\r\n');
+                    if (this.userPhone) esc += 'Telp/WA: ' + this.userPhone + '\r\n';
 
-                    // footer
-                    esc += '\x1B\x61\x01'; // center
-                    esc += 'Terima kasih atas kunjungan Anda!\r\n';
-                    esc += 'Simpan struk ini sebagai bukti pembayaran\r\n';
-                    esc += 'Kritik dan saran ke 082176623820\r\n';
+                    esc += '-'.repeat(COLS) + '\r\n';
+
+                    // Info transaksi
+                    esc += '\x1B\x61\x00';
+                    esc += this.lineLR('Kode Transaksi: ' + (trxId ? ('TRX' + trxId) : '-'), 'Pembayaran: ' + metode) + '\r\n';
+                    esc += 'Tanggal: ' + now + '\r\n';
+
+                    // CETAK PLAT (jika ada)
+                    if (this.platNomor && this.platNomor.trim()) {
+                        esc += `Plat: ${this.platNomor.trim().toUpperCase()}\r\n`;
+                    }
+
+                    if (this.customerName) esc += `Nama: ${this.customerName}\r\n`;
+                    if (this.customerPhone) esc += `Telp: ${this.customerPhone}\r\n`;
+                    esc += '\r\n';
+
+                    // Header tabel 3 kolom
+                    const hNama = this.padRight('Nama Barang', 26);
+                    const hQty = this.padLeft('Qty', 4);
+                    const hHarga = this.padLeft('Harga', COLS - 26 - 4 - 1);
+                    esc += hNama + ' ' + hQty + hHarga + '\r\n';
+                    esc += '-'.repeat(COLS) + '\r\n';
+
+                    // Baris item (harga per item)
+                    for (const it of this.cart) {
+                        esc += this.rowItem(it.ticket.name, it.quantity, 'Rp' + this.formatRupiah(it.ticket.price));
+                    }
+
+                    esc += '-'.repeat(COLS) + '\r\n';
+
+                    // Diskon & Parkir (jika ada)
+                    if (this.discountAmount > 0) {
+                        esc += this.lineLR(`Diskon (${this.selectedDiscount}%)`, `-Rp${this.formatRupiah(this.discountAmount)}`) + '\r\n';
+                    }
+                    if (this.selectedParking > 0) {
+                        esc += this.lineLR('Parkir', `Rp${this.formatRupiah(this.selectedParking)}`) + '\r\n';
+                    }
+
+                    // Total, Nominal Bayar, Kembalian
+                    const nominalBayar = (this.paymentMethod === 'cash' && this.cashGiven > 0) ? this.cashGiven : this.totalAll;
+                    const kembalian = Math.max(0, nominalBayar - this.totalAll);
+
+                    esc += this.lineLR('Total', `Rp${this.formatRupiah(this.totalAll)}`) + '\r\n';
+                    esc += this.lineLR('Nominal Bayar', `Rp${this.formatRupiah(nominalBayar)}`) + '\r\n';
+                    esc += this.lineLR('Kembalian', `Rp${this.formatRupiah(kembalian)}`) + '\r\n';
+
+                    esc += '='.repeat(COLS) + '\r\n';
+                    esc += '\x1B\x61\x01';
+                    esc += 'Terima Kasih!\r\n';
+                    esc += '='.repeat(COLS) + '\r\n';
                     esc += '\r\n\r\n';
                     esc += '\x1B\x61\x00';
                     esc += '\x1D\x56\x00'; // cut
 
-                    // payload = center logo + logo + text
                     const encoder = new TextEncoder();
-                    const preLogoCmds = encoder.encode('\x1B\x61\x01');
-                    const payload = logo ?
-                        this.concatUint8([preLogoCmds, logo, encoder.encode(esc)]) :
-                        encoder.encode(esc);
+                    const preLogo = encoder.encode('\x1B\x61\x01');
+                    const payload = logo ? this.concatUint8([preLogo, logo, encoder.encode(esc)]) : encoder.encode(esc);
 
-                    // 2) kirim (di sini jangan panggil ensurePrinter lagi, sudah tadi)
                     await this.connectAndPrintViaBluetooth(payload, /*skipEnsure=*/ true);
                 },
 
@@ -947,13 +1197,10 @@
                         const savedId = localStorage.getItem('printer_id') || null;
                         let dev = allowed.find(d => savedId ? d.id === savedId : (d.name?.startsWith('RPP')));
 
-                        // ⬇️ bedanya di sini: hanya minta dialog kalau interactive = true
                         if (!dev) {
-                            if (!interactive) {
-                                throw new Error('Printer belum dipilih untuk origin ini. (Lewati di init)');
-                            }
+                            if (!interactive) throw new Error('Printer belum dipilih untuk origin ini. (Lewati di init)');
                             dev = await navigator.bluetooth.requestDevice({
-                                acceptAllDevices: true, // lebih fleksibel
+                                acceptAllDevices: true,
                                 optionalServices: this.BT_SERVICE_HINTS
                             });
                             localStorage.setItem('printer_id', dev.id);
@@ -984,7 +1231,7 @@
                         if (name === 'NotFoundError') throw new Error('Printer tidak ditemukan. Nyalakan printer & dekatkan perangkat.');
                         if (name === 'SecurityError') throw new Error('Harus diakses via HTTPS atau localhost.');
                         if (name === 'NetworkError') throw new Error('Gagal connect. Coba matikan/nyalakan Bluetooth atau printer.');
-                        throw e; // biarkan caller yang tampilkan toast
+                        throw e;
                     }
                 },
 
@@ -992,23 +1239,18 @@
                     if (typeof payload === 'string') payload = new TextEncoder().encode(payload);
                     if (!skipEnsure) await this.ensurePrinter();
 
-                    const CHUNK = 20;
+                    const CHUNK = 20; // BLE ATT default
+                    const NEEDS_DELAY = this.btChar.properties.writeWithoutResponse ? 1 : 0; // ms
                     for (let i = 0; i < payload.length; i += CHUNK) {
                         const slice = payload.slice(i, i + CHUNK);
                         if (this.btChar.properties.write) {
-                            await this.btChar.writeValue(slice);
+                            await this.btChar.writeValue(slice); // ada ack
                         } else {
                             await this.btChar.writeValueWithoutResponse(slice);
                         }
-                        await new Promise(r => setTimeout(r, 8));
+                        if (NEEDS_DELAY) await new Promise(r => setTimeout(r, NEEDS_DELAY));
                     }
-
-                    try {
-                        await this.saveTransaction();
-                        showToast('success', '✅ Struk terkirim & transaksi disimpan.');
-                    } catch (e) {
-                        showToast('warning', 'Struk terkirim, tetapi gagal menyimpan transaksi.');
-                    }
+                    showToast('success', 'Struk terkirim.');
                 },
 
                 resetTransaction() {

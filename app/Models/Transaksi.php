@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Transaksi extends Model
 {
     protected $fillable = [
+        'customer_name',
+        'customer_phone',
         'metode_pembayaran',
         'subtotal',
         'diskon',

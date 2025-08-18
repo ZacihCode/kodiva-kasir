@@ -10,6 +10,8 @@ return new class extends Migration
     {
         Schema::create('transaksis', function (Blueprint $table) {
             $table->id();
+            $table->string('customer_name');
+            $table->string('customer_phone')->nullable();
             $table->string('metode_pembayaran');
             $table->integer('subtotal');
             $table->integer('diskon');

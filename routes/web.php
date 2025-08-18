@@ -96,8 +96,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/discounts', fn() => Diskon::all());
     Route::get('/api/parkings', fn() => Parkir::all());
 
+    Route::get('/api/user', function (Request $request) {
+        $u = $request->user();
+        return response()->json([
+            'id'      => $u->id,
+            'name'    => $u->name,
+            'phone'   => $u->phone   ?? $u->phone_number ?? $u->telepon ?? $u->no_hp ?? '',
+            'address' => $u->address ?? $u->alamat       ?? '',
+            'role'    => $u->role ?? null,
+        ]);
+    });
+
     Route::post('/api/transaksi', function (Request $request) {
         $validated = $request->validate([
+            'customer_name' => 'required|string|max:30',
+            'customer_phone' => 'nullable|string|max:13',
             'metode_pembayaran' => 'required|string',
             'subtotal' => 'required|integer',
             'diskon' => 'required|integer',

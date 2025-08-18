@@ -31,7 +31,7 @@
         data-info="{{ session('info') ?: ($infoMessage ?? '') }}">
     </div>
 
-    <main class="main-content pt-16 transition-all duration-300">
+    <main class="main-content bg-gray-100 pt-16 transition-all duration-300">
         @yield('content')
     </main>
     <!-- Footer -->
