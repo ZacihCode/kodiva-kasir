@@ -725,10 +725,12 @@
                     s = String(s);
                     return s.length >= w ? s.slice(-w) : ' '.repeat(w - s.length) + s;
                 },
+
                 padRight(s, w) {
                     s = String(s);
                     return s.length >= w ? s.slice(0, w) : s + ' '.repeat(w - s.length);
                 },
+
                 wrapN(str, width) {
                     const words = String(str).split(/\s+/);
                     const lines = [];
@@ -750,6 +752,7 @@
                     if (line) lines.push(line);
                     return lines;
                 },
+
                 rowItem(name, qty, priceStr) {
                     const nameW = 26,
                         qtyW = 4,
@@ -908,9 +911,11 @@
                 get subtotal() {
                     return this.cart.reduce((s, it) => s + (it.ticket.price * it.quantity), 0);
                 },
+
                 get discountAmount() {
                     return Math.round(this.subtotal * (this.selectedDiscount / 100));
                 },
+                
                 get totalAll() {
                     return Math.max(0, this.subtotal - this.discountAmount + this.selectedParking);
                 },
@@ -964,7 +969,7 @@
                 },
 
                 // === raster logo: kecil + latar putih + handle alpha ===
-                async makeLogoRaster(url, maxWidth = 160) {
+                async makeLogoRaster(url, maxWidth = 140) {
                     const img = new Image();
                     img.crossOrigin = 'anonymous';
                     img.src = url;

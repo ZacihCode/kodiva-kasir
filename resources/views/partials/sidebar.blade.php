@@ -151,6 +151,15 @@
             <button class="p-2 rounded-lg hover:bg-gray-100" id="menuToggle">
                 <i class="fas fa-bars text-gray-600 text-lg"></i>
             </button>
+
+            <!-- Current Date and Time (hanya tampil inline di sm ke atas) -->
+            <div class="hidden sm:flex items-center text-sm text-gray-500 ml-3">
+                <i class="fas fa-calendar-alt mr-2"></i>
+                <span id="current-date"></span>
+                <span class="mx-2">•</span>
+                <i class="fas fa-clock mr-2"></i>
+                <span id="current-time"></span>
+            </div>
         </div>
 
         <!-- Right: User Profile Dropdown -->
@@ -194,8 +203,16 @@
             </div>
         </div>
     </div>
-</nav>
 
+    <!-- Current Date and Time (khusus mobile, tampil di bawah navbar) -->
+    <div class="sm:hidden px-4 pb-2 flex items-center text-sm text-gray-500">
+        <i class="fas fa-calendar-alt mr-2"></i>
+        <span id="current-dates"></span>
+        <span class="mx-2">•</span>
+        <i class="fas fa-clock mr-2"></i>
+        <span id="current-times"></span>
+    </div>
+</nav>
 
 <!-- Overlay untuk Mobile -->
 <div class="overlay" id="overlay"></div>
@@ -370,4 +387,28 @@
             }
         }
     });
+
+    // Update current date and time
+    function updateDateTime() {
+        const now = new Date();
+        const dateOptions = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        };
+        const timeOptions = {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        };
+
+        document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', dateOptions);
+        document.getElementById('current-time').textContent = now.toLocaleTimeString('id-ID', timeOptions);
+        document.getElementById('current-dates').textContent = now.toLocaleDateString('id-ID', dateOptions);
+        document.getElementById('current-times').textContent = now.toLocaleTimeString('id-ID', timeOptions);
+    }
+
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
 </script>

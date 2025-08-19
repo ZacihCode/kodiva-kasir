@@ -146,13 +146,6 @@
                     Dashboard Utama
                 </h2>
                 <p class="text-gray-600 mt-2 text-lg">Selamat datang di sistem kasir tiket renang</p>
-                <div class="flex items-center mt-2 text-sm text-gray-500">
-                    <i class="fas fa-calendar-alt mr-2"></i>
-                    <span id="current-date"></span>
-                    <span class="mx-2">•</span>
-                    <i class="fas fa-clock mr-2"></i>
-                    <span id="current-time"></span>
-                </div>
             </div>
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                 <div class="relative">
@@ -353,28 +346,6 @@
         <livewire:transaksi-manager />
     </div>
     <script>
-        // Update current date and time
-        function updateDateTime() {
-            const now = new Date();
-            const dateOptions = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            };
-            const timeOptions = {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            };
-
-            document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', dateOptions);
-            document.getElementById('current-time').textContent = now.toLocaleTimeString('id-ID', timeOptions);
-        }
-
-        updateDateTime();
-        setInterval(updateDateTime, 1000);
-
         // Enhanced Chart
         const ctx = document.getElementById('omsetChart').getContext('2d');
 
