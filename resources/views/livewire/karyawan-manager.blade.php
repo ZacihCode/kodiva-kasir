@@ -76,6 +76,86 @@
             </div>
         </div>
 
+        <!-- Mobile/Tablet Card Layout -->
+        <div class="lg:hidden p-4">
+            <!-- Tombol Delete untuk Mobile -->
+            @if(count($selectedKaryawan) > 0)
+            <div class="lg:hidden p-4">
+                <button wire:click="confirmBulkDelete"
+                    class="w-full bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow hover:bg-red-700 transition">
+                    <i class="fas fa-trash mr-1"></i> Hapus Terpilih ({{ count($selectedKaryawan) }})
+                </button>
+            </div>
+            @endif
+            <div class="lg:hidden px-4 mb-2">
+                <label class="inline-flex items-center space-x-2">
+                    <input type="checkbox" wire:model="selectAll" wire:click="toggleSelectAll" class="rounded border-gray-300">
+                    <span class="text-sm text-gray-700">Pilih Semua</span>
+                </label>
+            </div>
+            <div class="space-y-4">
+                @foreach ($users as $karyawan)
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Nama</div>
+                            <span class="text-sm font-medium text-blue-600">{{ $karyawan->name }}</span>
+                        </div>
+                        <input type="checkbox" wire:model="selectedKaryawan" wire:change="$refresh" :value="{{ $karyawan->id }}" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-3">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Email</div>
+                            <div class="flex items-center mt-1">
+                                <div class="flex flex-col">
+                                    <span class="text-sm text-gray-900">{{ $karyawan->email }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Telpon</div>
+                            <div class="text-sm font-medium text-gray-900 mt-1">{{ $karyawan->phone }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Alamat</div>
+                            <div class="text-sm font-medium text-gray-900 mt-1">{{ $karyawan->address }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">QR Code</div>
+                            <div class="text-sm font-medium text-gray-900 mt-1">
+                                @php
+                                $qrPath = "qrcodes/karyawan_{$karyawan->id}.png";
+                                @endphp
+                                @if (file_exists(public_path($qrPath)))
+                                <img src="{{ asset($qrPath) }}" alt="QR Code" class="w-16 h-16">
+                                @else
+                                <span class="text-sm text-gray-500 italic">Belum ada</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Tanggal Dibuat</div>
+                            <div class="text-sm font-medium text-gray-900 mt-1">{{ $karyawan->created_at->format('d M Y') }}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t border-gray-200">
+                        <div class="flex space-x-3">
+                            <button wire:click="edit('{{ $karyawan->id }}')" class="text-green-600 hover:text-green-900 text-sm flex items-center">
+                                <i class="fas fa-edit mr-1"></i><span>Edit</span>
+                            </button>
+                            <button wire:click="confirmDelete('{{ $karyawan->id }}')" class="text-red-600 hover:text-red-900 text-sm flex items-center">
+                                <i class="fas fa-trash mr-1"></i><span>Hapus</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            <div class="mt-4">
+                {{ $users->links() }}
+            </div>
+        </div>
+
         <!-- Modal -->
         @if($showModal)
         <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">

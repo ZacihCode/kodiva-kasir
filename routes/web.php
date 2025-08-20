@@ -124,6 +124,9 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-Route::get('/api/omset', [DashboardController::class, 'omsetData']);
-Route::get('/api/tiket', [DashboardController::class, 'getTiketData']);
-Route::get('/api/pengunjung', [DashboardController::class, 'getVisitorData']);
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard/ringkasan', [DashboardController::class, 'ringkasan'])->name('dashboard.ringkasan');
+    Route::get('/api/omset', [DashboardController::class, 'omsetData'])->name('api.omset');
+    Route::get('/api/tiket', [DashboardController::class, 'getTiketData'])->name('api.tiket');
+    Route::get('/api/pengunjung', [DashboardController::class, 'getVisitorData'])->name('api.pengunjung');
+});

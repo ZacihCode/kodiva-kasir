@@ -231,17 +231,20 @@
         <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-6 lg:p-8 mb-8 scale-in border border-white/20">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                    <select class="custom-select border-0 rounded-2xl px-4 py-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300 font-medium">
+                    <select id="periodeSelect" class="custom-select border-0 rounded-2xl px-4 py-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300 font-medium">
                         <option>📅 Hari Ini</option>
                         <option>📅 Minggu Ini</option>
                         <option>📅 Bulan Ini</option>
                         <option>📅 Tahun Ini</option>
                         <option>📅 Custom Range</option>
                     </select>
-                    <button class="filter-button text-white px-6 py-3 rounded-2xl font-medium shadow-lg">
-                        <i class="fas fa-chart-bar mr-2"></i>
-                        Generate Laporan
-                    </button>
+                    <div id="rangeHolder" class="hidden items-center gap-2">
+                        <input id="dateStart" type="date"
+                            class="border-0 rounded-2xl px-4 py-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300 font-medium">
+                        <span class="text-gray-500">—</span>
+                        <input id="dateEnd" type="date"
+                            class="border-0 rounded-2xl px-4 py-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300 font-medium">
+                    </div>
                 </div>
                 <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                     <button class="export-button text-white px-6 py-3 rounded-2xl font-medium shadow-lg">
@@ -262,7 +265,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <p class="text-gray-500 text-xs uppercase font-semibold">Total Pengunjung</p>
-                        <p class="text-2xl xl:text-3xl font-bold text-blue-600 mt-2">1,245</p>
+                        <p class="text-2xl xl:text-3xl font-bold text-blue-600 mt-2" id="totalPengunjung">—</p>
                     </div>
                     <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-users text-white text-lg"></i>
@@ -278,8 +281,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <p class="text-gray-500 text-xs uppercase font-semibold">Omset Total</p>
-                        <p class="text-2xl xl:text-3xl font-bold text-emerald-600 mt-2">18.675.000</p>
-                        <p class="text-sm text-gray-400">Rupiah</p>
+                        <p class="text-2xl xl:text-3xl font-bold text-emerald-600 mt-2" id="omsetTotal">—</p>
                     </div>
                     <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-money-bill-wave text-white text-lg"></i>
@@ -295,8 +297,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <p class="text-gray-500 text-xs uppercase font-semibold">Rata-rata per Hari</p>
-                        <p class="text-2xl xl:text-3xl font-bold text-purple-600 mt-2">2.669.000</p>
-                        <p class="text-sm text-gray-400">Rupiah</p>
+                        <p class="text-2xl xl:text-3xl font-bold text-purple-600 mt-2" id="rataRata">—</p>
                     </div>
                     <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-chart-line text-white text-lg"></i>
@@ -312,15 +313,14 @@
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <p class="text-gray-500 text-xs uppercase font-semibold">Laba Bersih</p>
-                        <p class="text-2xl xl:text-3xl font-bold text-orange-600 mt-2">14.140.000</p>
-                        <p class="text-sm text-gray-400">Rupiah (75.7%)</p>
+                        <p class="text-2xl xl:text-3xl font-bold text-orange-600 mt-2" id="labaBersih">—</p>
                     </div>
                     <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center">
                         <i class="fa-solid fa-chart-line text-white text-lg"></i>
                     </div>
                 </div>
                 <div class="flex items-center justify-between mt-4">
-                    <span class="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full"><i class="fas fa-arrow-up mr-1"></i>+18%</span>
+                    <span class="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full" id="labaPersen"><i class="fas fa-arrow-up mr-1"></i></span>
                     <span class="text-xs text-gray-500">vs periode lalu</span>
                 </div>
             </div>
@@ -516,6 +516,170 @@
             </div>
         </div>
     </div>
+
+    <script>
+        /* ===== Util: formatter Rupiah & tanggal ===== */
+        function formatRupiah(num) {
+            try {
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    maximumFractionDigits: 0
+                }).format(num || 0);
+            } catch (e) {
+                // fallback
+                return 'Rp ' + (num || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            }
+        }
+
+        // === Toggle tampilkan input tanggal saat Custom Range ===
+        function toggleRangeUI() {
+            const holder = document.getElementById('rangeHolder');
+            const selVal = document.getElementById('periodeSelect')?.value || '';
+            const isCustom = selVal.includes('Custom');
+            if (!holder) return;
+
+            if (isCustom) {
+                holder.classList.remove('hidden');
+
+                // Set default hari ini jika kosong supaya bisa langsung load
+                const today = new Date();
+                const toYMD = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                const start = document.getElementById('dateStart');
+                const end = document.getElementById('dateEnd');
+                if (start && !start.value) start.value = toYMD(today);
+                if (end && !end.value) end.value = start ? start.value : toYMD(today);
+            } else {
+                holder.classList.add('hidden');
+            }
+        }
+
+        // === Debounce kecil biar gak spam fetch ===
+        function debounce(fn, delay = 300) {
+            let t;
+            return (...args) => {
+                clearTimeout(t);
+                t = setTimeout(() => fn(...args), delay);
+            };
+        }
+
+        // === Hook perubahan periode & tanggal ===
+        function wireAutoReload() {
+            const periode = document.getElementById('periodeSelect');
+            const start = document.getElementById('dateStart');
+            const end = document.getElementById('dateEnd');
+
+            const reload = debounce(() => loadRingkasan(), 150);
+
+            periode?.addEventListener('change', () => {
+                toggleRangeUI();
+                reload();
+            });
+
+            // Saat custom range, ubah tanggal langsung reload
+            start?.addEventListener('change', reload);
+            end?.addEventListener('change', reload);
+
+            // Inisialisasi awal
+            toggleRangeUI();
+            loadRingkasan();
+        }
+
+        wireAutoReload();
+
+        function ymd(date) {
+            const d = new Date(date);
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${d.getFullYear()}-${m}-${day}`;
+        }
+
+        /* ===== Baca pilihan periode ===== */
+        function getSelectedFilter() {
+            const sel = document.getElementById('periodeSelect');
+            const val = sel ? sel.value : '📅 Hari Ini';
+
+            if (val.includes('Hari')) return {
+                type: 'harian'
+            };
+            if (val.includes('Minggu')) return {
+                type: 'mingguan'
+            };
+            if (val.includes('Bulan')) return {
+                type: 'bulanan'
+            };
+            if (val.includes('Tahun')) {
+                const now = new Date();
+                const start = `${now.getFullYear()}-01-01`;
+                const end = `${now.getFullYear()}-12-31`;
+                return {
+                    type: 'custom',
+                    start,
+                    end
+                };
+            }
+            if (val.includes('Custom')) {
+                const s = document.getElementById('dateStart')?.value || ymd(new Date());
+                const e = document.getElementById('dateEnd')?.value || s;
+                return {
+                    type: 'custom',
+                    start: s,
+                    end: e
+                };
+            }
+            return {
+                type: 'harian'
+            };
+        }
+
+        /* ===== Muat ringkasan ke 4 kartu ===== */
+        async function loadRingkasan() {
+            const {
+                type,
+                start,
+                end
+            } = getSelectedFilter();
+
+            let url = `/dashboard/ringkasan?filter=${type}`;
+            if (type === 'custom') {
+                url += `&start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`;
+            }
+
+            try {
+                const res = await fetch(url);
+                const json = await res.json();
+
+                // Isi kartu
+                document.getElementById('totalPengunjung').textContent = (json.total_pengunjung ?? 0).toLocaleString('id-ID');
+                document.getElementById('omsetTotal').textContent = formatRupiah(json.omset_total ?? 0);
+                document.getElementById('rataRata').textContent = formatRupiah(json.rata_rata_per_hari ?? 0);
+                document.getElementById('labaBersih').textContent = formatRupiah(json.laba_bersih ?? 0);
+
+                // Persen laba = laba/omset
+                const omset = Number(json.omset_total || 0);
+                const laba = Number(json.laba_bersih || 0);
+                const persen = omset > 0 ? ((laba / omset) * 100).toFixed(1) : 0;
+                const persenNode = document.getElementById('labaPersen');
+                if (persenNode) persenNode.textContent = `${persen}%`;
+
+                // Sinkronkan chart range “global” jika mau:
+                // - tiket & pengunjung chart kamu pakai filter harian/mingguan/bulanan.
+                // - Untuk "Tahun Ini" atau "Custom", kita default-kan ke 'bulanan' biar tren masuk akal.
+                if (type === 'harian' || type === 'mingguan' || type === 'bulanan') {
+                    loadTicketChart(type);
+                    loadVisitorChart(type);
+                } else {
+                    loadTicketChart('bulanan');
+                    loadVisitorChart('bulanan');
+                }
+            } catch (e) {
+                console.error('Gagal memuat ringkasan:', e);
+            }
+        }
+        // load awal
+        loadRingkasan();
+    </script>
+
 
     <script>
         function updateButtonStyle(prefix, filter) {

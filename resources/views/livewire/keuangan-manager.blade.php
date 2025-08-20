@@ -129,6 +129,73 @@
             </div>
         </div>
 
+        <!-- Mobile/Tablet Card Layout -->
+        <div class="lg:hidden p-4">
+            <!-- Tombol Delete untuk Mobile -->
+            @if(count($selectedKeuangan) > 0)
+            <div class="lg:hidden p-4">
+                <button wire:click="confirmBulkDelete"
+                    class="w-full bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow hover:bg-red-700 transition">
+                    <i class="fas fa-trash mr-1"></i> Hapus Terpilih ({{ count($selectedKeuangan) }})
+                </button>
+            </div>
+            @endif
+            <div class="lg:hidden px-4 mb-2">
+                <label class="inline-flex items-center space-x-2">
+                    <input type="checkbox" wire:model="selectAll" wire:click="toggleSelectAll" class="rounded border-gray-300">
+                    <span class="text-sm text-gray-700">Pilih Semua</span>
+                </label>
+            </div>
+            <div class="space-y-4">
+                @foreach ($keuangans as $data)
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Jenis</div>
+                            <span class="text-sm font-medium text-blue-600">{{ $data->jenis_keuangan }}</span>
+                        </div>
+                        <input type="checkbox" wire:model="selectedKeuangan" wire:change="$refresh" :value="{{ $data->id }}" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-3">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Kategori</div>
+                            <div class="flex items-center mt-1">
+                                <div class="flex flex-col">
+                                    <span class="text-sm text-gray-900">{{ $data->kategori }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Jumlah</div>
+                            <div class="text-sm font-medium text-gray-900 mt-1">Rp {{ number_format($data->jumlah, 0, ',', '.') }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Keterangan</div>
+                            <div class="text-sm font-medium text-gray-900 mt-1">{{ $data->keterangan }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Tanggal Dibuat</div>
+                            <div class="text-sm font-medium text-gray-900 mt-1">{{ $data->created_at->format('d M Y') }}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t border-gray-200">
+                        <div class="flex space-x-3">
+                            <button wire:click="edit('{{ $data->id }}')" class="text-green-600 hover:text-green-900 text-sm flex items-center">
+                                <i class="fas fa-edit mr-1"></i><span>Edit</span>
+                            </button>
+                            <button wire:click="confirmDelete('{{ $data->id }}')" class="text-red-600 hover:text-red-900 text-sm flex items-center">
+                                <i class="fas fa-trash mr-1"></i><span>Hapus</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            <div class="mt-4">
+                {{ $keuangans->links() }}
+            </div>
+        </div>
+
         <!-- Modal Form -->
         @if($showModal)
         <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">

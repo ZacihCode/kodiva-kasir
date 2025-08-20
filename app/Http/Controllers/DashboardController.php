@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Transaksi;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\JsonResponse;
 use App\Models\Absensi;
 use App\Models\User;
 use App\Models\SlipGaji;
 use App\Models\GajiSetting;
-use Illuminate\Http\JsonResponse;
+use App\Models\Transaksi;
 
 class DashboardController extends Controller
 {
@@ -301,6 +303,86 @@ class DashboardController extends Controller
         return response()->json([
             'labels' => $labels,
             'data' => $counts,
+        ]);
+    }
+
+    protected function resolveDateRange(Request $request): array
+    {
+        $filter = $request->query('filter', 'harian');
+        $today  = Carbon::today();
+
+        if ($filter === 'mingguan') {
+            $start = Carbon::now()->startOfWeek(); // Senin
+            $end   = Carbon::now()->endOfWeek();   // Minggu
+        } elseif ($filter === 'bulanan') {
+            $start = Carbon::now()->startOfMonth();
+            $end   = Carbon::now()->endOfMonth();
+        } elseif ($filter === 'custom') {
+            $start = Carbon::parse($request->query('start', $today->toDateString()))->startOfDay();
+            $end   = Carbon::parse($request->query('end', $today->toDateString()))->endOfDay();
+        } else { // harian
+            $start = $today->copy()->startOfDay();
+            $end   = $today->copy()->endOfDay();
+        }
+
+        $days = max(1, $start->diffInDays($end) + 1);
+
+        return [$start, $end, $days, $filter];
+    }
+
+    // ===== Endpoint ringkasan untuk kartu-kartu =====
+    public function ringkasan(Request $request): JsonResponse
+    {
+        [$start, $end, $days, $filter] = $this->resolveDateRange($request);
+
+        $trx = Transaksi::whereBetween('created_at', [$start, $end]);
+
+        // Total Pengunjung = jumlah transaksi
+        $totalPengunjung = (clone $trx)->count();
+
+        // Omset Total
+        $omsetTotal = (clone $trx)->sum('total');
+
+        // Rata-rata per hari (berdasarkan omset)
+        $rataRataPerHari = $omsetTotal / $days;
+
+        // Pengeluaran (opsional) dari tabel keuangans kalau ada
+        $totalPengeluaran = 0.0;
+        if (Schema::hasTable('keuangans')) {
+            $nominalCol = Schema::hasColumn('keuangans', 'nominal') ? 'nominal'
+                : (Schema::hasColumn('keuangans', 'jumlah')  ? 'jumlah'
+                    : (Schema::hasColumn('keuangans', 'total')   ? 'total' : null));
+
+            if ($nominalCol) {
+                $keu = DB::table('keuangans')->whereBetween('created_at', [$start, $end]);
+
+                if (Schema::hasColumn('keuangans', 'tipe')) {
+                    $keu = $keu->where('tipe', 'pengeluaran');
+                } elseif (Schema::hasColumn('keuangans', 'jenis')) {
+                    $keu = $keu->where('jenis', 'pengeluaran');
+                } elseif (Schema::hasColumn('keuangans', 'kategori')) {
+                    $keu = $keu->where('kategori', 'pengeluaran');
+                } else {
+                    // fallback: kalau tidak ada kolom tipe, ambil nilai negatif jika ada
+                    $keu = $keu->where($nominalCol, '<', 0);
+                }
+
+                $totalPengeluaran = abs((float) $keu->sum($nominalCol));
+            }
+        }
+
+        $labaBersih = $omsetTotal - $totalPengeluaran;
+
+        return response()->json([
+            'filter'             => $filter,
+            'start'              => $start->toDateString(),
+            'end'                => $end->toDateString(),
+            'hari'               => $days,
+            'total_pengunjung'   => (int) $totalPengunjung,
+            'omset_total'        => (float) $omsetTotal,
+            'rata_rata_per_hari' => round($rataRataPerHari, 2),
+            'total_pengeluaran'  => (float) $totalPengeluaran,
+            'laba_bersih'        => (float) $labaBersih,
         ]);
     }
 

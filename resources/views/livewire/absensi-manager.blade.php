@@ -68,9 +68,9 @@
                         </th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Keterangan</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
                     </tr>
                 </thead>
@@ -82,13 +82,13 @@
                         </td>
                         <td class="px-6 py-4">{{ $absen->user->name }}</td>
                         <td class="px-6 py-4">{{ $absen->user->email }}</td>
-                        <td class="px-6 py-4">{{ \Carbon\Carbon::parse($absen->tanggal)->format('d M Y H:i:s') }}</td>
                         <td class="px-6 py-4">
                             <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $absen->status === 'hadir' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                                 {{ ucfirst($absen->status) }}
                             </span>
                         </td>
                         <td class="px-6 py-4">{{ $absen->keterangan }}</td>
+                        <td class="px-6 py-4">{{ \Carbon\Carbon::parse($absen->tanggal)->format('d M Y H:i:s') }}</td>
                         <td class="px-6 py-4">
                             <button wire:click="edit({{ $absen->id }})" class="text-green-600 hover:text-green-900 p-1"><i class="fas fa-edit"></i></button>
                             <button wire:click="confirmDelete({{ $absen->id }})" class="text-red-600 hover:text-red-900 p-1"><i class="fas fa-trash"></i></button>
@@ -98,6 +98,73 @@
                 </tbody>
             </table>
 
+            <div class="mt-4">
+                {{ $absensis->links() }}
+            </div>
+        </div>
+
+        <!-- Mobile/Tablet Card Layout -->
+        <div class="lg:hidden p-4">
+            <!-- Tombol Delete untuk Mobile -->
+            @if(count($selectedAbsensi) > 0)
+            <div class="lg:hidden p-4">
+                <button wire:click="confirmBulkDelete"
+                    class="w-full bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow hover:bg-red-700 transition">
+                    <i class="fas fa-trash mr-1"></i> Hapus Terpilih ({{ count($selectedAbsensi) }})
+                </button>
+            </div>
+            @endif
+            <div class="lg:hidden px-4 mb-2">
+                <label class="inline-flex items-center space-x-2">
+                    <input type="checkbox" wire:model="selectAll" wire:click="toggleSelectAll" class="rounded border-gray-300">
+                    <span class="text-sm text-gray-700">Pilih Semua</span>
+                </label>
+            </div>
+            <div class="space-y-4">
+                @foreach ($absensis as $absen)
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Nama</div>
+                            <span class="text-sm font-medium text-blue-600">{{ $absen->user->name }}</span>
+                        </div>
+                        <input type="checkbox" wire:model="selectedAbsensi" wire:change="$refresh" :value="{{ $absen->id }}" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-3">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Email</div>
+                            <div class="flex items-center mt-1">
+                                <div class="flex flex-col">
+                                    <span class="text-sm text-gray-900">{{ $absen->user->email }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Status</div>
+                            <div class="text-sm font-medium text-gray-900 mt-1">{{ $absen->status }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Keterangan</div>
+                            <div class="text-sm font-medium text-gray-900 mt-1">{{ $absen->keterangan }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Tanggal Dibuat</div>
+                            <div class="text-sm font-medium text-gray-900 mt-1">{{ $absen->created_at->format('d M Y') }}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t border-gray-200">
+                        <div class="flex space-x-3">
+                            <button wire:click="edit('{{ $absen->id }}')" class="text-green-600 hover:text-green-900 text-sm flex items-center">
+                                <i class="fas fa-edit mr-1"></i><span>Edit</span>
+                            </button>
+                            <button wire:click="confirmDelete('{{ $absen->id }}')" class="text-red-600 hover:text-red-900 text-sm flex items-center">
+                                <i class="fas fa-trash mr-1"></i><span>Hapus</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
             <div class="mt-4">
                 {{ $absensis->links() }}
             </div>

@@ -90,6 +90,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Potongan</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
                         </tr>
                     </thead>
@@ -102,6 +103,7 @@
                             <td class="px-6 py-4">Rp{{ number_format($slip->tunjangan, 0, ',', '.') }}</td>
                             <td class="px-6 py-4">Rp{{ number_format($slip->potongan, 0, ',', '.') }}</td>
                             <td class="px-6 py-4">Rp{{ number_format($slip->total_gaji, 0, ',', '.') }}</td>
+                            <td class="px-6 py-4">{{ \Carbon\Carbon::parse($slip->tanggal)->format('d M Y H:i:s') }}</td>
                             <td class="px-6 py-4">
                                 <span class="text-sm {{ $slip->status === 'Terkirim' ? 'text-green-600' : 'text-yellow-600' }}">
                                     {{ $slip->status }}
@@ -117,6 +119,81 @@
                 </table>
 
                 <div class="mt-4">{{ $slipGajis->links() }}</div>
+            </div>
+
+            <!-- Mobile/Tablet Card Layout -->
+            <div class="lg:hidden p-4">
+                <!-- Tombol Delete untuk Mobile -->
+                @if(count($selectedSlip) > 0)
+                <div class="lg:hidden p-4">
+                    <button wire:click="confirmBulkDelete"
+                        class="w-full bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow hover:bg-red-700 transition">
+                        <i class="fas fa-trash mr-1"></i> Hapus Terpilih ({{ count($selectedSlip) }})
+                    </button>
+                </div>
+                @endif
+                <div class="lg:hidden px-4 mb-2">
+                    <label class="inline-flex items-center space-x-2">
+                        <input type="checkbox" wire:model="selectAll" wire:click="toggleSelectAll" class="rounded border-gray-300">
+                        <span class="text-sm text-gray-700">Pilih Semua</span>
+                    </label>
+                </div>
+                <div class="space-y-4">
+                    @foreach ($slipGajis as $slip)
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <div class="text-xs text-gray-500 uppercase tracking-wider">Nama</div>
+                                <span class="text-sm font-medium text-blue-600">{{ $slip->nama_karyawan }}</span>
+                            </div>
+                            <input type="checkbox" wire:model="selectedSlip" wire:change="$refresh" :value="{{ $slip->id }}" />
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-3">
+                            <div>
+                                <div class="text-xs text-gray-500 uppercase tracking-wider">Gaji Pokok</div>
+                                <div class="flex items-center mt-1">
+                                    <div class="flex flex-col">
+                                        <span class="text-sm text-gray-900">Rp{{ number_format($slip->gaji_pokok, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 uppercase tracking-wider">Tunjangan</div>
+                                <div class="text-sm font-medium text-gray-900 mt-1">Rp{{ number_format($slip->tunjangan, 0, ',', '.') }}</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 uppercase tracking-wider">Potongan</div>
+                                <div class="text-sm font-medium text-gray-900 mt-1">Rp{{ number_format($slip->potongan, 0, ',', '.') }}</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 uppercase tracking-wider">Total</div>
+                                <div class="text-sm font-medium text-gray-900 mt-1">Rp{{ number_format($slip->total_gaji, 0, ',', '.') }}</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 uppercase tracking-wider">Status</div>
+                                <div class="text-sm font-medium text-gray-900 mt-1">{{ $slip->status }}</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 uppercase tracking-wider">Tanggal</div>
+                                <div class="text-sm font-medium text-gray-900 mt-1">{{ \Carbon\Carbon::parse($slip->tanggal)->format('d M Y H:i:s') }}</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center pt-3 border-t border-gray-200">
+                            <div class="flex space-x-3">
+                                <button wire:click="edit('{{ $slip->id }}')" class="text-green-600 hover:text-green-900 text-sm flex items-center">
+                                    <i class="fas fa-edit mr-1"></i><span>Edit</span>
+                                </button>
+                                <button wire:click="confirmDelete('{{ $slip->id }}')" class="text-red-600 hover:text-red-900 text-sm flex items-center">
+                                    <i class="fas fa-trash mr-1"></i><span>Hapus</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                <div class="mt-4">
+                    {{ $slipGajis->links() }}
+                </div>
             </div>
 
             <!-- Modal Tambah/Edit -->
