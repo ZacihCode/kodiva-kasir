@@ -89,8 +89,8 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tunjangan</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Potongan</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nomor WA</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
                         </tr>
                     </thead>
@@ -103,13 +103,23 @@
                             <td class="px-6 py-4">Rp{{ number_format($slip->tunjangan, 0, ',', '.') }}</td>
                             <td class="px-6 py-4">Rp{{ number_format($slip->potongan, 0, ',', '.') }}</td>
                             <td class="px-6 py-4">Rp{{ number_format($slip->total_gaji, 0, ',', '.') }}</td>
-                            <td class="px-6 py-4">{{ \Carbon\Carbon::parse($slip->tanggal)->format('d M Y H:i:s') }}</td>
+                            <td class="px-6 py-4">{{ $slip->no_wa }}</td>
                             <td class="px-6 py-4">
                                 <span class="text-sm {{ $slip->status === 'Terkirim' ? 'text-green-600' : 'text-yellow-600' }}">
                                     {{ $slip->status }}
                                 </span>
                             </td>
                             <td class="px-6 py-4">
+                                @if (strtolower($slip->status) === 'terkirim')
+                                <button class="text-gray-400 cursor-not-allowed mr-3" title="Sudah terkirim" disabled>
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                                @else
+                                <button wire:click="sendSlip({{ $slip->id }})" class="text-blue-600 hover:text-blue-900 mr-3" title="Kirim via WhatsApp">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                                @endif
+
                                 <button wire:click="edit({{ $slip->id }})" class="text-green-600 hover:text-green-900 mr-2"><i class="fas fa-edit"></i></button>
                                 <button wire:click="confirmDelete({{ $slip->id }})" class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
                             </td>
@@ -170,8 +180,12 @@
                                 <div class="text-sm font-medium text-gray-900 mt-1">Rp{{ number_format($slip->total_gaji, 0, ',', '.') }}</div>
                             </div>
                             <div>
+                                <div class="text-xs text-gray-500 uppercase tracking-wider">Nomor Wa</div>
+                                <div class="text-sm font-medium text-gray-900 mt-1">{{ $slip->no_wa }}</div>
+                            </div>
+                            <div>
                                 <div class="text-xs text-gray-500 uppercase tracking-wider">Status</div>
-                                <div class="text-sm font-medium text-gray-900 mt-1">{{ $slip->status }}</div>
+                                <div class="text-sm font-medium text-gray-900 mt-1 {{ $slip->status === 'Terkirim' ? 'text-green-600' : 'text-yellow-600' }}">{{ $slip->status }}</div>
                             </div>
                             <div>
                                 <div class="text-xs text-gray-500 uppercase tracking-wider">Tanggal</div>
@@ -180,6 +194,16 @@
                         </div>
                         <div class="flex justify-between items-center pt-3 border-t border-gray-200">
                             <div class="flex space-x-3">
+                                @if (strtolower($slip->status) === 'terkirim')
+                                <button class="text-gray-400 cursor-not-allowed text-sm flex items-center" disabled title="Sudah terkirim">
+                                    <i class="fas fa-paper-plane mr-1"></i><span>Kirim</span>
+                                </button>
+                                @else
+                                <button wire:click="sendSlip('{{ $slip->id }}')" class="text-blue-600 hover:text-blue-900 text-sm flex items-center">
+                                    <i class="fas fa-paper-plane mr-1"></i><span>Kirim</span>
+                                </button>
+                                @endif
+
                                 <button wire:click="edit('{{ $slip->id }}')" class="text-green-600 hover:text-green-900 text-sm flex items-center">
                                     <i class="fas fa-edit mr-1"></i><span>Edit</span>
                                 </button>
