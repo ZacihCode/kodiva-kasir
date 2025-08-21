@@ -75,6 +75,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/absensi/submit', [DashboardController::class, 'submitAbsensi'])->name('admin.absensi.submit');
     Route::get('/keuangan', [DashboardController::class, 'keuangan'])->name('admin.keuangan');
     Route::get('/setting', [DashboardController::class, 'setting'])->name('admin.setting');
+    Route::get('/broadcast', [DashboardController::class, 'broadcastWhatsApp'])->name('admin.broadcast');
 });
 
 // Kasir Group

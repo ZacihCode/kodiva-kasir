@@ -229,6 +229,17 @@
                 <span class="font-medium">Dashboard</span>
             </a>
 
+            @auth
+            @if(auth()->user()->role !== 'kasir' && auth()->user()->role !== 'user')
+            <a href="{{ route($prefix . 'broadcast') }}"
+                class="nav-item flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
+                {{ request()->routeIs($prefix . 'broadcast') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
+                <i class="fa-solid fa-bullhorn mr-3 text-lg"></i>
+                <span class="font-medium">Broadcast</span>
+            </a>
+            @endif
+            @endauth
+
             <a href="{{ route($prefix . 'kasir') }}"
                 class="nav-item flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
                 {{ request()->routeIs($prefix . 'kasir') ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">

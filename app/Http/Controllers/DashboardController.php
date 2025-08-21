@@ -80,7 +80,8 @@ class DashboardController extends Controller
 
         // Flash hanya sekali saat login
         if (!session()->has('success')) {
-            session()->flash('success', $user->role === 'admin' ? 'Login Admin Berhasil!' : 'Login Kasir Berhasil!');
+            return redirect()->route('admin.dashboard')
+                ->with('success', $user->role === 'admin' ? 'Login Admin Berhasil!' : 'Login Kasir Berhasil!');
         }
 
         if ($user->role === 'admin') {
@@ -439,5 +440,15 @@ class DashboardController extends Controller
     public function setting()
     {
         return view('admin.setting.index');
+    }
+
+    public function broadcastWhatsApp()
+    {
+        // Pastikan Livewire sudah terpasang
+        if (!class_exists('App\\Livewire\\BroadcastManager')) {
+            abort(404, 'Livewire Broadcast Manager not found.');
+        }
+
+        return view('admin.broadcast.index');
     }
 }
