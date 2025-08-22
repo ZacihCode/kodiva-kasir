@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Transaksi;
+use App\Models\Diskon;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Http;
@@ -18,9 +19,10 @@ class BroadcastManager extends Component
     public $selected = [];    // berisi customer_phone
     public $selectAllPage = false;
 
-    public $message = "Halo {nama}, ada promo terbaru dari Wisata Sendang Plesungan 🎉";
+    public $message = "Halo {nama}, ada promo terbaru dari Wisata Sendang Plesungan";
     public $progress = 0;
     public $sending = false;
+    public $diskonId = null;
 
     // Jika kolom pencarian berubah, reset ke halaman 1
     public function updatingSearch()
@@ -118,6 +120,16 @@ class BroadcastManager extends Component
             return;
         }
 
+        $diskonText = '';
+        if ($this->diskonId) {
+            $diskon = Diskon::find($this->diskonId);
+            if ($diskon) {
+                $diskonText = "\n\nKODE DISKON: *{$diskon->jenis_diskon}* 
+                \nPERSENTASE: *{$diskon->persentase}%*
+                \n{$diskon->deskripsi}";
+            }
+        }
+
         $token = $this->fonnteToken();
         if (!$token) {
             $this->dispatch('toast', type: 'error', message: 'FONNTE_DEVICE_TOKEN belum di-set di .env / config.');
@@ -141,7 +153,7 @@ class BroadcastManager extends Component
                 continue;
             }
 
-            $msg = $this->personalize($this->message, $name);
+            $msg = $this->personalize($this->message, $name) . $diskonText;
 
             try {
                 $res = Http::asForm()
@@ -177,6 +189,7 @@ class BroadcastManager extends Component
             'contacts'      => $contacts,
             'totalContacts' => $totalContacts,
             'selectedCount' => count($this->selected),
+            'diskons'       => Diskon::all(),
         ]);
     }
 }
