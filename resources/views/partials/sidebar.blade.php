@@ -122,12 +122,13 @@
     @media (max-width: 768px) {
         .sidebar {
             transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             width: 280px !important;
         }
 
         .sidebar.open {
             transform: translateX(0);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
 
         .overlay {
