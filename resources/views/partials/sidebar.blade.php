@@ -96,8 +96,9 @@
 
     /* Sidebar Scrollbar */
     .sidebar-scroll {
-        scrollbar-width: thin;
-        scrollbar-color: #cbd5e1 transparent;
+        height: calc(100vh - 96px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .sidebar-scroll::-webkit-scrollbar {
@@ -315,9 +316,9 @@
 <div class="overlay" id="overlay"></div>
 
 <!-- Sidebar - IMPROVED WITH SECTIONS -->
-<div class="sidebar fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-2xl lg:w-72 h-screen overflow-hidden" id="sidebar">
+<div class="sidebar fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-2xl lg:w-72 h-screen" id="sidebar">
     <!-- Navigation -->
-    <nav class="mt-24 px-4 pb-4 h-full overflow-hidden">
+    <nav class="mt-24 px-4 pb-4 h-full">
         <div class="sidebar-scroll h-full overflow-y-auto">
 
             <!-- FITUR UTAMA Section -->
