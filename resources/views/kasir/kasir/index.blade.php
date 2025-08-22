@@ -1260,7 +1260,6 @@
                                         namePrefix: 'PT-'
                                     }
                                 ],
-                                acceptAllDevices: true,
                                 optionalServices: this.BT_SERVICE_HINTS
                             });
                         }
