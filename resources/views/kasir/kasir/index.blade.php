@@ -1242,26 +1242,35 @@
 
                         if (!dev) {
                             if (!interactive) throw new Error('Belum ada printer yang diizinkan untuk origin ini.');
-                            // pakai filter agar permission lebih stabil
-                            dev = await navigator.bluetooth.requestDevice({
-                                filters: [{
-                                        namePrefix: 'RPP'
-                                    },
-                                    {
-                                        namePrefix: 'MPT'
-                                    },
-                                    {
-                                        namePrefix: 'POS'
-                                    },
-                                    {
-                                        namePrefix: 'QR'
-                                    },
-                                    {
-                                        namePrefix: 'PT-'
-                                    }
-                                ],
-                                optionalServices: this.BT_SERVICE_HINTS
-                            });
+                            try {
+                                // coba pakai filter dulu
+                                dev = await navigator.bluetooth.requestDevice({
+                                    filters: [{
+                                            namePrefix: 'RPP'
+                                        },
+                                        {
+                                            namePrefix: 'MPT'
+                                        },
+                                        {
+                                            namePrefix: 'POS'
+                                        },
+                                        {
+                                            namePrefix: 'QR'
+                                        },
+                                        {
+                                            namePrefix: 'PT-'
+                                        }
+                                    ],
+                                    optionalServices: this.BT_SERVICE_HINTS
+                                });
+                            } catch (err) {
+                                console.warn("Filter gagal, fallback ke acceptAllDevices:", err);
+                                // fallback: tampilkan semua device biar user bisa pilih manual
+                                dev = await navigator.bluetooth.requestDevice({
+                                    acceptAllDevices: true,
+                                    optionalServices: this.BT_SERVICE_HINTS
+                                });
+                            }
                         }
 
                         this.btDevice = dev;
