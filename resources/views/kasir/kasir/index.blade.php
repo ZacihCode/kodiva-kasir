@@ -915,7 +915,7 @@
                 get discountAmount() {
                     return Math.round(this.subtotal * (this.selectedDiscount / 100));
                 },
-                
+
                 get totalAll() {
                     return Math.max(0, this.subtotal - this.discountAmount + this.selectedParking);
                 },
@@ -1260,6 +1260,7 @@
                                         namePrefix: 'PT-'
                                     }
                                 ],
+                                acceptAllDevices: true,
                                 optionalServices: this.BT_SERVICE_HINTS
                             });
                         }
