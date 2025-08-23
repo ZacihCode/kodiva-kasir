@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wisata Sendang Plesungan - Kasir</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -203,6 +202,17 @@
                 </div>
                 <p class="text-gray-600 text-lg">Sistem kasir tiket renang modern dan efisien</p>
             </div>
+            <div class="flex items-center gap-2">
+                <span x-text="btStatus"
+                    class="text-xs px-2 py-1 rounded"
+                    :class="btStatus==='Connected' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'">
+                </span>
+                <span class="text-xs text-slate-500" x-text="btName ? ('(' + btName + ')') : ''"></span>
+                <button @click="quickReconnect()"
+                    class="text-xs px-3 py-1 rounded bg-slate-800 text-white hover:bg-slate-700">
+                    Reconnect
+                </button>
+            </div>
         </div>
 
         <!-- Main Cashier Interface -->
@@ -297,31 +307,104 @@
                         </div>
                     </div>
 
+                    <!-- Customer Identity -->
+                    <div class="bg-gradient-to-r from-sky-50 to-cyan-50 p-6 rounded-2xl border border-sky-100">
+                        <label class="flex items-center text-lg font-semibold text-gray-800 mb-3">
+                            <i class="fas fa-user text-sky-500 mr-2"></i>
+                            Identitas Pengunjung
+                        </label>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">Nama</label>
+                                <input type="text"
+                                    x-model.trim="customerName"
+                                    class="w-full p-3 border-0 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all duration-200"
+                                    placeholder="Nama lengkap">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm text-gray-700 mb-1">No. HP</label>
+                                <input type="tel"
+                                    x-model.trim="customerPhone"
+                                    inputmode="tel" pattern="[0-9+ ]*"
+                                    class="w-full p-3 border-0 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all duration-200"
+                                    placeholder="08xxxxxxxxxx">
+                            </div>
+                        </div>
+
+                        <p class="mt-2 text-xs text-gray-500">Opsional. Membantu identifikasi pengunjung saat diperlukan.</p>
+                    </div>
+
                     <!-- Payment Method -->
                     <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-100">
                         <label class="flex items-center text-lg font-semibold text-gray-800 mb-3">
                             <i class="fas fa-credit-card text-green-500 mr-2"></i>
                             Metode Pembayaran
                         </label>
-                        <div class="grid grid-cols-2 gap-4">
-                            <label class="flex items-center p-4 bg-white rounded-xl border-2 cursor-pointer transition-all duration-200"
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+                            <label
+                                class="group w-full rounded-xl border-2 bg-white cursor-pointer transition-all duration-200 p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 min-h-[64px]"
                                 :class="paymentMethod === 'cash' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'">
-                                <input type="radio" x-model="paymentMethod" value="cash" class="sr-only">
-                                <i class="fas fa-money-bill-wave text-green-500 text-2xl mr-3"></i>
-                                <div>
-                                    <div class="font-semibold text-gray-800">Tunai</div>
-                                    <div class="text-sm text-gray-600">Bayar dengan uang cash</div>
+                                <input type="radio" x-model="paymentMethod" value="cash" class="sr-only" />
+                                <i class="fas fa-money-bill-wave text-green-500 text-xl sm:text-2xl"></i>
+                                <div class="font-semibold text-gray-800 text-sm sm:text-base">Tunai</div>
+                                <div class="leading-tight">
+                                    <div class="text-xs sm:text-sm text-gray-600">Bayar dengan uang cash</div>
                                 </div>
                             </label>
-                            <label class="flex items-center p-4 bg-white rounded-xl border-2 cursor-pointer transition-all duration-200"
+
+                            <label
+                                class="group w-full rounded-xl border-2 bg-white cursor-pointer transition-all duration-200 p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 min-h-[64px]"
                                 :class="paymentMethod === 'qris' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'">
-                                <input type="radio" x-model="paymentMethod" value="qris" class="sr-only">
-                                <i class="fas fa-qrcode text-green-500 text-2xl mr-3"></i>
-                                <div>
-                                    <div class="font-semibold text-gray-800">QRIS</div>
-                                    <div class="text-sm text-gray-600">Scan QR Code</div>
+                                <input type="radio" x-model="paymentMethod" value="qris" class="sr-only" />
+                                <i class="fas fa-qrcode text-green-500 text-xl sm:text-2xl"></i>
+                                <div class="font-semibold text-gray-800 text-sm sm:text-base">QRIS</div>
+                                <div class="leading-tight">
+                                    <div class="text-xs sm:text-sm text-gray-600">Scan QR Code</div>
                                 </div>
                             </label>
+                        </div>
+                    </div>
+
+                    <!-- Cash Amount -->
+                    <div class="mt-4 rounded-2xl bg-white/70 p-4 border border-green-100"
+                        x-show="paymentMethod === 'cash'"
+                        x-transition>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nominal Bayar</label>
+
+                        <div class="flex items-center gap-3">
+                            <div class="relative flex-1">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
+                                <input type="number"
+                                    min="0" step="1000" inputmode="numeric"
+                                    x-model.number="cashGiven"
+                                    class="w-full pl-10 p-3 border-0 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
+                                    placeholder="0" />
+                            </div>
+                            <!-- Tombol cepat: set ke total -->
+                            <button type="button"
+                                class="px-3 py-2 rounded-lg text-sm bg-green-100 text-green-700 hover:bg-green-200"
+                                @click="cashGiven = totalAll">
+                                Pas
+                            </button>
+                        </div>
+
+                        <div class="mt-3 text-sm space-y-1">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total</span>
+                                <span class="font-semibold" x-text="'Rp ' + totalAll.toLocaleString('id-ID')"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Nominal Bayar</span>
+                                <span class="font-semibold" x-text="'Rp ' + (cashGiven || 0).toLocaleString('id-ID')"></span>
+                            </div>
+                            <div class="flex justify-between"
+                                :class="(cashGiven - totalAll) >= 0 ? 'text-emerald-600' : 'text-red-600'">
+                                <span x-text="(cashGiven - totalAll) >= 0 ? 'Kembalian' : 'Kurang'"></span>
+                                <span class="font-bold"
+                                    x-text="'Rp ' + Math.abs((cashGiven - totalAll) || 0).toLocaleString('id-ID')"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -410,7 +493,7 @@
                         class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
                         :class="{ 'pulse-border': cart.length > 0 }"
                         :disabled="cart.length === 0"
-                        @click="paymentMethod === 'qris' ? showQrisModal = true : (saveTransaction(), showReceipt = true)">
+                        @click="paymentMethod === 'qris' ? (showQrisModal = true) : (showReceipt = true)">
                         <i class="fas fa-credit-card mr-2"></i>
                         Proses Pembayaran
                     </button>
@@ -463,8 +546,9 @@
                     <i class="fas fa-times mr-2"></i>
                     Batal
                 </button>
-                <button class="flex-1 bg-white text-purple-600 py-3 rounded-xl font-bold hover:bg-gray-100 transition-all duration-200"
-                    @click="showQrisModal = false; saveTransaction(); showReceipt = true">
+                <button
+                    class="flex-1 bg-white text-purple-600 py-3 rounded-xl font-bold hover:bg-gray-100 transition-all duration-200"
+                    @click="showQrisModal = false; showReceipt = true">
                     <i class="fas fa-check mr-2"></i>
                     Sudah Bayar
                 </button>
@@ -561,7 +645,7 @@
     @endsection
 
     <script>
-        const COLS = 32
+        const COLS = 42
 
         function cashierSystem() {
             return {
@@ -575,6 +659,112 @@
                 parkingOptions: [],
                 ticketTypes: [],
                 platNomor: '',
+                cashGiven: 0,
+                userPhone: '',
+                userAddress: '',
+                lastTrxId: null,
+                customerName: '',
+                customerPhone: '',
+                logoBytes: null,
+
+                btDevice: null,
+                btChar: null,
+                btStatus: 'Disconnected',
+                btName: '',
+                BT_SERVICE_HINTS: [
+                    0xff00, 0xfff0, 0xffe0,
+                    '0000ff00-0000-1000-8000-00805f9b34fb',
+                    '0000fff0-0000-1000-8000-00805f9b34fb',
+                    '0000ffe0-0000-1000-8000-00805f9b34fb'
+                ],
+
+                wait(ms) {
+                    return new Promise(r => setTimeout(r, ms));
+                },
+                updateBtStatus() {
+                    const connected = !!(this.btChar && this.btDevice?.gatt?.connected);
+                    this.btStatus = connected ? 'Connected' : 'Disconnected';
+                    this.btName = this.btDevice?.name || (localStorage.getItem('printer_name') || '');
+                },
+
+                async tryConnect(dev, tries = 3, baseDelay = 500) {
+                    for (let i = 0; i < tries; i++) {
+                        try {
+                            if (dev.gatt.connected) return;
+                            // kadang perlu disconnect dulu biar bersih
+                            try {
+                                dev.gatt.disconnect();
+                            } catch (_) {}
+                            await this.wait(50);
+                            await dev.gatt.connect();
+                            return; // sukses
+                        } catch (e) {
+                            if (e.name !== 'NetworkError' && e.name !== 'NotFoundError') throw e;
+                            // backoff
+                            await this.wait(baseDelay * (i + 1));
+                        }
+                    }
+                    throw new Error('Gagal connect setelah beberapa percobaan (NetworkError).');
+                },
+
+                async ensureAdvertising(dev, timeout = 2000) {
+                    if (!dev.watchAdvertisements) return; // nggak semua platform support
+                    try {
+                        await dev.watchAdvertisements();
+                    } catch (_) {}
+                    await Promise.race([
+                        new Promise(res => dev.addEventListener('advertisementreceived', () => res(), {
+                            once: true
+                        })),
+                        this.wait(timeout)
+                    ]);
+                },
+
+                // === helpers kolom 3 ===
+                padLeft(s, w) {
+                    s = String(s);
+                    return s.length >= w ? s.slice(-w) : ' '.repeat(w - s.length) + s;
+                },
+
+                padRight(s, w) {
+                    s = String(s);
+                    return s.length >= w ? s.slice(0, w) : s + ' '.repeat(w - s.length);
+                },
+
+                wrapN(str, width) {
+                    const words = String(str).split(/\s+/);
+                    const lines = [];
+                    let line = '';
+                    for (const w of words) {
+                        if ((line + (line ? ' ' : '') + w).length <= width) line += (line ? ' ' : '') + w;
+                        else {
+                            if (line) lines.push(line);
+                            if (w.length > width) {
+                                let s = w;
+                                while (s.length > width) {
+                                    lines.push(s.slice(0, width));
+                                    s = s.slice(width);
+                                }
+                                line = s;
+                            } else line = w;
+                        }
+                    }
+                    if (line) lines.push(line);
+                    return lines;
+                },
+
+                rowItem(name, qty, priceStr) {
+                    const nameW = 26,
+                        qtyW = 4,
+                        priceW = COLS - nameW - qtyW - 1;
+                    const nameLines = this.wrapN(name, nameW);
+                    let out = '';
+                    nameLines.forEach((ln, i) => {
+                        if (i === 0) out += this.padRight(ln, nameW) + ' ' + this.padLeft(qty, qtyW) + this.padLeft(priceStr, priceW) + '\r\n';
+                        else out += this.padRight(ln, nameW) + '\r\n';
+                    });
+                    return out;
+                },
 
                 async init() {
                     try {
@@ -614,8 +804,33 @@
                         }));
                     } catch (error) {
                         console.error("Gagal fetch data:", error);
-                        // Show user-friendly error message
                         showToast('error', 'Gagal memuat data. Silakan refresh halaman.');
+                    }
+
+                    try {
+                        this.logoBytes = await this.makeLogoRaster('/assets/logo.png', 140);
+                    } catch (e) {
+                        console.warn('Preload logo gagal:', e);
+                    }
+
+                    try {
+                        const userRes = await fetch('/api/user', {
+                            credentials: 'include'
+                        });
+                        if (userRes.ok) {
+                            const me = await userRes.json();
+                            this.userPhone = me.phone || me.telepon || me.no_hp || '';
+                            this.userAddress = me.address || me.alamat || '';
+                        }
+                    } catch (_) {}
+
+                    // auto-reconnect (tanpa dialog) saat halaman dibuka
+                    if ('bluetooth' in navigator) {
+                        requestAnimationFrame(async () => {
+                            await this.ensurePrinter(false).catch(() => {});
+                            this.updateBtStatus(); // <— TAMBAHKAN
+                            this.initHooks();
+                        });
                     }
                 },
 
@@ -624,7 +839,6 @@
                         showToast('warning', 'Keranjang masih kosong!');
                         return;
                     }
-
                     try {
                         const res = await fetch(`/api/transaksi`, {
                             method: 'POST',
@@ -642,6 +856,8 @@
                                 parkir: this.selectedParking,
                                 total: this.totalAll,
                                 plat_nomor: this.platNomor,
+                                customer_name: this.customerName,
+                                customer_phone: this.customerPhone,
                                 detail: this.cart.map(item => ({
                                     name: item.ticket.name,
                                     quantity: item.quantity,
@@ -653,36 +869,34 @@
 
                         const result = await res.json();
                         if (res.ok) {
-                            console.log("Transaksi berhasil:", result);
+                            const newId = result?.id || result?.data?.id;
+                            this.lastTrxId = newId ?? null;
                             showToast('success', 'Transaksi berhasil disimpan!');
+                            return newId; // <- penting, kembalikan id
                         } else {
                             throw new Error(result.message || 'Gagal menyimpan transaksi');
                         }
                     } catch (error) {
                         console.error("Gagal simpan transaksi:", error);
-                        showToast('error', 'Gagal menyimpan transaksi. Silakan coba lagi.');
+                        throw error;
                     }
                 },
 
                 addToCart(ticket) {
                     const index = this.cart.findIndex(i => i.ticket.id === ticket.id);
-                    if (index !== -1) {
-                        this.cart[index].quantity++;
-                    } else {
-                        this.cart.push({
-                            ticket,
-                            quantity: 1
-                        });
-                    }
+                    if (index !== -1) this.cart[index].quantity++;
+                    else this.cart.push({
+                        ticket,
+                        quantity: 1
+                    });
                     showToast('success', `${ticket.name} ditambahkan ke keranjang`);
                 },
 
                 decreaseFromCart(ticket) {
                     const index = this.cart.findIndex(i => i.ticket.id === ticket.id);
                     if (index !== -1) {
-                        if (this.cart[index].quantity > 1) {
-                            this.cart[index].quantity--;
-                        } else {
+                        if (this.cart[index].quantity > 1) this.cart[index].quantity--;
+                        else {
                             this.cart.splice(index, 1);
                             showToast('info', `${ticket.name} dihapus dari keranjang`);
                         }
@@ -695,7 +909,7 @@
                 },
 
                 get subtotal() {
-                    return this.cart.reduce((sum, item) => sum + (item.ticket.price * item.quantity), 0);
+                    return this.cart.reduce((s, it) => s + (it.ticket.price * it.quantity), 0);
                 },
 
                 get discountAmount() {
@@ -706,8 +920,8 @@
                     return Math.max(0, this.subtotal - this.discountAmount + this.selectedParking);
                 },
 
-                formatRupiah(value) {
-                    return value.toLocaleString('id-ID');
+                formatRupiah(v) {
+                    return v.toLocaleString('id-ID');
                 },
 
                 wrapText(str) {
@@ -719,7 +933,6 @@
                             line += (line ? ' ' : '') + w;
                         } else {
                             if (line) lines.push(line);
-                            // kalau 1 kata > COLS, paksa pecah
                             if (w.length > COLS) {
                                 let s = w;
                                 while (s.length > COLS) {
@@ -736,117 +949,413 @@
                     return lines;
                 },
 
-                // kiri-kanan (teks, nominal) agar pas 1 baris
                 lineLR(left, right) {
-                    const l = left.length;
-                    const r = right.length;
+                    const l = left.length,
+                        r = right.length;
                     if (l + r >= COLS) return left.slice(0, Math.max(0, COLS - r - 1)) + ' ' + right;
                     return left + ' '.repeat(COLS - l - r) + right;
                 },
 
-                CRLF(s) {
-                    return s.replace(/\n/g, '\r\n');
+                concatUint8(arrays) {
+                    let total = arrays.reduce((s, a) => s + (a ? a.length : 0), 0);
+                    let out = new Uint8Array(total);
+                    let offset = 0;
+                    for (const a of arrays) {
+                        if (!a) continue;
+                        out.set(a, offset);
+                        offset += a.length;
+                    }
+                    return out;
                 },
 
-                printReceipt() {
+                // === raster logo: kecil + latar putih + handle alpha ===
+                async makeLogoRaster(url, maxWidth = 140) {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.src = url;
+                    await img.decode();
+
+                    // --- canvas asal untuk baca pixel ---
+                    const src = document.createElement('canvas');
+                    src.width = img.width;
+                    src.height = img.height;
+                    const sctx = src.getContext('2d', {
+                        willReadFrequently: true
+                    });
+                    // latar putih supaya PNG transparan tidak jadi hitam
+                    sctx.fillStyle = '#FFFFFF';
+                    sctx.fillRect(0, 0, src.width, src.height);
+                    sctx.drawImage(img, 0, 0);
+
+                    // --- trim pinggiran putih/transparan ---
+                    const {
+                        x,
+                        y,
+                        w,
+                        h
+                    } = this._trimBounds(sctx, src.width, src.height);
+                    const scale = Math.min(1, maxWidth / w);
+                    const W = Math.max(1, Math.round(w * scale));
+                    const H = Math.max(1, Math.round(h * scale));
+
+                    // canvas final setelah trim + resize
+                    const canvas = document.createElement('canvas');
+                    canvas.width = W;
+                    canvas.height = H;
+                    const ctx = canvas.getContext('2d', {
+                        willReadFrequently: true
+                    });
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, W, H);
+                    ctx.drawImage(src, x, y, w, h, 0, 0, W, H);
+
+                    const data = ctx.getImageData(0, 0, W, H).data;
+
+                    // 1-bit packing
+                    const bytesPerRow = Math.ceil(W / 8);
+                    const bitmap = new Uint8Array(bytesPerRow * H);
+                    const threshold = 195; // naikkan utk garis lebih tipis
+
+                    for (let yy = 0; yy < H; yy++) {
+                        for (let xx = 0; xx < W; xx++) {
+                            const i = (yy * W + xx) * 4;
+                            let r = data[i],
+                                g = data[i + 1],
+                                b = data[i + 2],
+                                a = data[i + 3];
+                            let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                            if (a < 255) { // komposit di atas putih
+                                const alp = a / 255;
+                                gray = gray * alp + 255 * (1 - alp);
+                            }
+                            const bit = gray < threshold ? 1 : 0;
+                            const byteIndex = yy * bytesPerRow + (xx >> 3);
+                            bitmap[byteIndex] |= bit << (7 - (xx & 7));
+                        }
+                    }
+
+                    // GS v 0 (raster bit image)
+                    const header = new Uint8Array([
+                        0x1D, 0x76, 0x30, 0x00,
+                        bytesPerRow & 0xFF, (bytesPerRow >> 8) & 0xFF,
+                        H & 0xFF, (H >> 8) & 0xFF
+                    ]);
+
+                    return this.concatUint8([header, bitmap, new TextEncoder().encode('\r\n')]);
+                },
+
+                _trimBounds(ctx, w, h) {
+                    const img = ctx.getImageData(0, 0, w, h).data;
+                    const white = 250; // >250 dianggap putih
+                    const alphaMin = 10; // <10 dianggap transparan
+                    let top = h,
+                        left = w,
+                        right = -1,
+                        bottom = -1;
+
+                    for (let y = 0; y < h; y++) {
+                        for (let x = 0; x < w; x++) {
+                            const i = (y * w + x) * 4;
+                            const r = img[i],
+                                g = img[i + 1],
+                                b = img[i + 2],
+                                a = img[i + 3];
+                            if (a > alphaMin && !(r > white && g > white && b > white)) {
+                                if (x < left) left = x;
+                                if (x > right) right = x;
+                                if (y < top) top = y;
+                                if (y > bottom) bottom = y;
+                            }
+                        }
+                    }
+                    if (right < 0) return {
+                        x: 0,
+                        y: 0,
+                        w: 1,
+                        h: 1
+                    }; // semua putih
+                    return {
+                        x: left,
+                        y: top,
+                        w: right - left + 1,
+                        h: bottom - top + 1
+                    };
+                },
+
+                async quickReconnect() {
+                    try {
+                        await this.ensurePrinter(true);
+                        this.updateBtStatus(); // <— TAMBAHKAN
+                        showToast('success', `Terhubung ke ${this.btDevice?.name || 'printer'}.`);
+                    } catch (e) {
+                        showToast('error', e.message || 'Gagal reconnect.');
+                    }
+                },
+
+                initHooks() {
+                    // Saat tab kembali aktif, coba cek koneksi tanpa dialog
+                    document.addEventListener('visibilitychange', async () => {
+                        if (document.visibilityState === 'visible') {
+                            try {
+                                await this.ensurePrinter(false);
+                            } catch (_) {}
+                            this.updateBtStatus();
+                        }
+                    });
+
+                    // Jika Bluetooth adapter on/off, refresh status
+                    try {
+                        navigator.bluetooth.addEventListener?.('availabilitychanged', () => this.updateBtStatus());
+                    } catch (_) {}
+                },
+
+                async printReceipt() {
+                    // simpan transaksi dulu supaya dapat ID
+                    let trxId = null;
+                    try {
+                        trxId = await this.saveTransaction();
+                    } catch (e) {
+                        showToast('error', 'Gagal menyimpan transaksi: ' + (e?.message || ''));
+                        return;
+                    }
+
+                    // pairing / connect (di gesture klik yang sama)
+                    try {
+                        await this.ensurePrinter(true);
+                    } catch (e) {
+                        showToast('error', 'Tidak bisa mengakses Bluetooth: ' + e.message);
+                        return;
+                    }
+
                     const now = new Date().toLocaleString('id-ID');
-                    const metode = this.paymentMethod === 'qris' ? 'QRIS' : 'Tunai';
+                    const metode = (this.paymentMethod === 'qris') ? 'Cashless' : 'Cash';
 
-                    const body = [];
-                    for (const item of this.cart) {
-                        const name = `${item.ticket.name} x${item.quantity}`;
-                        const price = `Rp${this.formatRupiah(item.ticket.price * item.quantity)}`;
-                        body.push(this.lineLR(name, price)); // <- this.
-                    }
-                    if (this.discountAmount > 0) {
-                        body.push(this.lineLR(`Diskon (${this.selectedDiscount}%)`, `-Rp${this.formatRupiah(this.discountAmount)}`)); // <- this.
-                    }
-                    if (this.selectedParking > 0) {
-                        body.push(this.lineLR('Parkir', `Rp${this.formatRupiah(this.selectedParking)}`)); // <- this.
-                    }
-
-                    const totalLine = this.lineLR('TOTAL', `Rp${this.formatRupiah(this.totalAll)}`); // <- this.
-
+                    // ===== ESC/POS =====
                     let esc = '';
                     esc += '\x1B\x40'; // reset
-                    esc += '\x1B\x74\x00'; // codepage CP437 (cocok untuk RPP-02)
-                    esc += '\x1B\x4D\x01'; // Font B (≈42 kolom) kalau COLS kamu 42; kalau tetap 32, pakai \x1B\x4D\x00
-                    esc += '\x1B\x32'; // default line spacing
-                    esc += '\x1B\x61\x01'; // center
-                    esc += '\x1B\x45\x01'; // bold on
-                    this.wrapText('WISATA SENDANG PLESUNG').forEach(l => esc += l + '\r\n'); // <- this.
-                    esc += '\x1B\x45\x00'; // bold off
-                    this.wrapText('Struk Pembayaran').forEach(l => esc += l + '\r\n'); // <- this.
-                    esc += now + '\r\n';
-                    esc += '\x1B\x61\x00'; // left
-                    esc += this.lineLR('Kasir: Admin', `Metode: ${metode}`) + '\r\n'; // <- this.
-                    if (this.platNomor) esc += `Plat: ${this.platNomor}\r\n`;
+                    esc += '\x1B\x74\x00'; // CP437
+                    esc += '\x1B\x4D\x01'; // Font B (42 col)
+                    esc += '\x1B\x32'; // line spacing
+
+                    // Logo kecil (opsional)
+                    let logo = this.logoBytes;
+                    if (!logo) {
+                        try {
+                            logo = await this.makeLogoRaster('/assets/logo.png', 140);
+                            this.logoBytes = logo;
+                        } catch {}
+                    }
+
+                    // Header tengah
+                    esc += '\x1B\x61\x01';
+                    esc += '\x1B\x45\x01';
+                    this.wrapText('WISATA SENDANG PLESUNGAN').forEach(l => esc += l + '\r\n');
+                    esc += '\x1B\x45\x00';
+
+                    // Alamat & Telp dari user login
+                    if (this.userAddress) this.wrapText(this.userAddress).forEach(l => esc += l + '\r\n');
+                    if (this.userPhone) esc += 'Telp/WA: ' + this.userPhone + '\r\n';
+
                     esc += '-'.repeat(COLS) + '\r\n';
 
-                    body.forEach(l => esc += this.CRLF(l) + '\r\n'); // <- this.
+                    // Info transaksi
+                    esc += '\x1B\x61\x00';
+                    esc += this.lineLR('Kode Transaksi: ' + (trxId ? ('TRX' + trxId) : '-'), 'Pembayaran: ' + metode) + '\r\n';
+                    esc += 'Tanggal: ' + now + '\r\n';
+
+                    // CETAK PLAT (jika ada)
+                    if (this.platNomor && this.platNomor.trim()) {
+                        esc += `Plat: ${this.platNomor.trim().toUpperCase()}\r\n`;
+                    }
+
+                    if (this.customerName) esc += `Nama: ${this.customerName}\r\n`;
+                    if (this.customerPhone) esc += `Telp: ${this.customerPhone}\r\n`;
+                    esc += '\r\n';
+
+                    // Header tabel 3 kolom
+                    const hNama = this.padRight('Nama Barang', 26);
+                    const hQty = this.padLeft('Qty', 4);
+                    const hHarga = this.padLeft('Harga', COLS - 26 - 4 - 1);
+                    esc += hNama + ' ' + hQty + hHarga + '\r\n';
                     esc += '-'.repeat(COLS) + '\r\n';
-                    esc += totalLine + '\r\n\r\n';
-                    this.wrapText('Terima kasih atas kunjungan Anda!').forEach(l => esc += l + '\r\n'); // <- this.
-                    this.wrapText('Simpan struk ini sebagai bukti pembayaran').forEach(l => esc += l + '\r\n'); // <- this.
 
-                    esc += '\r\n\r\n\r\n';
-                    esc += '\x1D\x56\x00'; // partial cut
+                    // Baris item (harga per item)
+                    for (const it of this.cart) {
+                        esc += this.rowItem(it.ticket.name, it.quantity, 'Rp' + this.formatRupiah(it.ticket.price));
+                    }
 
-                    this.connectAndPrintViaBluetooth(esc);
+                    esc += '-'.repeat(COLS) + '\r\n';
+
+                    // Diskon & Parkir (jika ada)
+                    if (this.discountAmount > 0) {
+                        esc += this.lineLR(`Diskon (${this.selectedDiscount}%)`, `-Rp${this.formatRupiah(this.discountAmount)}`) + '\r\n';
+                    }
+                    if (this.selectedParking > 0) {
+                        esc += this.lineLR('Parkir', `Rp${this.formatRupiah(this.selectedParking)}`) + '\r\n';
+                    }
+
+                    // Total, Nominal Bayar, Kembalian
+                    const nominalBayar = (this.paymentMethod === 'cash' && this.cashGiven > 0) ? this.cashGiven : this.totalAll;
+                    const kembalian = Math.max(0, nominalBayar - this.totalAll);
+
+                    esc += this.lineLR('Total', `Rp${this.formatRupiah(this.totalAll)}`) + '\r\n';
+                    esc += this.lineLR('Nominal Bayar', `Rp${this.formatRupiah(nominalBayar)}`) + '\r\n';
+                    esc += this.lineLR('Kembalian', `Rp${this.formatRupiah(kembalian)}`) + '\r\n';
+
+                    esc += '='.repeat(COLS) + '\r\n';
+                    esc += '\x1B\x61\x01';
+                    esc += 'Terima Kasih!\r\n';
+                    esc += '='.repeat(COLS) + '\r\n';
+                    esc += '\r\n\r\n';
+                    esc += '\x1B\x61\x00';
+                    esc += '\x1D\x56\x00'; // cut
+
+                    const encoder = new TextEncoder();
+                    const preLogo = encoder.encode('\x1B\x61\x01');
+                    const payload = logo ? this.concatUint8([preLogo, logo, encoder.encode(esc)]) : encoder.encode(esc);
+
+                    await this.connectAndPrintViaBluetooth(payload, /*skipEnsure=*/ true);
                 },
 
-                async connectAndPrintViaBluetooth(escposText) {
-                    const encoder = new TextEncoder(); // UTF-8; aman karena kita hanya pakai ASCII
-                    const payload = encoder.encode(escposText);
+                async ensurePrinter(interactive = false) {
+                    if (!('bluetooth' in navigator)) throw new Error('Browser tidak mendukung Web Bluetooth.');
+                    if (!window.isSecureContext) throw new Error('Akses Bluetooth butuh HTTPS atau localhost.');
+                    if (this.btChar && this.btDevice?.gatt?.connected) return;
 
-                    const CANDIDATE_SERVICES = [
-                        0xff00, 0xfff0, 0xffe0,
-                        '0000ff00-0000-1000-8000-00805f9b34fb',
-                        '0000fff0-0000-1000-8000-00805f9b34fb',
-                        '0000ffe0-0000-1000-8000-00805f9b34fb'
-                    ];
+                    const prefixRe = /^(RPP|MPT|POS|QR|PT-)/i; // umum printer thermal
+                    const savedId = localStorage.getItem('printer_id') || null;
+                    const savedName = localStorage.getItem('printer_name') || null;
+                    const savedSvc = localStorage.getItem('printer_svc') || null;
+                    const savedChr = localStorage.getItem('printer_chr') || null;
 
                     try {
-                        const device = await navigator.bluetooth.requestDevice({
-                            filters: [{
-                                namePrefix: 'RPP'
-                            }],
-                            optionalServices: CANDIDATE_SERVICES
-                        });
-                        const server = await device.gatt.connect();
+                        const available = await navigator.bluetooth.getAvailability?.();
+                        if (available === false) throw new Error('Bluetooth adapter tidak tersedia / dimatikan di OS.');
 
-                        let writableChar = null;
-                        const services = await server.getPrimaryServices();
-                        for (const svc of services) {
-                            const chars = await svc.getCharacteristics();
-                            for (const ch of chars) {
-                                if (ch.properties.write || ch.properties.writeWithoutResponse) {
-                                    writableChar = ch;
-                                    break;
+                        const allowed = (await navigator.bluetooth.getDevices?.()) || [];
+                        let dev = null;
+
+                        if (savedId) dev = allowed.find(d => d.id === savedId) || null;
+                        if (!dev && savedName) dev = allowed.find(d => (d.name || '') === savedName) || null;
+                        if (!dev) dev = allowed.find(d => prefixRe.test(d.name || '')) || null;
+                        if (!dev && allowed.length) dev = allowed[0];
+
+                        if (!dev) {
+                            if (!interactive) throw new Error('Belum ada printer yang diizinkan untuk origin ini.');
+                            try {
+                                // coba pakai filter dulu
+                                dev = await navigator.bluetooth.requestDevice({
+                                    filters: [{
+                                            namePrefix: 'RPP'
+                                        },
+                                        {
+                                            namePrefix: 'MPT'
+                                        },
+                                        {
+                                            namePrefix: 'POS'
+                                        },
+                                        {
+                                            namePrefix: 'QR'
+                                        },
+                                        {
+                                            namePrefix: 'PT-'
+                                        }
+                                    ],
+                                    optionalServices: this.BT_SERVICE_HINTS
+                                });
+                            } catch (err) {
+                                console.warn("Filter gagal, fallback ke acceptAllDevices:", err);
+                                // fallback: tampilkan semua device biar user bisa pilih manual
+                                dev = await navigator.bluetooth.requestDevice({
+                                    acceptAllDevices: true,
+                                    optionalServices: []
+                                });
+                            }
+                        }
+
+                        this.btDevice = dev;
+                        this.btDevice.addEventListener('gattserverdisconnected', () => {
+                            this.btChar = null;
+                            this.updateBtStatus();
+                        });
+
+                        // Tunggu device advertising supaya connect() nggak lempar NetworkError
+                        await this.ensureAdvertising(dev, 1500);
+
+                        // Coba connect dengan retry (bersihin koneksi stale)
+                        await this.tryConnect(dev, 3, 500);
+
+                        // === Cari characteristic tulis ===
+                        let svc = null,
+                            chr = null;
+                        try {
+                            if (savedSvc) {
+                                svc = await dev.gatt.getPrimaryService(savedSvc);
+                                if (savedChr) {
+                                    chr = await svc.getCharacteristic(savedChr);
+                                    if (!(chr.properties.write || chr.properties.writeWithoutResponse)) chr = null;
                                 }
                             }
-                            if (writableChar) break;
+                        } catch (_) {
+                            /* fallback ke scan semua */
                         }
-                        if (!writableChar) throw new Error('Tidak menemukan characteristic tulis.');
 
-                        // kirim per 20 byte + jeda kecil
-                        const CHUNK = 20;
-                        for (let i = 0; i < payload.length; i += CHUNK) {
-                            const slice = payload.slice(i, i + CHUNK);
-                            if (writableChar.properties.write) {
-                                await writableChar.writeValue(slice);
-                            } else {
-                                await writableChar.writeValueWithoutResponse(slice);
+                        if (!chr) {
+                            const services = await dev.gatt.getPrimaryServices();
+                            outer: for (const s of services) {
+                                console.log("Service UUID:", s.uuid);
+                                const chars = await s.getCharacteristics();
+                                for (const c of chars) {
+                                    if (c.properties.write || c.properties.writeWithoutResponse) {
+                                        svc = s;
+                                        chr = c;
+                                        console.log("  Char UUID:", c.uuid, "props:", c.properties);
+                                        break outer;
+                                    }
+                                }
                             }
-                            await new Promise(r => setTimeout(r, 8));
                         }
 
-                        showToast('success', '✅ Struk terkirim via BLE.');
-                        this.resetTransaction();
-                    } catch (err) {
-                        console.error(err);
-                        showToast('error', '❌ Gagal BLE: ' + err.message);
+                        if (!chr) throw new Error('Characteristic tulis tidak ditemukan pada printer.');
+
+                        this.btChar = chr;
+
+                        // Simpan hint untuk sesi berikutnya (id sering berubah, nama & uuid lebih stabil)
+                        try {
+                            localStorage.setItem('printer_id', dev.id || '');
+                            if (dev.name) localStorage.setItem('printer_name', dev.name);
+                            if (svc?.uuid) localStorage.setItem('printer_svc', svc.uuid);
+                            if (chr?.uuid) localStorage.setItem('printer_chr', chr.uuid);
+                        } catch (_) {}
+                        this.updateBtStatus();
+
+                    } catch (e) {
+                        const name = e?.name || '';
+                        if (name === 'NotAllowedError') throw new Error('Akses ditolak. Pilih perangkat pada dialog atau izinkan Bluetooth.');
+                        if (name === 'NotFoundError') throw new Error('Printer tidak ditemukan. Nyalakan printer & dekatkan perangkat.');
+                        if (name === 'SecurityError') throw new Error('Harus diakses via HTTPS atau localhost.');
+                        if (name === 'NetworkError') throw new Error('Gagal connect. Coba aktifkan/printer-advertising lalu ulangi.');
+                        throw e;
                     }
+                },
+
+                async connectAndPrintViaBluetooth(payload, skipEnsure = false) {
+                    if (typeof payload === 'string') payload = new TextEncoder().encode(payload);
+                    if (!skipEnsure) await this.ensurePrinter(true);
+
+                    const CHUNK = 20; // BLE ATT default
+                    const NEEDS_DELAY = this.btChar.properties.writeWithoutResponse ? 8 : 0; // 8–10ms aman
+                    for (let i = 0; i < payload.length; i += CHUNK) {
+                        const slice = payload.slice(i, i + CHUNK);
+                        if (this.btChar.properties.write) {
+                            await this.btChar.writeValue(slice);
+                        } else {
+                            await this.btChar.writeValueWithoutResponse(slice);
+                        }
+                        if (NEEDS_DELAY) await this.wait(NEEDS_DELAY);
+                    }
+                    showToast('success', 'Struk terkirim.');
+                    this.updateBtStatus();
                 },
 
                 resetTransaction() {
