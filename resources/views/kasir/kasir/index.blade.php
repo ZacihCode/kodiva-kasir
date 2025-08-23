@@ -190,28 +190,147 @@
     @section('content')
     <div class="min-h-screen ml-6 mr-2 p-6">
         <!-- Enhanced Header -->
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 fade-in">
-            <div class="mb-4 lg:mb-0">
-                <div class="flex items-center space-x-3 mb-2">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center floating-icon">
-                        <i class="fas fa-cash-register text-white text-xl"></i>
+        <!-- Enhanced Header dengan struktur asli yang diperbaiki -->
+        <style>
+            @keyframes float {
+
+                0%,
+                100% {
+                    transform: translateY(0px) rotate(0deg);
+                }
+
+                50% {
+                    transform: translateY(-6px) rotate(1deg);
+                }
+            }
+
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes shimmer {
+                0% {
+                    background-position: -200% 0;
+                }
+
+                100% {
+                    background-position: 200% 0;
+                }
+            }
+
+            @keyframes statusPulse {
+
+                0%,
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+
+                50% {
+                    transform: scale(1.05);
+                    opacity: 0.8;
+                }
+            }
+
+            .floating-icon {
+                animation: float 3s ease-in-out infinite;
+                box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+            }
+
+            .fade-in {
+                animation: fadeInUp 0.6s ease-out;
+            }
+
+            .gradient-text {
+                background: linear-gradient(135deg, #1e40af, #7c3aed, #4338ca);
+                background-size: 300% 300%;
+                animation: shimmer 4s ease-in-out infinite;
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            .status-connected {
+                animation: statusPulse 2s infinite;
+            }
+
+            .btn-modern:hover {
+                background: linear-gradient(135deg, #374151, #4b5563);
+                transform: translateY(-1px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            }
+        </style>
+
+        <!-- Enhanced Header -->
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 fade-in bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 rounded-3xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
+            <div class="mb-6 lg:mb-0">
+                <div class="flex items-center space-x-4 mb-3">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-600 rounded-3xl flex items-center justify-center floating-icon shadow-2xl">
+                        <i class="fas fa-cash-register text-white text-2xl"></i>
                     </div>
-                    <h2 class="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                        Menu Kasir
-                    </h2>
+                    <div>
+                        <h2 class="text-4xl lg:text-6xl font-bold gradient-text leading-tight">
+                            Menu Kasir
+                        </h2>
+                        <div class="flex items-center mt-2">
+                            <div class="w-12 h-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                            <div class="w-6 h-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full ml-1"></div>
+                            <div class="w-3 h-1 bg-indigo-600 rounded-full ml-1"></div>
+                        </div>
+                    </div>
                 </div>
-                <p class="text-gray-600 text-lg">Sistem kasir tiket renang modern dan efisien</p>
+                <p class="text-gray-600 text-xl font-medium ml-20 bg-gradient-to-r from-gray-600 to-gray-700 bg-clip-text text-transparent">
+                    Sistem kasir tiket renang modern dan efisien
+                </p>
             </div>
-            <div class="flex items-center gap-2">
-                <span x-text="btStatus"
-                    class="text-xs px-2 py-1 rounded"
-                    :class="btStatus==='Connected' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'">
-                </span>
-                <span class="text-xs text-slate-500" x-text="btName ? ('(' + btName + ')') : ''"></span>
-                <button @click="quickReconnect()"
-                    class="text-xs px-3 py-1 rounded bg-slate-800 text-white hover:bg-slate-700">
-                    Reconnect
-                </button>
+
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                <!-- Width Selection -->
+                <div class="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/30">
+                    <div class="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-xl">
+                        <i class="fas fa-print text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <label for="colsSelect" class="block text-sm font-semibold text-gray-700 mb-1">Lebar Struk</label>
+                        <select id="colsSelect" class="block w-52 rounded-xl border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:ring-2 focus:ring-opacity-50 bg-white/90 text-sm font-medium transition-all duration-200">
+                            <option value="32">32 Kolom (58mm, Font A)</option>
+                            <option value="42">42 Kolom (58mm, Font B) [Default]</option>
+                            <option value="48">48 Kolom (80mm)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Connection Status -->
+                <div class="flex items-center gap-4 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/30">
+                    <div class="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl">
+                        <i class="fas fa-bluetooth text-white text-sm"></i>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="flex flex-col">
+                            <div class="flex items-center gap-2">
+                                <span x-text="btStatus"
+                                    class="text-sm font-bold px-3 py-1.5 rounded-xl shadow-sm transition-all duration-300"
+                                    :class="btStatus==='Connected' ? 'bg-emerald-100 text-emerald-700 status-connected' : 'bg-amber-100 text-amber-700'">
+                                </span>
+                                <div :class="btStatus==='Connected' ? 'w-2 h-2 bg-emerald-500 rounded-full animate-pulse' : 'w-2 h-2 bg-amber-500 rounded-full'"></div>
+                            </div>
+                            <span class="text-xs text-slate-600 font-medium mt-1" x-text="btName ? ('(' + btName + ')') : ''"></span>
+                        </div>
+                        <button @click="quickReconnect()"
+                            class="text-sm font-semibold px-4 py-2.5 rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 text-white hover:from-slate-600 hover:to-slate-700 shadow-lg transition-all duration-200 btn-modern">
+                            <i class="fas fa-sync-alt mr-2"></i>
+                            Reconnect
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -645,7 +764,7 @@
     @endsection
 
     <script>
-        const COLS = 42
+        let COLS = parseInt(localStorage.getItem("printer_cols") || "42", 10);
 
         function cashierSystem() {
             return {
@@ -751,14 +870,22 @@
                 },
 
                 rowItem(name, qty, priceStr) {
-                    const nameW = 26,
-                        qtyW = 4,
-                        priceW = COLS - nameW - qtyW - 1;
+                    // Sesuaikan lebar otomatis
+                    const qtyW = 4; // lebar Qty
+                    const priceW = 10; // lebar Harga minimal
+                    const nameW = COLS - qtyW - priceW - 1;
+
                     const nameLines = this.wrapN(name, nameW);
                     let out = '';
                     nameLines.forEach((ln, i) => {
-                        if (i === 0) out += this.padRight(ln, nameW) + ' ' + this.padLeft(qty, qtyW) + this.padLeft(priceStr, priceW) + '\r\n';
-                        else out += this.padRight(ln, nameW) + '\r\n';
+                        if (i === 0) {
+                            out += this.padRight(ln, nameW) +
+                                ' ' +
+                                this.padLeft(qty, qtyW) +
+                                this.padLeft(priceStr, priceW) + '\r\n';
+                        } else {
+                            out += this.padRight(ln, nameW) + '\r\n';
+                        }
                     });
                     return out;
                 },
@@ -803,12 +930,6 @@
                         console.error("Gagal fetch data:", error);
                         showToast('error', 'Gagal memuat data. Silakan refresh halaman.');
                     }
-
-                    // try {
-                    //     this.logoBytes = await this.makeLogoRaster('/assets/logo.png', 140);
-                    // } catch (e) {
-                    //     console.warn('Preload logo gagal:', e);
-                    // }
 
                     try {
                         const userRes = await fetch('/api/user', {
@@ -949,7 +1070,9 @@
                 lineLR(left, right) {
                     const l = left.length,
                         r = right.length;
-                    if (l + r >= COLS) return left.slice(0, Math.max(0, COLS - r - 1)) + ' ' + right;
+                    if (l + r >= COLS) {
+                        return left.slice(0, Math.max(0, COLS - r - 1)) + ' ' + right;
+                    }
                     return left + ' '.repeat(COLS - l - r) + right;
                 },
 
@@ -1133,15 +1256,6 @@
                     esc += '\x1B\x74\x00'; // CP437
                     esc += '\x1B\x4D\x01'; // Font B (42 col)
                     esc += '\x1B\x32'; // line spacing
-
-                    // Logo kecil (opsional)
-                    // let logo = this.logoBytes;
-                    // if (!logo) {
-                    //     try {
-                    //         logo = await this.makeLogoRaster('/assets/logo.png', 100);
-                    //         this.logoBytes = logo;
-                    //     } catch {}
-                    // }
 
                     // Header tengah
                     esc += '\x1B\x61\x01';
@@ -1363,6 +1477,21 @@
                 },
             }
         }
+        document.addEventListener("DOMContentLoaded", function() {
+            const select = document.getElementById("colsSelect");
+
+            // Ambil setting sebelumnya dari localStorage
+            let savedCols = localStorage.getItem("printer_cols") || "42";
+            select.value = savedCols;
+            COLS = parseInt(savedCols, 10);
+
+            // Kalau user ubah dropdown, update localStorage + variable global
+            select.addEventListener("change", function() {
+                localStorage.setItem("printer_cols", this.value);
+                COLS = parseInt(this.value, 10);
+                showToast('success', 'Lebar struk diubah ke ' + COLS + ' kolom. Cetak struk berikutnya akan mengikuti.');
+            });
+        });
     </script>
 </body>
 
