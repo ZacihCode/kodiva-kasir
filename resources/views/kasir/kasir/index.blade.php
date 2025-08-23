@@ -1151,7 +1151,6 @@
 
                     // Alamat & Telp dari user login
                     if (this.userAddress) this.wrapText(this.userAddress).forEach(l => esc += l + '\r\n');
-                    if (this.userPhone) esc += 'Telp/WA: ' + this.userPhone + '\r\n';
 
                     esc += '-'.repeat(COLS) + '\r\n';
 
@@ -1202,6 +1201,7 @@
                     esc += '='.repeat(COLS) + '\r\n';
                     esc += '\x1B\x61\x01';
                     esc += 'Terima Kasih!\r\n';
+                    if (this.userPhone) esc += 'Saran & Kritik:' + this.userPhone + '\r\n';
                     esc += '='.repeat(COLS) + '\r\n';
                     esc += '\r\n\r\n';
                     esc += '\x1B\x61\x00';
