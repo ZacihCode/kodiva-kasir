@@ -1222,55 +1222,28 @@
                     if (!window.isSecureContext) throw new Error('Akses Bluetooth butuh HTTPS atau localhost.');
                     if (this.btChar && this.btDevice?.gatt?.connected) return;
 
-                    const prefixRe = /^(RPP|MPT|POS|QR|PT-)/i; // umum printer thermal
                     const savedId = localStorage.getItem('printer_id') || null;
                     const savedName = localStorage.getItem('printer_name') || null;
                     const savedSvc = localStorage.getItem('printer_svc') || null;
                     const savedChr = localStorage.getItem('printer_chr') || null;
 
+                    let dev = null,
+                        svc = null,
+                        chr = null;
+
                     try {
-                        const available = await navigator.bluetooth.getAvailability?.();
-                        if (available === false) throw new Error('Bluetooth adapter tidak tersedia / dimatikan di OS.');
-
+                        // 🔹 STEP 1: coba ambil device yang sudah diizinkan
                         const allowed = (await navigator.bluetooth.getDevices?.()) || [];
-                        let dev = null;
-
                         if (savedId) dev = allowed.find(d => d.id === savedId) || null;
                         if (!dev && savedName) dev = allowed.find(d => (d.name || '') === savedName) || null;
-                        if (!dev) dev = allowed.find(d => prefixRe.test(d.name || '')) || null;
-                        if (!dev && allowed.length) dev = allowed[0];
 
+                        // 🔹 STEP 2: kalau masih belum ketemu device → fallback manual
                         if (!dev) {
-                            if (!interactive) throw new Error('Belum ada printer yang diizinkan untuk origin ini.');
-                            try {
-                                // coba pakai filter dulu
-                                dev = await navigator.bluetooth.requestDevice({
-                                    filters: [{
-                                            namePrefix: 'RPP'
-                                        },
-                                        {
-                                            namePrefix: 'MPT'
-                                        },
-                                        {
-                                            namePrefix: 'POS'
-                                        },
-                                        {
-                                            namePrefix: 'QR'
-                                        },
-                                        {
-                                            namePrefix: 'PT-'
-                                        }
-                                    ],
-                                    optionalServices: this.BT_SERVICE_HINTS
-                                });
-                            } catch (err) {
-                                console.warn("Filter gagal, fallback ke acceptAllDevices:", err);
-                                // fallback: tampilkan semua device biar user bisa pilih manual
-                                dev = await navigator.bluetooth.requestDevice({
-                                    acceptAllDevices: true,
-                                    optionalServices: []
-                                });
-                            }
+                            if (!interactive) throw new Error('Belum ada printer yang diizinkan.');
+                            dev = await navigator.bluetooth.requestDevice({
+                                acceptAllDevices: true, // biarkan user pilih semua
+                                optionalServices: [] // biar semua service bisa di-scan
+                            });
                         }
 
                         this.btDevice = dev;
@@ -1279,37 +1252,34 @@
                             this.updateBtStatus();
                         });
 
-                        // Tunggu device advertising supaya connect() nggak lempar NetworkError
-                        await this.ensureAdvertising(dev, 1500);
-
-                        // Coba connect dengan retry (bersihin koneksi stale)
+                        // connect ke GATT
                         await this.tryConnect(dev, 3, 500);
 
-                        // === Cari characteristic tulis ===
-                        let svc = null,
-                            chr = null;
-                        try {
-                            if (savedSvc) {
+                        // 🔹 STEP 3: coba pakai service/char yang tersimpan
+                        if (savedSvc && savedChr) {
+                            try {
                                 svc = await dev.gatt.getPrimaryService(savedSvc);
-                                if (savedChr) {
-                                    chr = await svc.getCharacteristic(savedChr);
-                                    if (!(chr.properties.write || chr.properties.writeWithoutResponse)) chr = null;
+                                chr = await svc.getCharacteristic(savedChr);
+                                if (!(chr.properties.write || chr.properties.writeWithoutResponse)) {
+                                    chr = null;
                                 }
+                            } catch (e) {
+                                console.warn("Service/Char saved tidak cocok, fallback scan...");
+                                chr = null;
                             }
-                        } catch (_) {
-                            /* fallback ke scan semua */
                         }
 
+                        // 🔹 STEP 4: fallback scan semua services kalau tidak ketemu
                         if (!chr) {
                             const services = await dev.gatt.getPrimaryServices();
                             outer: for (const s of services) {
                                 console.log("Service UUID:", s.uuid);
                                 const chars = await s.getCharacteristics();
                                 for (const c of chars) {
+                                    console.log("  Char UUID:", c.uuid, "props:", c.properties);
                                     if (c.properties.write || c.properties.writeWithoutResponse) {
                                         svc = s;
                                         chr = c;
-                                        console.log("  Char UUID:", c.uuid, "props:", c.properties);
                                         break outer;
                                     }
                                 }
@@ -1318,23 +1288,19 @@
 
                         if (!chr) throw new Error('Characteristic tulis tidak ditemukan pada printer.');
 
+                        // simpan data terbaru ke localStorage
                         this.btChar = chr;
-
-                        // Simpan hint untuk sesi berikutnya (id sering berubah, nama & uuid lebih stabil)
                         try {
                             localStorage.setItem('printer_id', dev.id || '');
                             if (dev.name) localStorage.setItem('printer_name', dev.name);
                             if (svc?.uuid) localStorage.setItem('printer_svc', svc.uuid);
                             if (chr?.uuid) localStorage.setItem('printer_chr', chr.uuid);
                         } catch (_) {}
-                        this.updateBtStatus();
 
+                        this.updateBtStatus();
+                        showToast('success', `✅ Terhubung ke ${dev.name || 'printer'}.`);
                     } catch (e) {
-                        const name = e?.name || '';
-                        if (name === 'NotAllowedError') throw new Error('Akses ditolak. Pilih perangkat pada dialog atau izinkan Bluetooth.');
-                        if (name === 'NotFoundError') throw new Error('Printer tidak ditemukan. Nyalakan printer & dekatkan perangkat.');
-                        if (name === 'SecurityError') throw new Error('Harus diakses via HTTPS atau localhost.');
-                        if (name === 'NetworkError') throw new Error('Gagal connect. Coba aktifkan/printer-advertising lalu ulangi.');
+                        console.error("ensurePrinter gagal:", e);
                         throw e;
                     }
                 },
