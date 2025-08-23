@@ -1268,7 +1268,7 @@
                                 // fallback: tampilkan semua device biar user bisa pilih manual
                                 dev = await navigator.bluetooth.requestDevice({
                                     acceptAllDevices: true,
-                                    optionalServices: this.BT_SERVICE_HINTS
+                                    optionalServices: []
                                 });
                             }
                         }
@@ -1303,11 +1303,13 @@
                         if (!chr) {
                             const services = await dev.gatt.getPrimaryServices();
                             outer: for (const s of services) {
+                                console.log("Service UUID:", s.uuid);
                                 const chars = await s.getCharacteristics();
                                 for (const c of chars) {
                                     if (c.properties.write || c.properties.writeWithoutResponse) {
                                         svc = s;
                                         chr = c;
+                                        console.log("  Char UUID:", c.uuid, "props:", c.properties);
                                         break outer;
                                     }
                                 }
