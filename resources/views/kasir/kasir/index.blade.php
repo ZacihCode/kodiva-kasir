@@ -804,11 +804,11 @@
                         showToast('error', 'Gagal memuat data. Silakan refresh halaman.');
                     }
 
-                    try {
-                        this.logoBytes = await this.makeLogoRaster('/assets/logo.png', 140);
-                    } catch (e) {
-                        console.warn('Preload logo gagal:', e);
-                    }
+                    // try {
+                    //     this.logoBytes = await this.makeLogoRaster('/assets/logo.png', 140);
+                    // } catch (e) {
+                    //     console.warn('Preload logo gagal:', e);
+                    // }
 
                     try {
                         const userRes = await fetch('/api/user', {
@@ -966,7 +966,7 @@
                 },
 
                 // === raster logo: kecil + latar putih + handle alpha ===
-                async makeLogoRaster(url, maxWidth = 140) {
+                async makeLogoRaster(url, maxWidth = 100) {
                     const img = new Image();
                     img.crossOrigin = 'anonymous';
                     img.src = url;
@@ -1138,7 +1138,7 @@
                     // let logo = this.logoBytes;
                     // if (!logo) {
                     //     try {
-                    //         logo = await this.makeLogoRaster('/assets/logo.png', 140);
+                    //         logo = await this.makeLogoRaster('/assets/logo.png', 100);
                     //         this.logoBytes = logo;
                     //     } catch {}
                     // }
@@ -1208,8 +1208,7 @@
                     esc += '\x1D\x56\x00'; // cut
 
                     const encoder = new TextEncoder();
-                    const preLogo = encoder.encode('\x1B\x61\x01');
-                    const payload = logo ? this.concatUint8([preLogo, logo, encoder.encode(esc)]) : encoder.encode(esc);
+                    const payload = encoder.encode(esc);
 
                     await this.connectAndPrintViaBluetooth(payload, /*skipEnsure=*/ true);
                 },
@@ -1265,7 +1264,7 @@
                                 // fallback: tampilkan semua device biar user bisa pilih manual
                                 dev = await navigator.bluetooth.requestDevice({
                                     acceptAllDevices: true,
-                                    optionalServices: []
+                                    optionalServices: this.BT_SERVICE_HINTS
                                 });
                             }
                         }
@@ -1300,13 +1299,11 @@
                         if (!chr) {
                             const services = await dev.gatt.getPrimaryServices();
                             outer: for (const s of services) {
-                                console.log("Service UUID:", s.uuid);
                                 const chars = await s.getCharacteristics();
                                 for (const c of chars) {
                                     if (c.properties.write || c.properties.writeWithoutResponse) {
                                         svc = s;
                                         chr = c;
-                                        console.log("  Char UUID:", c.uuid, "props:", c.properties);
                                         break outer;
                                     }
                                 }
