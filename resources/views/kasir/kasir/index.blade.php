@@ -672,10 +672,7 @@
                 btStatus: 'Disconnected',
                 btName: '',
                 BT_SERVICE_HINTS: [
-                    0xff00, 0xfff0, 0xffe0,
-                    '0000ff00-0000-1000-8000-00805f9b34fb',
-                    '0000fff0-0000-1000-8000-00805f9b34fb',
-                    '0000ffe0-0000-1000-8000-00805f9b34fb'
+                    '000018f0-0000-1000-8000-00805f9b34fb'
                 ],
 
                 wait(ms) {
