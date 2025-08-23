@@ -1135,13 +1135,13 @@
                     esc += '\x1B\x32'; // line spacing
 
                     // Logo kecil (opsional)
-                    let logo = this.logoBytes;
-                    if (!logo) {
-                        try {
-                            logo = await this.makeLogoRaster('/assets/logo.png', 140);
-                            this.logoBytes = logo;
-                        } catch {}
-                    }
+                    // let logo = this.logoBytes;
+                    // if (!logo) {
+                    //     try {
+                    //         logo = await this.makeLogoRaster('/assets/logo.png', 140);
+                    //         this.logoBytes = logo;
+                    //     } catch {}
+                    // }
 
                     // Header tengah
                     esc += '\x1B\x61\x01';
