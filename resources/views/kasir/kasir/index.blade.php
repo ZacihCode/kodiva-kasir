@@ -269,38 +269,55 @@
             }
         </style>
 
-        <!-- Enhanced Header -->
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 fade-in bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 rounded-3xl p-6 shadow-xl border border-white/20 backdrop-blur-sm">
-            <div class="mb-6 lg:mb-0">
-                <div class="flex items-center space-x-4 mb-3">
-                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-600 rounded-3xl flex items-center justify-center floating-icon shadow-2xl">
-                        <i class="fas fa-cash-register text-white text-2xl"></i>
+        <!-- Enhanced Header (Compact for Mobile) -->
+        <div
+            class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 fade-in 
+            bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 
+            rounded-2xl p-4 sm:p-6 shadow-lg border border-white/20 backdrop-blur-sm">
+            <!-- Title Section -->
+            <div class="mb-4 lg:mb-0 text-center lg:text-left">
+                <div class="flex flex-col sm:flex-row items-center sm:items-start sm:space-x-3 mb-2">
+                    <div
+                        class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-600 
+                        rounded-2xl flex items-center justify-center floating-icon shadow-xl mb-2 sm:mb-0">
+                        <i class="fas fa-cash-register text-white text-xl sm:text-2xl"></i>
                     </div>
                     <div>
-                        <h2 class="text-4xl lg:text-6xl font-bold gradient-text leading-tight">
+                        <h2 class="text-2xl sm:text-3xl lg:text-5xl font-bold gradient-text leading-snug">
                             Menu Kasir
                         </h2>
-                        <div class="flex items-center mt-2">
-                            <div class="w-12 h-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
-                            <div class="w-6 h-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full ml-1"></div>
-                            <div class="w-3 h-1 bg-indigo-600 rounded-full ml-1"></div>
+                        <div class="flex justify-center sm:justify-start items-center mt-1">
+                            <div class="w-8 h-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+                            <div class="w-4 h-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full ml-1"></div>
+                            <div class="w-2 h-1 bg-indigo-600 rounded-full ml-1"></div>
                         </div>
                     </div>
                 </div>
-                <p class="text-gray-600 text-xl font-medium ml-20 bg-gradient-to-r from-gray-600 to-gray-700 bg-clip-text text-transparent">
+                <p
+                    class="text-gray-600 text-sm sm:text-base lg:text-lg font-medium 
+                    mt-1 sm:ml-16 bg-gradient-to-r from-gray-600 to-gray-700 bg-clip-text text-transparent">
                     Sistem kasir tiket renang modern dan efisien
                 </p>
             </div>
-
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <!-- Control Section -->
+            <div
+                class="flex flex-col sm:flex-row flex-wrap items-stretch gap-3 w-full lg:w-auto">
                 <!-- Width Selection -->
-                <div class="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/30">
-                    <div class="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-xl">
-                        <i class="fas fa-print text-white text-sm"></i>
+                <div
+                    class="flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-xl 
+                    p-3 shadow-md border border-white/30 w-full sm:w-auto">
+                    <div
+                        class="flex items-center justify-center w-8 h-8 
+                        bg-gradient-to-br from-emerald-400 to-blue-500 rounded-lg">
+                        <i class="fas fa-print text-white text-xs"></i>
                     </div>
-                    <div>
-                        <label for="colsSelect" class="block text-sm font-semibold text-gray-700 mb-1">Lebar Struk</label>
-                        <select id="colsSelect" class="block w-52 rounded-xl border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:ring-2 focus:ring-opacity-50 bg-white/90 text-sm font-medium transition-all duration-200">
+                    <div class="w-full">
+                        <label for="colsSelect"
+                            class="block text-xs font-semibold text-gray-700 mb-0.5">Lebar Struk</label>
+                        <select id="colsSelect"
+                            class="block w-full sm:w-40 rounded-lg border-gray-200 shadow-sm 
+                            focus:border-blue-500 focus:ring-blue-500 focus:ring-2 focus:ring-opacity-50 
+                            bg-white/90 text-xs sm:text-sm font-medium transition-all duration-200">
                             <option value="32">32 Kolom (58mm, Font A)</option>
                             <option value="42">42 Kolom (58mm, Font B) [Default]</option>
                             <option value="48">48 Kolom (80mm)</option>
@@ -309,24 +326,34 @@
                 </div>
 
                 <!-- Connection Status -->
-                <div class="flex items-center gap-4 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/30">
-                    <div class="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl">
-                        <i class="fas fa-bluetooth text-white text-sm"></i>
+                <div
+                    class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 
+                    bg-white/80 backdrop-blur-sm rounded-xl p-3 shadow-md border border-white/30 
+                    w-full sm:w-auto">
+                    <div
+                        class="flex items-center justify-center w-8 h-8 
+                        bg-gradient-to-br from-purple-400 to-pink-500 rounded-lg">
+                        <i class="fas fa-bluetooth text-white text-xs"></i>
                     </div>
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-between w-full sm:w-auto gap-2">
                         <div class="flex flex-col">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-1.5">
                                 <span x-text="btStatus"
-                                    class="text-sm font-bold px-3 py-1.5 rounded-xl shadow-sm transition-all duration-300"
+                                    class="text-xs sm:text-sm font-bold px-2 py-1 rounded-lg shadow-sm transition-all duration-300"
                                     :class="btStatus==='Connected' ? 'bg-emerald-100 text-emerald-700 status-connected' : 'bg-amber-100 text-amber-700'">
                                 </span>
-                                <div :class="btStatus==='Connected' ? 'w-2 h-2 bg-emerald-500 rounded-full animate-pulse' : 'w-2 h-2 bg-amber-500 rounded-full'"></div>
+                                <div
+                                    :class="btStatus==='Connected' ? 'w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse' : 'w-1.5 h-1.5 bg-amber-500 rounded-full'">
+                                </div>
                             </div>
-                            <span class="text-xs text-slate-600 font-medium mt-1" x-text="btName ? ('(' + btName + ')') : ''"></span>
+                            <span class="text-[11px] text-slate-600 font-medium mt-0.5"
+                                x-text="btName ? ('(' + btName + ')') : ''"></span>
                         </div>
                         <button @click="quickReconnect()"
-                            class="text-sm font-semibold px-4 py-2.5 rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 text-white hover:from-slate-600 hover:to-slate-700 shadow-lg transition-all duration-200 btn-modern">
-                            <i class="fas fa-sync-alt mr-2"></i>
+                            class="text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-lg 
+                            bg-gradient-to-r from-slate-700 to-slate-800 text-white 
+                            hover:from-slate-600 hover:to-slate-700 shadow-md transition-all duration-200 btn-modern">
+                            <i class="fas fa-sync-alt mr-1"></i>
                             Reconnect
                         </button>
                     </div>
@@ -383,7 +410,6 @@
                         </div>
                     </template>
                 </div>
-
                 <!-- Enhanced Options Section -->
                 <div class="mt-8 space-y-6">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
