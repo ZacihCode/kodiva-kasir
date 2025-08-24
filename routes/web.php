@@ -23,7 +23,7 @@ Route::get('/', function () {
         if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         } elseif ($user->role === 'kasir') {
-            return redirect()->route('kasir.dashboard');
+            return redirect()->route('kasir.kasir');
         } elseif ($user->role === 'user') {
             return redirect()->route('user.qrcode');
         }
@@ -38,7 +38,7 @@ Route::get('/login', function (Request $request) {
         if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard')->with('info', "Anda Sudah Login, {$user->name}!");
         } elseif ($user->role === 'kasir') {
-            return redirect()->route('kasir.dashboard')->with('info', "Anda Sudah Login, {$user->name}!");
+            return redirect()->route('kasir.kasir')->with('info', "Anda Sudah Login, {$user->name}!");
         } elseif ($user->role === 'user') {
             return redirect()->route('user.qrcode')->with('info', "Anda Sudah Login, {$user->name}!");
         }
