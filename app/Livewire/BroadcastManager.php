@@ -72,11 +72,11 @@ class BroadcastManager extends Component
         $base = $this->contactsBaseFiltered()
             ->select([
                 'customer_phone',
-                DB::raw('MAX(customer_name) as customer_name'),
+                'customer_name',
                 DB::raw('COUNT(*) as transaksi_count'),
                 DB::raw('MAX(created_at) as last_trx'),
             ])
-            ->groupBy('customer_phone');
+            ->groupBy('customer_phone', 'customer_name');
 
         // orderBy alias di luar subquery -> aman untuk paginate()
         return DB::query()->fromSub($base, 'c')->orderByDesc('last_trx');
