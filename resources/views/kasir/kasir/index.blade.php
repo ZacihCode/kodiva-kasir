@@ -1351,6 +1351,8 @@
                     const payload = encoder.encode(esc);
 
                     await this.connectAndPrintViaBluetooth(payload, /*skipEnsure=*/ true);
+                    this.showReceipt = false;
+                    this.resetTransaction();
                 },
 
                 async ensurePrinter(interactive = false) {
@@ -1500,6 +1502,9 @@
                     this.paymentMethod = 'cash';
                     this.showReceipt = false;
                     this.showQrisModal = false;
+                    this.customerName = '';
+                    this.customerPhone = '';
+                    this.cashGiven = 0;
                 },
             }
         }
