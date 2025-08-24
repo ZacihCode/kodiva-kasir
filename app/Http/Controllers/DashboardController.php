@@ -80,8 +80,13 @@ class DashboardController extends Controller
 
         // Flash hanya sekali saat login
         if (!session()->has('success')) {
-            return redirect()->route('admin.dashboard')
-                ->with('success', $user->role === 'admin' ? 'Login Admin Berhasil!' : 'Login Kasir Berhasil!');
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.dashboard')
+                    ->with('success', 'Login Admin Berhasil!');
+            } elseif ($user->role === 'kasir') {
+                return redirect()->route('kasir.dashboard')
+                    ->with('success', 'Login Kasir Berhasil!');
+            }
         }
 
         if ($user->role === 'admin') {

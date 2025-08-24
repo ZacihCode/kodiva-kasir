@@ -285,22 +285,8 @@
                     <p class="text-xs text-gray-500 capitalize">{{ auth()->user()->role }}</p>
                 </div>
                 @php
-                $role = auth()->user()->role ?? 'guest';
-
-                switch ($role) {
-                case 'admin':
-                $prefix = 'admin.';
-                break;
-                case 'kasir':
-                $prefix = 'kasir.';
-                break;
-                case 'user':
-                $prefix = 'user.';
-                break;
-                default:
-                $prefix = '';
-                break;
-                }
+                $role = auth()->user()->role;
+                $prefix = $role === 'admin' ? 'admin.' : ($role === 'kasir' ? 'kasir.' : 'user.');
                 @endphp
                 <a href="{{ route($prefix . 'setting') }}"
                     class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
