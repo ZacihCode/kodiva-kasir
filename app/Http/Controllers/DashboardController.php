@@ -92,7 +92,7 @@ class DashboardController extends Controller
         if ($user->role === 'admin') {
             return view('kasir.dashboard.index', $data);
         } elseif ($user->role === 'kasir') {
-            return view('kasir.kasir.index', $data);
+            return view('kasir.dashboard.index', $data);
         }
 
         return abort(403);
